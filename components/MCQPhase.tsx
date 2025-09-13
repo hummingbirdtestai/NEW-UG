@@ -15,6 +15,7 @@ import {
 } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import SelfSignalsPanel from "@/components/SelfSignalsPanel";
+import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MCQOption {
   A: string;
@@ -493,12 +494,15 @@ function FeedbackCard({
 
           {/* Glowing border effect */}
           <MotiView
-      {/* Self Signals Panel */}
-      <SelfSignalsPanel
-        objectType="mcq"
-        objectUuid={mcq.id}
-        topicName={mcq.stem.substring(0, 50) + '...'}
-      />
+        {/* Self Signals Panel */}
+        <View className="mt-2">
+          <SelfSignalsPanel
+            objectType="mcq"
+            objectUuid={mcq.id}
+            topicName={mcq.stem.substring(0, 50) + '...'}
+          />
+        </View>
+      </View>
 
             from={{ scale: 1, opacity: 0.6 }}
             animate={{ scale: 1.02, opacity: 0 }}
@@ -510,7 +514,6 @@ function FeedbackCard({
             className="absolute inset-0 rounded-3xl border-2 border-emerald-400/50"
           />
         </View>
-      </MotiView>
 
       {/* Learning Gap Card */}
       {!isCorrect && mcq.learning_gap && (
@@ -587,6 +590,15 @@ function FeedbackCard({
           </View>
         </MotiView>
       )}
+
+      {/* Self Signals Panel */}
+      <View className="mt-2">
+        <SelfSignalsPanel
+          objectType="mcq"
+          objectUuid={mcq.id}
+          topicName={mcq.stem.substring(0, 50) + '...'}
+        />
+      </View>
     </View>
   );
 }
