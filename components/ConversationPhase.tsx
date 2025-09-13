@@ -4,6 +4,7 @@ import { MotiView, AnimatePresence } from 'moti';
 import { MessageCircle, User, GraduationCap, Lightbulb, BookOpen, Bookmark, BookmarkCheck, ChevronRight, ChevronDown, ChevronUp, CircleCheck as CheckCircle, Circle as XCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import ConfettiCannon from 'react-native-confetti-cannon';
+import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MCQ {
   question: string;
@@ -564,6 +565,20 @@ export default function ConversationPhase({
             </View>
           </View>
 
+          {/* Self Signals Panel for MCQ */}
+          <SelfSignalsPanel
+            objectType="conversation_mcq"
+            objectUuid={`mcq-${mcqIndex}`}
+            topicName={mcq.question.substring(0, 50) + '...'}
+          />
+
+          {/* Self Signals Panel for HYF */}
+          <SelfSignalsPanel
+            objectType="conversation_hyf"
+            objectUuid={`hyf-${index}`}
+            topicName={hyf.text.substring(0, 50) + '...'}
+          />
+
           {/* Progress Indicator */}
           <MotiView
             from={{ opacity: 0, scale: 0.8 }}
@@ -667,10 +682,10 @@ export default function ConversationPhase({
             </View>
             <Text className="text-3xl font-bold text-slate-100 mb-2 text-center">
               🎉 All HYFs Completed!
-            </Text>
+        {/* Self Signals Panel */}
             <Text className="text-slate-300 text-lg text-center">
-              You've mastered {hyfs.length} high-yield concepts
-            </Text>
+          objectType="conversation_hyf"
+          objectUuid={`hyf-${index}`}
           </MotiView>
         )}
       </ScrollView>

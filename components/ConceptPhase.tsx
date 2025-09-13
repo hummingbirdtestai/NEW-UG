@@ -3,12 +3,12 @@ import { View, Text, Pressable, ScrollView, Dimensions, Linking, Platform } from
 import { MotiView } from 'moti';
 import { Atom, Bookmark, BookmarkCheck, ExternalLink, ChevronRight } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import SelfSignalsPanel from "@/components/SelfSignalsPanel"; // ✅ import panel
+import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface ConceptPhaseProps {
   concept: string;
   explanation: string;
-  conceptId: string;   // ✅ real UUID from concepts_vertical
+  conceptId: string;
   onNext?: () => void;
   current?: number;
   total?: number;
@@ -119,7 +119,7 @@ export default function ConceptPhase({
           </View>
         </View>
 
-        {/* ✅ Self Signals Panel */}
+        {/* Self Signals Panel */}
         <SelfSignalsPanel
           objectType="concept"
           objectUuid={conceptId}

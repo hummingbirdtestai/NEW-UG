@@ -3,6 +3,7 @@ import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
 import { Eye, Lightbulb, ChevronRight, Sparkles } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
+import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface QAItem {
   id?: string;
@@ -240,6 +241,13 @@ function ToggleCard({ item, index }: ToggleCardProps) {
           />
         </View>
       </View>
+
+      {/* Self Signals Panel */}
+      <SelfSignalsPanel
+        objectType="flashcard"
+        objectUuid={item.id || `qa-${index}`}
+        topicName={item.question.substring(0, 50) + '...'}
+      />
 
       {/* Card Number Badge */}
       <MotiView

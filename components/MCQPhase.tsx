@@ -14,6 +14,7 @@ import {
   Sparkles
 } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
+import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MCQOption {
   A: string;
@@ -492,6 +493,13 @@ function FeedbackCard({
 
           {/* Glowing border effect */}
           <MotiView
+      {/* Self Signals Panel */}
+      <SelfSignalsPanel
+        objectType="mcq"
+        objectUuid={mcq.id}
+        topicName={mcq.stem.substring(0, 50) + '...'}
+      />
+
             from={{ scale: 1, opacity: 0.6 }}
             animate={{ scale: 1.02, opacity: 0 }}
             transition={{
