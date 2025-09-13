@@ -14,7 +14,6 @@ import {
   Sparkles
 } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MCQOption {
   A: string;
