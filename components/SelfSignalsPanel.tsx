@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Pressable, TextInput } from 'react-native';
 import { MotiView } from 'moti';
-import { Target, Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, Edit3, Check } from 'lucide-react-native';
+import { Target, Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, CreditCard as Edit3, Check } from 'lucide-react-native';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
 
