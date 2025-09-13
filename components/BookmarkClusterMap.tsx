@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, Pressable, ScrollView, Dimensions, TextInput } from 'react-native';
 import { MotiView } from 'moti';
 import { PanGestureHandler, PinchGestureHandler, State } from 'react-native-gesture-handler';
-import { Bookmark, Target, TrendingUp, ArrowLeft, X, ZoomIn, ZoomOut, Info, BookmarkCheck, ThumbsUp, ThumbsDown, Edit3, Check } from 'lucide-react-native';
+import { Bookmark, Target, TrendingUp, ArrowLeft, X, ZoomIn, ZoomOut, Info, BookmarkCheck, ThumbsUp, ThumbsDown, CreditCard as Edit3, Check } from 'lucide-react-native';
 import Svg, { Circle, Text as SvgText, G, Defs, RadialGradient, Stop } from 'react-native-svg';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
