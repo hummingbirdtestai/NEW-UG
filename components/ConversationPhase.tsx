@@ -568,15 +568,15 @@ export default function ConversationPhase({
           {/* Self Signals Panel for MCQ */}
           <SelfSignalsPanel
             objectType="conversation_mcq"
-            objectUuid={`mcq-${mcqIndex}`}
-            topicName={mcq.question.substring(0, 50) + '...'}
+            objectUuid={`mcq-${currentMCQIndex}`}
+            topicName={currentMCQ?.question.substring(0, 50) + '...'}
           />
 
           {/* Self Signals Panel for HYF */}
           <SelfSignalsPanel
             objectType="conversation_hyf"
-            objectUuid={`hyf-${index}`}
-            topicName={hyf.text.substring(0, 50) + '...'}
+            objectUuid={`hyf-${currentHYFIndex}`}
+            topicName={currentHYF?.text.substring(0, 50) + '...'}
           />
 
           {/* Progress Indicator */}
@@ -645,7 +645,7 @@ export default function ConversationPhase({
                   >
                     <Pressable
                       onPress={handleNextMCQ}
-                     className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 border border-emerald-500/30 shadow-2xl active:scale-95"
+                      className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 border border-emerald-500/30 shadow-2xl active:scale-95 flex-row items-center"
                       style={{
                         shadowColor: '#10b981',
                         shadowOffset: { width: 0, height: 8 },
@@ -682,10 +682,11 @@ export default function ConversationPhase({
             </View>
             <Text className="text-3xl font-bold text-slate-100 mb-2 text-center">
               🎉 All HYFs Completed!
-        {/* Self Signals Panel */}
+            </Text>
+            {/* Self Signals Panel */}
             <Text className="text-slate-300 text-lg text-center">
-          objectType="conversation_hyf"
-          objectUuid={`hyf-${index}`}
+              Great job mastering these key concepts!
+            </Text>
           </MotiView>
         )}
       </ScrollView>
