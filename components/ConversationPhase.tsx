@@ -385,6 +385,10 @@ export default function ConversationPhase({
   onBookmark,
   bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
+  const normalizedHyfs: HYF[] = hyfs.map((h: any) => ({
+    text: h.text ?? h.HYF,   // if JSON uses HYF
+    mcqs: h.mcqs ?? h.MCQs   // if JSON uses MCQs
+  }));
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
   const [answeredMCQ, setAnsweredMCQ] = useState<AnsweredMCQ | undefined>(undefined);
