@@ -69,6 +69,7 @@ function shuffleOptions(mcq: MCQ) {
 }
 
 
+
 function MCQCard({
   mcq,
   index,
@@ -225,16 +226,14 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
           {/* Enhanced Options Grid */}
           <View className="space-y-4">
             {shuffledOptions.map((opt, optionIndex) => {
-  const isSelected = answeredMCQ?.selectedOption === opt.dbKey; // ✅ use dbKey for checking
+  const isSelected = answeredMCQ?.selectedOption === opt.dbKey; // ✅ use dbKey
   const isCorrect = opt.dbKey === mcq.correct_answer;
   const isDisabled = !!answeredMCQ;
-
-  ...
 
   return (
     <MotiView key={`${mcq.id}-${opt.uiLabel}`} ...>
       <Pressable
-        onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ send dbKey back
+        onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ pass dbKey
         disabled={isDisabled}
         className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
       >
@@ -262,6 +261,7 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
     </MotiView>
   );
 })}
+
 
 
           </View>
