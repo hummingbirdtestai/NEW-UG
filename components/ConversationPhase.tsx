@@ -277,7 +277,8 @@ function MCQCard({
 }) {
   const correctValue = mcq.options[mcq.correct_answer];
   const correctUiLabel =
-    shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
+  shuffledOptions.find((opt) => opt.dbKey === mcq.correct_answer)?.uiLabel || "?";
+
 
   return (
     <MotiView
