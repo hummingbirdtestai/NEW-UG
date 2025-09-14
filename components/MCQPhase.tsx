@@ -854,25 +854,12 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
                       <Text className="text-emerald-200 text-3xl font-bold">
                         {Math.round((correctCount / mcqs.length) * 100)}%
                       </Text>
-        <View className="flex-row items-center justify-between p-6">
-          <View className="flex-row items-center">
-            <View className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl items-center justify-center mr-3">
-              <Sparkles size={20} color="#ffffff" />
+                    </View>
+                  </View>
+                </View>
+              </View>
             </View>
-            <View>
-              <Text className="text-sm text-teal-400 font-semibold uppercase tracking-wide">
-                MCQ Practice
-              </Text>
-              <Text className="text-xl font-bold text-slate-100">
-                Interactive Questions
-              </Text>
-            </View>
-          </View>
-          <View className="bg-teal-500/20 rounded-lg px-3 py-2 border border-teal-500/30">
-            <Text className="text-teal-400 font-bold text-lg">
-              {Math.min(currentMCQIndex + 1, mcqs.length)} / {mcqs.length}
-            </Text>
-          </View>
+          </MotiView>
         )}
       </ScrollView>
     </View>
