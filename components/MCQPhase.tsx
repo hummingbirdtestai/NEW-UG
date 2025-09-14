@@ -678,21 +678,21 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
         />
         
         <View className="flex-row items-center justify-between p-8 pt-16 border-b border-slate-700/30">
-          <View className="flex-row items-center flex-1">
+          <View className="flex-row items-center flex-1 mr-4">
             <MotiView
               from={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', duration: 1000, delay: 200 }}
-              className="w-16 h-16 bg-gradient-to-br from-teal-500 to-indigo-600 rounded-3xl items-center justify-center mr-6 shadow-2xl"
+              className="w-14 h-14 bg-gradient-to-br from-teal-500 to-indigo-600 rounded-2xl items-center justify-center mr-4 shadow-xl"
               style={{
                 shadowColor: '#14b8a6',
-                shadowOffset: { width: 0, height: 12 },
+                shadowOffset: { width: 0, height: 8 },
                 shadowOpacity: 0.4,
-                shadowRadius: 24,
-                elevation: 12,
+                shadowRadius: 16,
+                elevation: 8,
               }}
             >
-              <MessageCircle size={32} color="#ffffff" />
+              <MessageCircle size={24} color="#ffffff" />
               
               {/* Rotating glow */}
               <MotiView
@@ -703,23 +703,23 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
                   type: 'timing',
                   duration: 6000,
                 }}
-                className="absolute inset-0 rounded-3xl bg-teal-400/20"
+                className="absolute inset-0 rounded-2xl bg-teal-400/20"
               />
             </MotiView>
             
-            <View className="flex-1">
+            <View className="flex-1 min-w-0">
               <MotiView
                 from={{ opacity: 0, translateX: -30 }}
                 animate={{ opacity: 1, translateX: 0 }}
                 transition={{ type: 'spring', duration: 800, delay: 400 }}
               >
-                <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider mb-2">
+                <Text className="text-teal-400 text-xs font-semibold mb-1 uppercase tracking-wider">
                   MCQ Practice
                 </Text>
-                <Text className="text-4xl font-bold text-slate-100 mb-2 leading-tight">
+                <Text className="text-2xl font-bold text-slate-100 mb-1 leading-tight">
                   Interactive Questions
                 </Text>
-                <Text className="text-xl text-slate-300">
+                <Text className="text-base text-slate-300">
                   Test your knowledge with adaptive feedback
                 </Text>
               </MotiView>
@@ -733,8 +733,8 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
             transition={{ type: 'spring', duration: 600, delay: 600 }}
             className="items-center"
           >
-            <View className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl px-6 py-4 border border-teal-500/30 shadow-xl">
-              <Text className="text-teal-400 font-bold text-2xl text-center">
+            <View className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-xl px-4 py-3 border border-teal-500/30 shadow-lg">
+              <Text className="text-teal-400 font-bold text-xl text-center">
                 {Math.min(currentMCQIndex + 1, mcqs.length)}
               </Text>
               <Text className="text-teal-300/80 text-sm text-center font-medium">
