@@ -217,7 +217,7 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
 
           {/* Enhanced Options Grid */}
           <View className="space-y-4">
-            {shuffledOptions.map((key, optionIndex) => {
+            {shuffledOptions.map((opt, optionIndex) => {
               const isSelected = answeredMCQ?.selectedOption === key;
               const isCorrect = key === mcq.correct_answer;
               const isDisabled = !!answeredMCQ;
