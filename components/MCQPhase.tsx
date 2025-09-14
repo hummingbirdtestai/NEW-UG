@@ -156,7 +156,6 @@ function MCQCard({
                     )}
                   </Pressable>
                 </MotiView>
-             </MotiView>
               );
             })}
           </View>
