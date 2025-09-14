@@ -253,7 +253,16 @@ function shuffleOptions(mcq: MCQ) {
 }
 
 
-function MCQCard({ mcq, mcqIndex, onAnswer, selectedAnswer, showFeedback, isCorrect }: MCQCardProps) {
+function MCQCard({
+  mcq,
+  mcqIndex,
+  shuffledOptions,
+  onAnswer,
+  selectedValue,
+  showFeedback,
+  isCorrect,
+}: MCQCardProps)
+ {
   const markdownStyles = {
     body: {
       color: '#ffffff',
