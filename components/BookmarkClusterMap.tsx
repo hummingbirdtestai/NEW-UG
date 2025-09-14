@@ -1,12 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, Pressable, ScrollView, Dimensions, TextInput } from 'react-native';
+import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
 import { MotiView } from 'moti';
 import { PanGestureHandler, PinchGestureHandler, State } from 'react-native-gesture-handler';
-import { Bookmark, Target, TrendingUp, ArrowLeft, X, ZoomIn, ZoomOut, Info, BookmarkCheck, ThumbsUp, ThumbsDown, CreditCard as Edit3, Check } from 'lucide-react-native';
+import { Bookmark, Target, TrendingUp, ArrowLeft, X, ZoomIn, ZoomOut, Info } from 'lucide-react-native';
 import Svg, { Circle, Text as SvgText, G, Defs, RadialGradient, Stop } from 'react-native-svg';
-import { supabase } from '@/lib/supabaseClient';
-import { useAuth } from '@/contexts/AuthContext';
-import SelfSignalsPanel from '@/components/SelfSignalsPanel';
 
 interface Topic {
   subject: string;
@@ -117,7 +114,6 @@ interface BubbleTooltipProps {
 }
 
 function BubbleTooltip({ data, onClose }: BubbleTooltipProps) {
-  const { user } = useAuth();
   const { item, type, position } = data;
   
   const getName = () => {
@@ -204,15 +200,6 @@ function BubbleTooltip({ data, onClose }: BubbleTooltipProps) {
               </Text>
             </View>
           )}
-
-          {/* Self Signals Panel */}
-          {user?.id && (
-            <SelfSignalsPanel
-              objectType="concept"
-              objectUuid={`topic-${getName().toLowerCase().replace(/\s+/g, '-')}`}
-              topicName={getName()}
-            />
-          )}
         </View>
 
         {(type === 'subject' || type === 'chapter') && (
@@ -230,7 +217,6 @@ function BubbleTooltip({ data, onClose }: BubbleTooltipProps) {
 export default function BookmarkClusterMap() {
   const { width, height } = Dimensions.get('window');
   const isMobile = width < 768;
-  const { user } = useAuth();
   
   const [viewLevel, setViewLevel] = useState<ViewLevel>('subjects');
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);

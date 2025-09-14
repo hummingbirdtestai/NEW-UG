@@ -14,7 +14,6 @@ import {
   Sparkles
 } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MCQOption {
   A: string;
@@ -426,7 +425,7 @@ function FeedbackCard({
         from={{ opacity: 0, translateY: 30, scale: 0.95 }}
         animate={{ opacity: 1, translateY: 0, scale: 1 }}
         transition={{ type: 'spring', duration: 800, delay: isCorrect ? 300 : 600 }}
-        className="bg-slate-800/90 border-b border-slate-700/50"
+        className="relative overflow-hidden"
       >
         <View 
           className="bg-gradient-to-br from-emerald-900/60 to-teal-900/60 rounded-3xl border border-emerald-500/40 shadow-2xl"
@@ -580,15 +579,6 @@ function FeedbackCard({
           </View>
         </MotiView>
       )}
-
-      {/* Self Signals Panel */}
-      <View className="mt-4">
-        <SelfSignalsPanel
-          objectType="mcq"
-          objectUuid={mcq.id}
-          topicName={mcq.stem.substring(0, 50) + '...'}
-        />
-      </View>
     </View>
   );
 }
@@ -664,27 +654,85 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
         from={{ opacity: 0, translateY: -30 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: 'spring', duration: 800 }}
-        className="bg-slate-800/90 border-b border-slate-700/50 p-6"
+        className="relative overflow-hidden"
       >
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <View className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl items-center justify-center mr-3">
-              <MessageCircle size={20} color="#ffffff" />
-            </View>
-            <View>
-              <Text className="text-teal-400 text-sm font-semibold uppercase tracking-wide">
-                MCQ Practice
-              </Text>
-              <Text className="text-xl font-bold text-slate-100">
-                Interactive Questions
-              </Text>
+        {/* Animated background gradient */}
+        <MotiView
+          from={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1.2, opacity: 0.1 }}
+          transition={{
+            loop: true,
+            type: 'timing',
+            duration: 8000,
+          }}
+          className="absolute inset-0 bg-gradient-to-br from-teal-500/20 via-cyan-500/10 to-indigo-500/20"
+        />
+        
+        <View className="flex-row items-center justify-between p-8 pt-16 border-b border-slate-700/30">
+          <View className="flex-row items-center flex-1">
+            <MotiView
+              from={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', duration: 1000, delay: 200 }}
+              className="w-16 h-16 bg-gradient-to-br from-teal-500 to-indigo-600 rounded-3xl items-center justify-center mr-6 shadow-2xl"
+              style={{
+                shadowColor: '#14b8a6',
+                shadowOffset: { width: 0, height: 12 },
+                shadowOpacity: 0.4,
+                shadowRadius: 24,
+                elevation: 12,
+              }}
+            >
+              <MessageCircle size={32} color="#ffffff" />
+              
+              {/* Rotating glow */}
+              <MotiView
+                from={{ rotate: '0deg', scale: 1 }}
+                animate={{ rotate: '360deg', scale: 1.4 }}
+                transition={{
+                  loop: true,
+                  type: 'timing',
+                  duration: 6000,
+                }}
+                className="absolute inset-0 rounded-3xl bg-teal-400/20"
+              />
+            </MotiView>
+            
+            <View className="flex-1">
+              <MotiView
+                from={{ opacity: 0, translateX: -30 }}
+                animate={{ opacity: 1, translateX: 0 }}
+                transition={{ type: 'spring', duration: 800, delay: 400 }}
+              >
+                <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider mb-2">
+                  MCQ Practice
+                </Text>
+                <Text className="text-4xl font-bold text-slate-100 mb-2 leading-tight">
+                  Interactive Questions
+                </Text>
+                <Text className="text-xl text-slate-300">
+                  Test your knowledge with adaptive feedback
+                </Text>
+              </MotiView>
             </View>
           </View>
-          <View className="bg-teal-500/20 rounded-lg px-3 py-2 border border-teal-500/30">
-            <Text className="text-teal-400 font-bold text-lg">
-              {Math.min(currentMCQIndex + 1, mcqs.length)} / {mcqs.length}
-            </Text>
-          </View>
+
+          {/* Enhanced Progress Badge */}
+          <MotiView
+            from={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', duration: 600, delay: 600 }}
+            className="items-center"
+          >
+            <View className="bg-gradient-to-br from-teal-500/20 to-cyan-500/20 rounded-2xl px-6 py-4 border border-teal-500/30 shadow-xl">
+              <Text className="text-teal-400 font-bold text-2xl text-center">
+                {Math.min(currentMCQIndex + 1, mcqs.length)}
+              </Text>
+              <Text className="text-teal-300/80 text-sm text-center font-medium">
+                of {mcqs.length}
+              </Text>
+            </View>
+          </MotiView>
         </View>
       </MotiView>
 
@@ -855,8 +903,77 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
                         {Math.round((correctCount / mcqs.length) * 100)}%
                       </Text>
                     </View>
+                    <View className="items-center">
+                      <Text className="text-cyan-400 text-sm font-semibold uppercase tracking-wide">
+                        Correct
+                      </Text>
+                      <Text className="text-cyan-200 text-3xl font-bold">
+                        {correctCount}
+                      </Text>
+                    </View>
+                    <View className="items-center">
+                      <Text className="text-blue-400 text-sm font-semibold uppercase tracking-wide">
+                        Total
+                      </Text>
+                      <Text className="text-blue-200 text-3xl font-bold">
+                        {mcqs.length}
+                      </Text>
+                    </View>
                   </View>
                 </View>
+
+                {/* Next Concept Button */}
+                <Pressable
+                  onPress={onComplete}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-6 px-8 flex-row items-center justify-center shadow-2xl active:scale-95"
+                  style={{
+                    shadowColor: '#10b981',
+                    shadowOffset: { width: 0, height: 12 },
+                    shadowOpacity: 0.5,
+                    shadowRadius: 24,
+                    elevation: 12,
+                  }}
+                >
+                  <Sparkles size={24} color="#ffffff" />
+                  <Text className="text-white font-bold text-xl ml-3 mr-2">
+                    Next Concept
+                  </Text>
+                  <ChevronRight size={24} color="#ffffff" />
+                </Pressable>
+              </View>
+
+              {/* Celebration particles */}
+              <View className="absolute inset-0 pointer-events-none">
+                {[...Array(12)].map((_, i) => (
+                  <MotiView
+                    key={`celebration-particle-${i}`}
+                    from={{ 
+                      opacity: 0, 
+                      translateY: Math.random() * 100,
+                      translateX: Math.random() * 200 - 100,
+                      scale: 0
+                    }}
+                    animate={{ 
+                      opacity: [0, 1, 0],
+                      translateY: Math.random() * -150,
+                      translateX: Math.random() * 100 - 50,
+                      scale: [0, 1.2, 0]
+                    }}
+                    transition={{
+                      loop: true,
+                      type: 'timing',
+                      duration: 4000,
+                      delay: i * 300,
+                    }}
+                    className="absolute"
+                    style={{
+                      left: `${Math.random() * 80 + 10}%`,
+                      top: `${Math.random() * 80 + 10}%`,
+                    }}
+                  >
+                    <View className="w-3 h-3 bg-emerald-400 rounded-full shadow-lg" />
+                  </MotiView>
+                ))}
               </View>
             </View>
           </MotiView>

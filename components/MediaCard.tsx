@@ -11,7 +11,6 @@ import {
   BookmarkCheck,
 } from "lucide-react-native";
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import SelfSignalsPanel from "@/components/SelfSignalsPanel";
 
 interface MediaItem {
   id: string;
@@ -172,13 +171,6 @@ export default function MediaCard({
           </Pressable>
         </View>
       </View>
-
-      {/* Self Signals Panel */}
-      <SelfSignalsPanel
-        objectType={type === "video" ? "video_search" : "image_search"}
-        objectUuid={item.id}
-        topicName={item.description.substring(0, 50) + '...'}
-      />
     </MotiView>
   );
 }
