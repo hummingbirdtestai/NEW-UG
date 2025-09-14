@@ -6,8 +6,6 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import {
   CheckCircle,
   XCircle,
-  MessageCircle,
-  Lightbulb,
   ChevronRight,
   Award,
   Sparkles,
@@ -38,7 +36,7 @@ interface MCQPhaseProps {
 }
 interface AnsweredMCQ {
   mcq: MCQ;
-  selectedOption: keyof MCQOption;
+  selectedValue: string; // store chosen value, not A/B/C/D
   isCorrect: boolean;
   showFeedback: boolean;
 }
@@ -47,10 +45,13 @@ interface AnsweredMCQ {
 function shuffleOptions(mcq: MCQ) {
   const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
   const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
+
+  // Fisher-Yates shuffle
   for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [values[i], values[j]] = [values[j], values[i]];
   }
+
   const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
   return values.map((entry, idx) => ({
     uiLabel: uiLabels[idx],
@@ -68,7 +69,7 @@ function MCQCard({
 }: {
   mcq: MCQ;
   index: number;
-  onAnswer: (uiLabel: keyof MCQOption, dbKey: keyof MCQOption) => void;
+  onAnswer: (selectedValue: string) => void;
   answeredMCQ?: AnsweredMCQ;
   isActive: boolean;
 }) {
@@ -94,8 +95,9 @@ function MCQCard({
           {/* Options */}
           <View className="space-y-4">
             {shuffledOptions.map((opt) => {
-              const isSelected = answeredMCQ?.selectedOption === opt.dbKey;
-              const isCorrect = opt.dbKey === mcq.correct_answer;
+              const isSelected = answeredMCQ?.selectedValue === opt.value;
+              const correctValue = mcq.options[mcq.correct_answer];
+              const isCorrect = opt.value === correctValue;
               const isDisabled = !!answeredMCQ;
 
               let optionStyle =
@@ -113,7 +115,7 @@ function MCQCard({
               return (
                 <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  onPress={() => !isDisabled && onAnswer(opt.uiLabel, opt.dbKey)}
+                  onPress={() => !isDisabled && onAnswer(opt.value)} // ✅ pass value
                   disabled={isDisabled}
                   className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
@@ -154,31 +156,43 @@ function MCQCard({
 
 function FeedbackCard({
   mcq,
-  isCorrect,
+  answered,
 }: {
   mcq: MCQ;
-  isCorrect: boolean;
+  answered: AnsweredMCQ;
 }) {
+  const correctValue = mcq.options[mcq.correct_answer];
+
   return (
     <View className="mb-8">
-      {!isCorrect && (
-        <View className="bg-red-900/40 rounded-2xl border border-red-500/40 p-6 mb-4">
-          <Text className="text-red-300 font-bold mb-2">❌ Incorrect</Text>
-          <MarkdownWithLatex content={mcq.feedback?.wrong} />
-        </View>
+      {!answered.isCorrect && (
+        <>
+          <View className="bg-red-900/40 rounded-2xl border border-red-500/40 p-6 mb-4">
+            <Text className="text-red-300 font-bold mb-2">❌ Incorrect</Text>
+            <MarkdownWithLatex content={mcq.feedback?.wrong} />
+          </View>
+
+          {mcq.learning_gap && (
+            <View className="bg-amber-900/40 rounded-2xl border border-amber-500/40 p-6 mb-4">
+              <Text className="text-amber-300 font-bold mb-2">💡 Learning Gap</Text>
+              <Text className="text-amber-100">{mcq.learning_gap}</Text>
+            </View>
+          )}
+        </>
       )}
-      <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-6 mb-4">
+
+      <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-6">
         <Text className="text-emerald-300 font-bold mb-2">
-          ✅ {isCorrect ? "Correct!" : "Correct Answer"}
+          ✅ {answered.isCorrect ? "Correct!" : "Correct Answer"}
         </Text>
         <MarkdownWithLatex content={mcq.feedback?.correct} />
+
+        {/* Show correct UI option */}
+        <Text className="text-emerald-200 mt-2">
+          Correct Option:{" "}
+          {Object.entries(mcq.options).find(([key, val]) => val === correctValue)?.[0]}
+        </Text>
       </View>
-      {!isCorrect && mcq.learning_gap && (
-        <View className="bg-amber-900/40 rounded-2xl border border-amber-500/40 p-6">
-          <Text className="text-amber-300 font-bold mb-2">💡 Learning Gap</Text>
-          <Text className="text-amber-100">{mcq.learning_gap}</Text>
-        </View>
-      )}
     </View>
   );
 }
@@ -197,29 +211,29 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption)=> {
-  const currentMCQ = mcqs[currentMCQIndex];
-  const isCorrect = dbKey === currentMCQ.correct_answer;
+  const handleAnswer = (selectedValue: string) => {
+    const currentMCQ = mcqs[currentMCQIndex];
+    const correctValue = currentMCQ.options[currentMCQ.correct_answer];
+    const isCorrect = selectedValue === correctValue;
 
-  const newAnswered: AnsweredMCQ = {
-    mcq: currentMCQ,
-    selectedOption: uiLabel,  // store what student clicked
-    isCorrect,
-    showFeedback: true,
+    const newAnswered: AnsweredMCQ = {
+      mcq: currentMCQ,
+      selectedValue,
+      isCorrect,
+      showFeedback: true,
+    };
+
+    setAnsweredMCQs((prev) => {
+      const updated = [...prev];
+      updated[currentMCQIndex] = newAnswered;
+      return updated;
+    });
+
+    if (isCorrect) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 1500);
+    }
   };
-
-  setAnsweredMCQs((prev) => {
-    const updated = [...prev];
-    updated[currentMCQIndex] = newAnswered;
-    return updated;
-  });
-
-  if (isCorrect) {
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 1500);
-  }
-};
-
 
   const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
@@ -237,7 +251,7 @@ const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption)=> {
         <ConfettiCannon count={120} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
       )}
 
-      {/* 🔹 Animated teal header with progress counter */}
+      {/* Header */}
       <MotiView
         from={{ opacity: 0, translateY: -30 }}
         animate={{ opacity: 1, translateY: 0 }}
@@ -259,14 +273,13 @@ const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption)=> {
         {answeredMCQs.map((ans, idx) => (
           <View key={ans.mcq.id || idx}>
             <MCQCard
-              mcq={mcqs[currentMCQIndex]}
-              index={currentMCQIndex}
+              mcq={ans.mcq}
+              index={idx}
               onAnswer={handleAnswer}
-              isActive={true}
+              answeredMCQ={ans}
+              isActive={false}
             />
-
-
-            {ans.showFeedback && <FeedbackCard mcq={ans.mcq} isCorrect={ans.isCorrect} />}
+            {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
             {idx === currentMCQIndex && (
               <Pressable
                 onPress={handleNext}
