@@ -1,3 +1,16 @@
+
+import { 
+  CheckCircle,
+  XCircle,
+  MessageCircle,
+  Lightbulb,
+  ChevronRight,
+  Target,
+  Award,
+  Sparkles
+} from "lucide-react-native";
+
+
 function MCQCard({
   mcq,
   index,
