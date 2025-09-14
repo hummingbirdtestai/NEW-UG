@@ -16,6 +16,16 @@ interface MCQFeedback {
   correct: string;
   wrong: string;
 }
+interface MCQOption {
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+}
+interface MCQFeedback {
+  correct: string;
+  wrong: string;
+}
 interface MCQ {
   id: string;
   stem: string;
@@ -24,6 +34,7 @@ interface MCQ {
   learning_gap?: string;
   correct_answer: keyof MCQOption;
 }
+
 interface MCQPhaseProps {
   mcqs: MCQ[];
   onComplete?: () => void;
@@ -34,6 +45,23 @@ interface AnsweredMCQ {
   isCorrect: boolean;
   correctUiLabel: string; // UI label of correct answer
   showFeedback: boolean;
+}
+function shuffleOptions(mcq: MCQ) {
+  const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
+
+  // Fisher–Yates shuffle
+  for (let i = values.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+
+  const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  return values.map((entry, idx) => ({
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey,
+    value: entry.value,
+  }));
 }
 
 function shuffleOptions(mcq: MCQ) {
