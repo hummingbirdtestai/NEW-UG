@@ -47,6 +47,20 @@ interface AnsweredMCQ {
   isCorrect: boolean;
   showFeedback: boolean;
 }
+function shuffleOptions(mcq: MCQ) {
+  const entries = Object.entries(mcq.options).map(([key, value]) => ({
+    key: key as keyof MCQOption,
+    value,
+  }));
+
+  // Fisher-Yates shuffle
+  for (let i = entries.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [entries[i], entries[j]] = [entries[j], entries[i]];
+  }
+
+  return entries;
+}
 
 function MCQCard({
   mcq,
@@ -61,7 +75,9 @@ function MCQCard({
   answeredMCQ?: AnsweredMCQ;
   isActive: boolean;
 }) {
-  const optionKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  // shuffle once per question
+const shuffledOptions = useRef(shuffleOptions(mcq)).current;
+
 
   const markdownStyles = {
     body: { 
@@ -201,95 +217,35 @@ function MCQCard({
 
           {/* Enhanced Options Grid */}
           <View className="space-y-4">
-            {optionKeys.map((key, optionIndex) => {
-              const isSelected = answeredMCQ?.selectedOption === key;
-              const isCorrect = key === mcq.correct_answer;
-              const isDisabled = !!answeredMCQ;
+            {shuffledOptions.map((opt, optionIndex) => {
+  const isSelected = answeredMCQ?.selectedOption === opt.key;
+  const isCorrect = opt.key === mcq.correct_answer;
+  const isDisabled = !!answeredMCQ;
 
-              let optionStyle = 'bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60 hover:bg-slate-700/80 active:scale-[0.98]';
-              let textColor = 'text-slate-100';
-              let borderWidth = 'border-2';
-              
-              if (isDisabled) {
-                if (isSelected) {
-                  if (answeredMCQ?.isCorrect) {
-                    optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-                    textColor = 'text-emerald-100';
-                    borderWidth = 'border-3';
-                  } else {
-                    optionStyle = 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60';
-                    textColor = 'text-red-100';
-                    borderWidth = 'border-3';
-                  }
-                } else if (isCorrect && !answeredMCQ?.isCorrect) {
-                  optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-                  textColor = 'text-emerald-100';
-                  borderWidth = 'border-3';
-                }
-              }
+  return (
+    <MotiView
+      key={`${mcq.id}-${opt.key}`}
+      from={{ opacity: 0, translateX: -30, scale: 0.9 }}
+      animate={{ opacity: 1, translateX: 0, scale: 1 }}
+      transition={{ type: 'spring', duration: 600, delay: 600 + optionIndex * 150 }}
+    >
+      <Pressable
+        onPress={() => !isDisabled && onAnswer(opt.key)}
+        disabled={isDisabled}
+        className="..."
+      >
+        <MotiView className="w-12 h-12 ...">
+          <Text className="text-white font-bold text-xl">{opt.key}</Text>
+        </MotiView>
 
-              return (
-                <MotiView
-                  key={`${mcq.id}-${key}`}
-                  from={{ opacity: 0, translateX: -30, scale: 0.9 }}
-                  animate={{ opacity: 1, translateX: 0, scale: 1 }}
-                  transition={{ 
-                    type: 'spring', 
-                    duration: 600, 
-                    delay: 600 + optionIndex * 150 
-                  }}
-                >
-                  <Pressable
-                    onPress={() => !isDisabled && onAnswer(key)}
-                    disabled={isDisabled}
-                    className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
-                  >
-                    {/* Enhanced Option Circle */}
-                    <MotiView
-                      from={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ 
-                        type: 'spring', 
-                        duration: 500, 
-                        delay: 800 + optionIndex * 150 
-                      }}
-                      className="w-12 h-12 rounded-2xl items-center justify-center mr-6 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600"
-                      style={{
-                        shadowColor: '#3b82f6',
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 8,
-                        elevation: 4,
-                      }}
-                    >
-                      <Text className="text-white font-bold text-xl">{key}</Text>
-                    </MotiView>
-                    
-                    {/* Enhanced Option Text */}
-                    <View className="flex-1">
-                      <MarkdownWithLatex content={mcq.options[key]} markdownStyles={markdownStyles} />
-                    </View>
+        <View className="flex-1">
+          <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
+        </View>
+      </Pressable>
+    </MotiView>
+  );
+})}
 
-                    {/* Selection Indicator */}
-                    {isSelected && (
-                      <MotiView
-                        from={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: 'spring', duration: 400 }}
-                        className="ml-4"
-                      >
-                        {answeredMCQ?.isCorrect ? (
-                          <CheckCircle size={24} color="#10b981" />
-                        ) : (
-                          <XCircle size={24} color="#ef4444" />
-                        )}
-                      </MotiView>
-                    )}
-
-                  </Pressable>
-                </MotiView>
-              );
-            })}
           </View>
         </View>
 
