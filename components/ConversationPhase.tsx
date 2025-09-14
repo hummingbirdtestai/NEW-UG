@@ -386,9 +386,10 @@ export default function ConversationPhase({
   bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
   const normalizedHyfs: HYF[] = hyfs.map((h: any) => ({
-    text: h.text ?? h.HYF,   // if JSON uses HYF
-    mcqs: h.mcqs ?? h.MCQs   // if JSON uses MCQs
-  }));
+  text: h.text ?? h.HYF ?? "",
+  mcqs: h.mcqs ?? h.MCQs ?? []
+}));
+
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
   const [answeredMCQ, setAnsweredMCQ] = useState<AnsweredMCQ | undefined>(undefined);
@@ -425,14 +426,15 @@ const handleNextMCQ = () => {
 };
 
 
- const handleGotIt = () => {
-  if (currentHYF.mcqs.length > 0) {
+const handleGotIt = () => {
+  if (currentHYF?.mcqs?.length > 0) {
     setShuffledOptionsList(currentHYF.mcqs.map(shuffleOptions));
     setCurrentMCQIndex(0);
   } else {
     handleNextHYF();
   }
 };
+
 
 
 const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
