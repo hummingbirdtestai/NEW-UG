@@ -193,26 +193,34 @@ export default function ConversationPhase({
   const [showFeedback, setShowFeedback] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  // Pre-shuffle all MCQs once when component mounts
+const [shuffledOptionsList] = useState(() =>
+  hyfs.map((hyf) => hyf.mcqs.map(shuffleOptions))
+);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const isMobile = Dimensions.get('window').width < 768;
 
   const currentHYF = hyfs[currentHYFIndex];
   const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
 
-  const handleNextMCQ = () => {
-    const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
-    if (isCorrect) {
-      handleNextHYF();
+const handleNextMCQ = () => {
+  const correctValue = currentMCQ?.options[currentMCQ.correct_answer];
+  const isCorrect = selectedValue === correctValue;
+
+  if (isCorrect) {
+    handleNextHYF();
+  } else {
+    if (currentMCQIndex < currentHYF.mcqs.length - 1) {
+      setCurrentMCQIndex(currentMCQIndex + 1);
+      setSelectedValue(undefined);
+      setShowFeedback(false);
     } else {
-      if (currentMCQIndex < currentHYF.mcqs.length - 1) {
-        setCurrentMCQIndex(currentMCQIndex + 1);
-        setSelectedValue(undefined);
-        setShowFeedback(false);
-      } else {
-        handleNextHYF();
-      }
+      handleNextHYF();
     }
-  };
+  }
+};
+
 
   const handleNextHYF = () => {
     if (currentHYFIndex < hyfs.length - 1) {
@@ -234,17 +242,24 @@ export default function ConversationPhase({
     }
   };
 
-  const handleMCQAnswer = (selected: string, uiLabel: string) => {
-    setSelectedValue(selected);
-    setCorrectUiLabel(uiLabel);
-    setShowFeedback(true);
+ const handleMCQAnswer = (selected: string, uiLabel: string) => {
+  setSelectedValue(selected);
 
-    const correctValue = currentMCQ?.options[currentMCQ.correct_answer];
-    if (selected === correctValue) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
-    }
-  };
+  const correctValue = currentMCQ?.options[currentMCQ.correct_answer];
+  const correctUiLabel =
+    shuffledOptionsList[currentHYFIndex][currentMCQIndex].find(
+      (opt) => opt.value === correctValue
+    )?.uiLabel || "?";
+
+  setCorrectUiLabel(correctUiLabel);
+  setShowFeedback(true);
+
+  if (selected === correctValue) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+  }
+};
+
 
   const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
 
@@ -275,29 +290,44 @@ export default function ConversationPhase({
             {currentMCQIndex >= 0 && currentMCQ && (
               <>
                 <MCQCard
-                  mcq={currentMCQ}
-                  mcqIndex={currentMCQIndex}
-                  shuffledOptions={shuffleOptions(currentMCQ)}
-                  onAnswer={handleMCQAnswer}
-                  selectedValue={selectedValue}
-                  showFeedback={showFeedback}
-                  isCorrect={isCorrect}
-                />
-                {showFeedback && (
-                  <Pressable
-                    onPress={handleNextMCQ}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 mt-4 self-end"
-                  >
-                    <Text className="text-white font-bold">
-                      {isCorrect 
-                        ? 'Next HYF' 
-                        : currentMCQIndex < currentHYF.mcqs.length - 1 
-                          ? 'Next MCQ' 
-                          : 'Next HYF'
-                      }
-                    </Text>
-                  </Pressable>
-                )}
+  mcq={currentMCQ}
+  mcqIndex={currentMCQIndex}
+  shuffledOptions={shuffledOptionsList[currentHYFIndex][currentMCQIndex]} // ✅ use pre-shuffled
+  onAnswer={handleMCQAnswer}
+  selectedValue={selectedValue}
+  showFeedback={showFeedback}
+  isCorrect={isCorrect}
+/>
+
+                {/* Feedback Section */}
+{showFeedback && (
+  <View className="mt-4">
+    {!isCorrect && (
+      <>
+        <View className="bg-red-900/40 rounded-2xl border border-red-500/40 p-4 mb-3">
+          <Text className="text-red-300 font-bold mb-2">❌ Incorrect</Text>
+          <MarkdownWithLatex content={mcq.feedback?.wrong} />
+        </View>
+
+        {mcq.learning_gap && (
+          <View className="bg-amber-900/40 rounded-2xl border border-amber-500/40 p-4 mb-3">
+            <Text className="text-amber-300 font-bold mb-2">💡 Learning Gap</Text>
+            <Text className="text-amber-100">{mcq.learning_gap}</Text>
+          </View>
+        )}
+      </>
+    )}
+
+    <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
+      <Text className="text-emerald-300 font-bold mb-2">
+        ✅ {isCorrect ? "Correct!" : "Correct Answer"}
+      </Text>
+      <MarkdownWithLatex content={mcq.feedback?.correct} />
+      <Text className="text-emerald-200 mt-2">Correct Option: {correctUiLabel}</Text>
+    </View>
+  </View>
+)}
+
               </>
             )}
           </>
