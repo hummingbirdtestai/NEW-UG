@@ -387,7 +387,15 @@ export default function ConversationPhase({
 }: ConversationPhaseProps) {
   const normalizedHyfs: HYF[] = hyfs.map((h: any) => ({
   text: h.text ?? h.HYF ?? "",
-  mcqs: h.mcqs ?? h.MCQs ?? []
+  mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any) => ({
+  id: m.id ?? crypto.randomUUID(),
+  stem: m.stem ?? m.question ?? "",   // normalize
+  options: m.options,
+  feedback: m.feedback,
+  learning_gap: m.learning_gap,
+  correct_answer: m.correct_answer,
+}))
+
 }));
 
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
