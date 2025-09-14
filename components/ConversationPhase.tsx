@@ -445,15 +445,24 @@ const handleGotIt = () => {
 };
 
 
-
-const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
+const handleMCQAnswer = (selectedValue: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
 
-  // Use dbKey instead of text value
+  // 1. Get the correct dbKey from MCQ definition
+  const correctDbKey = currentMCQ.correct_answer;
+
+  // 2. Find the correct option’s UI label (A/B/C/D) from shuffled list
+  const correctUiLabel =
+    shuffledOptionsList[currentMCQIndex].find((opt) => opt.dbKey === correctDbKey)?.uiLabel || "?";
+
+  // 3. Find which dbKey was selected
   const selectedDbKey = shuffledOptionsList[currentMCQIndex]
     .find((opt) => opt.value === selectedValue)?.dbKey;
-  const isCorrect = selectedDbKey === currentMCQ.correct_answer;
 
+  // 4. Correctness check
+  const isCorrect = selectedDbKey === correctDbKey;
+
+  // 5. Save answer with proper correctUiLabel
   setAnsweredMCQ({
     mcq: currentMCQ,
     selectedValue,
