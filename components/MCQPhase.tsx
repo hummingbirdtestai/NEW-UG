@@ -1,15 +1,9 @@
 // components/MCQPhase.tsx
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Dimensions } from "react-native";
 import { MotiView } from "moti";
 import ConfettiCannon from "react-native-confetti-cannon";
-import {
-  CheckCircle,
-  XCircle,
-  ChevronRight,
-  Award,
-  Sparkles,
-} from "lucide-react-native";
+import { CheckCircle, XCircle, ChevronRight, Award, Sparkles } from "lucide-react-native";
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 
 interface MCQOption {
@@ -36,13 +30,12 @@ interface MCQPhaseProps {
 }
 interface AnsweredMCQ {
   mcq: MCQ;
-  selectedValue: string; // chosen text value
+  selectedValue: string;
   isCorrect: boolean;
-  correctUiLabel: string; // A, B, C, or D
+  correctUiLabel: string; // UI label of correct answer
   showFeedback: boolean;
 }
 
-// 🔀 Shuffle only values, keep A–D fixed
 function shuffleOptions(mcq: MCQ) {
   const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
   const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
@@ -63,18 +56,15 @@ function shuffleOptions(mcq: MCQ) {
 
 function MCQCard({
   mcq,
-  index,
+  shuffledOptions,
   onAnswer,
   answeredMCQ,
-  isActive,
 }: {
   mcq: MCQ;
-  index: number;
+  shuffledOptions: ReturnType<typeof shuffleOptions>;
   onAnswer: (selectedValue: string, correctUiLabel: string) => void;
   answeredMCQ?: AnsweredMCQ;
-  isActive: boolean;
 }) {
-  const shuffledOptions = useRef(shuffleOptions(mcq)).current;
   const correctValue = mcq.options[mcq.correct_answer];
   const correctUiLabel =
     shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
@@ -103,8 +93,7 @@ function MCQCard({
               const isCorrect = opt.value === correctValue;
               const isDisabled = !!answeredMCQ;
 
-              let optionStyle =
-                "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60";
+              let optionStyle = "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60";
               if (isDisabled) {
                 if (isSelected) {
                   optionStyle = answeredMCQ?.isCorrect
@@ -118,26 +107,20 @@ function MCQCard({
               return (
                 <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  onPress={() =>
-                    !isDisabled && onAnswer(opt.value, correctUiLabel)
-                  }
+                  onPress={() => !isDisabled && onAnswer(opt.value, correctUiLabel)}
                   disabled={isDisabled}
                   className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
                   {/* Fixed A–D label */}
                   <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <Text className="text-white font-bold text-xl">
-                      {opt.uiLabel}
-                    </Text>
+                    <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
                   </View>
 
-                  {/* Shuffled value */}
+                  {/* Option value */}
                   <View className="flex-1">
                     <MarkdownWithLatex
                       content={opt.value}
-                      markdownStyles={{
-                        body: { color: "#f1f5f9", fontSize: 16 },
-                      }}
+                      markdownStyles={{ body: { color: "#f1f5f9", fontSize: 16 } }}
                     />
                   </View>
 
@@ -161,13 +144,7 @@ function MCQCard({
   );
 }
 
-function FeedbackCard({
-  mcq,
-  answered,
-}: {
-  mcq: MCQ;
-  answered: AnsweredMCQ;
-}) {
+function FeedbackCard({ mcq, answered }: { mcq: MCQ; answered: AnsweredMCQ }) {
   return (
     <View className="mb-8">
       {!answered.isCorrect && (
@@ -191,11 +168,7 @@ function FeedbackCard({
           ✅ {answered.isCorrect ? "Correct!" : "Correct Answer"}
         </Text>
         <MarkdownWithLatex content={mcq.feedback?.correct} />
-
-        {/* Show correct UI key (A/B/C/D) */}
-        <Text className="text-emerald-200 mt-2">
-          Correct Option: {answered.correctUiLabel}
-        </Text>
+        <Text className="text-emerald-200 mt-2">Correct Option: {answered.correctUiLabel}</Text>
       </View>
     </View>
   );
@@ -209,12 +182,12 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
+  // 🔐 Pre-shuffle once
+  const [shuffledOptionsList] = useState(() => mcqs.map(shuffleOptions));
+
   useEffect(() => {
     if (scrollViewRef.current) {
-      setTimeout(
-        () => scrollViewRef.current?.scrollToEnd({ animated: true }),
-        300
-      );
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
@@ -227,7 +200,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
       mcq: currentMCQ,
       selectedValue,
       isCorrect,
-      correctUiLabel, // save correct UI key
+      correctUiLabel,
       showFeedback: true,
     };
 
@@ -256,12 +229,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   return (
     <View className="flex-1 bg-slate-900">
       {showConfetti && (
-        <ConfettiCannon
-          count={120}
-          origin={{ x: width / 2, y: 0 }}
-          autoStart
-          fadeOut
-        />
+        <ConfettiCannon count={120} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
       )}
 
       {/* Header */}
@@ -271,12 +239,8 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
         transition={{ type: "spring", duration: 700 }}
         className="p-6 border-b border-slate-700/50 bg-slate-800/60"
       >
-        <Text className="text-teal-400 text-sm font-bold uppercase">
-          Interactive Questions
-        </Text>
-        <Text className="text-slate-100 text-2xl font-bold mt-1">
-          Test Your Understanding
-        </Text>
+        <Text className="text-teal-400 text-sm font-bold uppercase">Interactive Questions</Text>
+        <Text className="text-slate-100 text-2xl font-bold mt-1">Test Your Understanding</Text>
         <Text className="text-slate-400 text-sm mt-1">
           Question {currentMCQIndex + 1} / {mcqs.length}
         </Text>
@@ -287,14 +251,11 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
           <View key={ans.mcq.id || idx}>
             <MCQCard
               mcq={ans.mcq}
-              index={idx}
+              shuffledOptions={shuffledOptionsList[idx]}
               onAnswer={handleAnswer}
               answeredMCQ={ans}
-              isActive={false}
             />
-            {ans.showFeedback && (
-              <FeedbackCard mcq={ans.mcq} answered={ans} />
-            )}
+            {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
             {idx === currentMCQIndex && (
               <Pressable
                 onPress={handleNext}
@@ -308,23 +269,18 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
           </View>
         ))}
 
-        {!isComplete &&
-          currentMCQIndex < mcqs.length &&
-          !answeredMCQs[currentMCQIndex] && (
-            <MCQCard
-              mcq={mcqs[currentMCQIndex]}
-              index={currentMCQIndex}
-              onAnswer={handleAnswer}
-              isActive={true}
-            />
-          )}
+        {!isComplete && currentMCQIndex < mcqs.length && !answeredMCQs[currentMCQIndex] && (
+          <MCQCard
+            mcq={mcqs[currentMCQIndex]}
+            shuffledOptions={shuffledOptionsList[currentMCQIndex]}
+            onAnswer={handleAnswer}
+          />
+        )}
 
         {isComplete && (
           <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
             <Award size={40} color="#10b981" />
-            <Text className="text-emerald-100 text-2xl font-bold mt-4">
-              🎉 All MCQs Completed!
-            </Text>
+            <Text className="text-emerald-100 text-2xl font-bold mt-4">🎉 All MCQs Completed!</Text>
             <Text className="text-emerald-200 text-lg mt-2">
               You scored {correctCount} / {mcqs.length}
             </Text>
@@ -333,9 +289,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
               className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
             >
               <Sparkles size={20} color="#fff" />
-              <Text className="text-white font-bold text-lg ml-2">
-                Next Concept
-              </Text>
+              <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
               <ChevronRight size={20} color="#fff" />
             </Pressable>
           </View>
