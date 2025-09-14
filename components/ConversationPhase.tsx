@@ -414,16 +414,16 @@ const handleNextMCQ = () => {
 
 
   const handleNextHYF = () => {
-    if (currentHYFIndex < normalizedHyfs.length - 1) {
-      setCurrentHYFIndex(currentHYFIndex + 1);
-      setCurrentMCQIndex(-1);
-      setSelectedAnswer(undefined);
-      setShowFeedback(false);
-    } else {
-      setIsComplete(true);
-      onComplete?.();
-    }
-  };
+  if (currentHYFIndex < normalizedHyfs.length - 1) {
+    setCurrentHYFIndex(currentHYFIndex + 1);
+    setCurrentMCQIndex(-1);
+    setAnsweredMCQ(undefined);   // reset instead of setSelectedAnswer / setShowFeedback
+  } else {
+    setIsComplete(true);
+    onComplete?.();
+  }
+};
+
 
  const handleGotIt = () => {
   if (currentHYF.mcqs.length > 0) {
