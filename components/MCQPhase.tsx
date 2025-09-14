@@ -46,22 +46,23 @@ interface AnsweredMCQ {
 }
 
 // 🔀 Shuffle only values, keep A–D fixed
+// 🔀 Shuffle: values only, keep A–D labels fixed
 function shuffleOptions(mcq: MCQ) {
   const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
   const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
 
-  // Shuffle values only
+  // Fisher-Yates shuffle
   for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [values[i], values[j]] = [values[j], values[i]];
   }
 
-  // Map shuffled values back to fixed UI labels A–D
+  // Attach back to UI labels A–D
   const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
   return values.map((entry, idx) => ({
-    uiLabel: uiLabels[idx], // fixed UI label
-    dbKey: entry.dbKey, // original DB key
-    value: entry.value, // shuffled text
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey, // correct DB key
+    value: entry.value,
   }));
 }
 
@@ -87,35 +88,31 @@ function MCQCard({
       transition={{ type: "spring", duration: 600 }}
       className="mb-8"
     >
-      <View className="bg-slate-800/90 rounded-3xl border border-slate-700 shadow-xl overflow-hidden">
-        {/* Header */}
-        <View className="flex-row items-center p-6 border-b border-slate-700 bg-slate-800/40">
-          <Text className="text-teal-400 text-sm font-bold flex-1">
+      {/* Same styled question card header as before */}
+      <View className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden">
+        <View className="flex-row items-center p-6 border-b border-slate-700/30 bg-slate-800/40">
+          <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider flex-1">
             MCQ Practice
           </Text>
-          <Text className="text-slate-100 text-lg font-bold">
-            Q{index + 1}
+          <Text className="text-slate-100 text-2xl font-bold">
+            Question {index + 1}
           </Text>
         </View>
 
         {/* Question Stem */}
-        <View className="p-6">
-          <View className="bg-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-600/30">
-            <MarkdownWithLatex
-              content={mcq.stem}
-              markdownStyles={{ body: { color: "#f1f5f9", fontSize: 18 } }}
-            />
+        <View className="p-8">
+          <View className="bg-slate-900/40 rounded-2xl p-6 border border-slate-600/30 mb-8 shadow-inner">
+            <MarkdownWithLatex content={mcq.stem} markdownStyles={{ body: { color: "#f1f5f9", fontSize: 18 } }} />
           </View>
 
-          {/* Options */}
+          {/* Options (A–D fixed, shuffled values) */}
           <View className="space-y-4">
             {shuffledOptions.map((opt, optionIndex) => {
               const isSelected = answeredMCQ?.selectedOption === opt.dbKey;
               const isCorrect = opt.dbKey === mcq.correct_answer;
               const isDisabled = !!answeredMCQ;
 
-              let optionStyle =
-                "bg-slate-800/80 border-slate-600/50";
+              let optionStyle = "bg-slate-800/80 border-slate-600/50";
               if (isDisabled) {
                 if (isSelected) {
                   optionStyle = answeredMCQ?.isCorrect
@@ -127,48 +124,33 @@ function MCQCard({
               }
 
               return (
-                <MotiView
+                <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  from={{ opacity: 0, translateX: -20 }}
-                  animate={{ opacity: 1, translateX: 0 }}
-                  transition={{
-                    type: "spring",
-                    duration: 400,
-                    delay: optionIndex * 100,
-                  }}
+                  onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ dbKey check
+                  disabled={isDisabled}
+                  className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
-                  <Pressable
-                    onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ dbKey sent back
-                    disabled={isDisabled}
-                    className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
-                  >
-                    {/* Fixed A–D label */}
-                    <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
-                      <Text className="text-white font-bold text-lg">
-                        {opt.uiLabel}
-                      </Text>
-                    </View>
+                  {/* Fixed A–D label */}
+                  <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
+                    <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
+                  </View>
 
-                    {/* Shuffled value */}
-                    <View className="flex-1">
-                      <MarkdownWithLatex
-                        content={opt.value}
-                        markdownStyles={{ body: { color: "#f1f5f9", fontSize: 16 } }}
-                      />
-                    </View>
+                  {/* Shuffled option text */}
+                  <View className="flex-1">
+                    <MarkdownWithLatex content={opt.value} markdownStyles={{ body: { color: "#f1f5f9", fontSize: 16 } }} />
+                  </View>
 
-                    {/* Feedback icon */}
-                    {isSelected && (
-                      <View className="ml-4">
-                        {answeredMCQ?.isCorrect ? (
-                          <CheckCircle size={22} color="#10b981" />
-                        ) : (
-                          <XCircle size={22} color="#ef4444" />
-                        )}
-                      </View>
-                    )}
-                  </Pressable>
-                </MotiView>
+                  {/* Check/Incorrect indicator */}
+                  {isSelected && (
+                    <View className="ml-4">
+                      {answeredMCQ?.isCorrect ? (
+                        <CheckCircle size={24} color="#10b981" />
+                      ) : (
+                        <XCircle size={24} color="#ef4444" />
+                      )}
+                    </View>
+                  )}
+                </Pressable>
               );
             })}
           </View>
