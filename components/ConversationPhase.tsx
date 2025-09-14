@@ -448,8 +448,11 @@ const handleGotIt = () => {
 
 const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
-  const correctValue = currentMCQ.options[currentMCQ.correct_answer];
-  const isCorrect = selectedValue === correctValue;
+
+  // Use dbKey instead of text value
+  const selectedDbKey = shuffledOptionsList[currentMCQIndex]
+    .find((opt) => opt.value === selectedValue)?.dbKey;
+  const isCorrect = selectedDbKey === currentMCQ.correct_answer;
 
   setAnsweredMCQ({
     mcq: currentMCQ,
@@ -464,6 +467,7 @@ const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
+
 
 const isCorrect = answeredMCQ?.isCorrect ?? false;
 
