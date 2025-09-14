@@ -30,7 +30,7 @@ interface MCQ {
   options: MCQOption;
   feedback: MCQFeedback;
   learning_gap?: string;
-  correct_answer: keyof MCQOption;
+  correct_answer: keyof MCQOption; // "A" | "B" | "C" | "D"
 }
 
 interface MCQPhaseProps {
@@ -45,24 +45,23 @@ interface AnsweredMCQ {
   showFeedback: boolean;
 }
 
-// 🔀 Shuffle logic
+// 🔀 Shuffle only values, keep A–D fixed
 function shuffleOptions(mcq: MCQ) {
-  const entries = Object.entries(mcq.options).map(([dbKey, value]) => ({
-    dbKey: dbKey as keyof MCQOption,
-    value,
-  }));
+  const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
 
-  // Fisher-Yates shuffle
-  for (let i = entries.length - 1; i > 0; i--) {
+  // Shuffle values only
+  for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [entries[i], entries[j]] = [entries[j], entries[i]];
+    [values[i], values[j]] = [values[j], values[i]];
   }
 
+  // Map shuffled values back to fixed UI labels A–D
   const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
-  return entries.map((entry, idx) => ({
-    uiLabel: uiLabels[idx],
-    dbKey: entry.dbKey,
-    value: entry.value,
+  return values.map((entry, idx) => ({
+    uiLabel: uiLabels[idx], // fixed UI label
+    dbKey: entry.dbKey, // original DB key
+    value: entry.value, // shuffled text
   }));
 }
 
@@ -81,42 +80,31 @@ function MCQCard({
 }) {
   const shuffledOptions = useRef(shuffleOptions(mcq)).current;
 
-  const markdownStyles = {
-    body: { color: "#f1f5f9", fontSize: 18, lineHeight: 28 },
-    paragraph: { color: "#f1f5f9", marginBottom: 16, fontSize: 18 },
-    strong: {
-      color: "#5eead4",
-      fontWeight: "700",
-      backgroundColor: "rgba(94,234,212,0.15)",
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 6,
-    },
-    em: { color: "#34d399", fontStyle: "italic" },
-  };
-
   return (
     <MotiView
-      from={{ opacity: 0, translateY: 50, scale: 0.95 }}
-      animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: "spring", duration: 800 }}
+      from={{ opacity: 0, translateY: 40 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: "spring", duration: 600 }}
       className="mb-8"
     >
       <View className="bg-slate-800/90 rounded-3xl border border-slate-700 shadow-xl overflow-hidden">
         {/* Header */}
         <View className="flex-row items-center p-6 border-b border-slate-700 bg-slate-800/40">
-          <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider flex-1">
+          <Text className="text-teal-400 text-sm font-bold flex-1">
             MCQ Practice
           </Text>
-          <Text className="text-slate-100 text-xl font-bold">
+          <Text className="text-slate-100 text-lg font-bold">
             Q{index + 1}
           </Text>
         </View>
 
-        {/* Stem */}
+        {/* Question Stem */}
         <View className="p-6">
-          <View className="bg-slate-900/40 rounded-2xl p-6 border border-slate-600/30 mb-6">
-            <MarkdownWithLatex content={mcq.stem} markdownStyles={markdownStyles} />
+          <View className="bg-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-600/30">
+            <MarkdownWithLatex
+              content={mcq.stem}
+              markdownStyles={{ body: { color: "#f1f5f9", fontSize: 18 } }}
+            />
           </View>
 
           {/* Options */}
@@ -127,60 +115,55 @@ function MCQCard({
               const isDisabled = !!answeredMCQ;
 
               let optionStyle =
-                "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60 hover:bg-slate-700/80";
-              let textColor = "text-slate-100";
-              let borderWidth = "border-2";
-
+                "bg-slate-800/80 border-slate-600/50";
               if (isDisabled) {
                 if (isSelected) {
-                  if (answeredMCQ?.isCorrect) {
-                    optionStyle =
-                      "bg-emerald-500/20 border-emerald-500/60";
-                    textColor = "text-emerald-100";
-                    borderWidth = "border-3";
-                  } else {
-                    optionStyle =
-                      "bg-red-500/20 border-red-500/60";
-                    textColor = "text-red-100";
-                    borderWidth = "border-3";
-                  }
+                  optionStyle = answeredMCQ?.isCorrect
+                    ? "bg-emerald-500/20 border-emerald-500/60"
+                    : "bg-red-500/20 border-red-500/60";
                 } else if (isCorrect && !answeredMCQ?.isCorrect) {
-                  optionStyle =
-                    "bg-emerald-500/20 border-emerald-500/60";
-                  textColor = "text-emerald-100";
-                  borderWidth = "border-3";
+                  optionStyle = "bg-emerald-500/20 border-emerald-500/60";
                 }
               }
 
               return (
                 <MotiView
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  from={{ opacity: 0, translateX: -30 }}
+                  from={{ opacity: 0, translateX: -20 }}
                   animate={{ opacity: 1, translateX: 0 }}
-                  transition={{ type: "spring", duration: 500, delay: optionIndex * 100 }}
+                  transition={{
+                    type: "spring",
+                    duration: 400,
+                    delay: optionIndex * 100,
+                  }}
                 >
                   <Pressable
-                    onPress={() => !isDisabled && onAnswer(opt.dbKey)}
+                    onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ dbKey sent back
                     disabled={isDisabled}
-                    className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center`}
+                    className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                   >
                     {/* Fixed A–D label */}
                     <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
-                      <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
+                      <Text className="text-white font-bold text-lg">
+                        {opt.uiLabel}
+                      </Text>
                     </View>
 
-                    {/* Shuffled text */}
+                    {/* Shuffled value */}
                     <View className="flex-1">
-                      <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
+                      <MarkdownWithLatex
+                        content={opt.value}
+                        markdownStyles={{ body: { color: "#f1f5f9", fontSize: 16 } }}
+                      />
                     </View>
 
-                    {/* Indicator */}
+                    {/* Feedback icon */}
                     {isSelected && (
                       <View className="ml-4">
                         {answeredMCQ?.isCorrect ? (
-                          <CheckCircle size={24} color="#10b981" />
+                          <CheckCircle size={22} color="#10b981" />
                         ) : (
-                          <XCircle size={24} color="#ef4444" />
+                          <XCircle size={22} color="#ef4444" />
                         )}
                       </View>
                     )}
@@ -201,6 +184,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   const [currentMCQIndex, setCurrentMCQIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+
   const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -228,7 +212,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
 
     if (isCorrect) {
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
+      setTimeout(() => setShowConfetti(false), 1500);
     }
   };
 
@@ -249,7 +233,6 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
       )}
 
       <ScrollView ref={scrollViewRef} className="flex-1 p-4">
-        {/* Show already answered */}
         {answeredMCQs.map((ans, idx) => (
           <View key={ans.mcq.id || idx}>
             <MCQCard
@@ -260,7 +243,6 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
               isActive={false}
             />
 
-            {/* Next button after feedback */}
             {idx === currentMCQIndex && (
               <Pressable
                 onPress={handleNext}
@@ -274,7 +256,6 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
           </View>
         ))}
 
-        {/* Active question */}
         {!isComplete &&
           currentMCQIndex < mcqs.length &&
           !answeredMCQs[currentMCQIndex] && (
@@ -286,7 +267,6 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
             />
           )}
 
-        {/* Completion card */}
         {isComplete && (
           <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
             <Award size={40} color="#10b981" />
