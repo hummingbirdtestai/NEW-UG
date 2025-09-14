@@ -68,7 +68,7 @@ function MCQCard({
 }: {
   mcq: MCQ;
   index: number;
-  onAnswer: (option: keyof MCQOption) => void;
+  onAnswer: (uiLabel: keyof MCQOption, dbKey: keyof MCQOption) => void;
   answeredMCQ?: AnsweredMCQ;
   isActive: boolean;
 }) {
@@ -197,7 +197,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
- const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption) => {
+const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption)=> {
   const currentMCQ = mcqs[currentMCQIndex];
   const isCorrect = dbKey === currentMCQ.correct_answer;
 
@@ -258,7 +258,14 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
       <ScrollView ref={scrollViewRef} className="flex-1 p-4">
         {answeredMCQs.map((ans, idx) => (
           <View key={ans.mcq.id || idx}>
-            <MCQCard mcq={ans.mcq} index={idx} onAnswer={() => {}} answeredMCQ={ans} isActive={false} />
+            <MCQCard
+  mcq={mcqs[currentMCQIndex]}
+  index={currentMCQIndex}
+  onAnswer={handleAnswer}
+  isActive={true}
+/>
+
+
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} isCorrect={ans.isCorrect} />}
             {idx === currentMCQIndex && (
               <Pressable
