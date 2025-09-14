@@ -4,14 +4,23 @@ import { MotiView, AnimatePresence } from 'moti';
 import { MessageCircle, User, GraduationCap, Lightbulb, BookOpen, Bookmark, BookmarkCheck, ChevronRight, ChevronDown, ChevronUp, CircleCheck as CheckCircle, Circle as XCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import ConfettiCannon from 'react-native-confetti-cannon';
-
+interface MCQOption {
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+}
+interface MCQFeedback {
+  correct: string;
+  wrong: string;
+}
 interface MCQ {
-  question: string;
-  options: string[];
-  answerIndex: number;
-  feedback: string;
-  correctExplanation: string;
-  learningGap?: string;
+  id: string;
+  stem: string;
+  options: MCQOption;
+  feedback: MCQFeedback;
+  learning_gap?: string;
+  correct_answer: keyof MCQOption;
 }
 
 interface HYF {
@@ -36,12 +45,13 @@ interface HYFCardProps {
 
 interface MCQCardProps {
   mcq: MCQ;
-  mcqIndex: number;
-  onAnswer: (selectedIndex: number) => void;
-  selectedAnswer?: number;
+  shuffledOptions: ReturnType<typeof shuffleOptions>;
+  onAnswer: (selectedValue: string, correctUiLabel: string) => void;
+  selectedValue?: string;
   showFeedback?: boolean;
   isCorrect?: boolean;
 }
+
 
 
 function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFCardProps) {
@@ -225,6 +235,24 @@ function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFC
   );
 }
 
+function shuffleOptions(mcq: MCQ) {
+  const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
+
+  for (let i = values.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+
+  const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  return values.map((entry, idx) => ({
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey,
+    value: entry.value,
+  }));
+}
+
+
 function MCQCard({ mcq, mcqIndex, onAnswer, selectedAnswer, showFeedback, isCorrect }: MCQCardProps) {
   const markdownStyles = {
     body: {
@@ -280,85 +308,59 @@ function MCQCard({ mcq, mcqIndex, onAnswer, selectedAnswer, showFeedback, isCorr
 
       {/* Options */}
       <View className="space-y-3 mb-4">
-        {mcq.options.map((option, optionIndex) => {
-          const isSelected = selectedAnswer === optionIndex;
-          const isCorrectOption = optionIndex === mcq.answerIndex;
-          const showAsCorrect = showFeedback && isCorrectOption && !isCorrect;
-          const showAsWrong = showFeedback && isSelected && !isCorrect;
-          
-          let optionStyle = 'bg-slate-800/80 border-slate-600/50 active:bg-slate-700/95';
-          let textColor = 'text-slate-100';
-          
-          if (showFeedback) {
-            if (isSelected && isCorrect) {
-              optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-              textColor = 'text-emerald-100';
-            } else if (showAsWrong) {
-              optionStyle = 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60';
-              textColor = 'text-red-100';
-            } else if (showAsCorrect) {
-              optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-              textColor = 'text-emerald-100';
-            }
-          }
+        {shuffledOptions.map((opt) => {
+  const isSelected = selectedValue === opt.value;
+  const isCorrectOption = opt.dbKey === mcq.correct_answer;
+  const showAsCorrect = showFeedback && isCorrectOption && !isCorrect;
+  const showAsWrong = showFeedback && isSelected && !isCorrect;
 
-          return (
-            <MotiView
-              key={optionIndex}
-              from={{ opacity: 0, translateX: -30, scale: 0.9 }}
-              animate={{ opacity: 1, translateX: 0, scale: 1 }}
-              transition={{ type: 'spring', duration: 500, delay: optionIndex * 100 + 400 }}
-            >
-              <Pressable
-                onPress={() => !showFeedback && onAnswer(optionIndex)}
-                disabled={showFeedback}
-                className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center shadow-lg`}
-              >
-                {/* Option Letter */}
-                <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4 shadow-md">
-                  <Text className="text-white font-bold text-sm">
-                    {String.fromCharCode(65 + optionIndex)}
-                  </Text>
-                </View>
-                
-                {/* Option Text */}
-                <View className="flex-1">
-                  <Text className={`${textColor} text-base`}>
-                    {option}
-                  </Text>
-                </View>
+  let optionStyle = "bg-slate-800/80 border-slate-600/50 active:bg-slate-700/95";
+  let textColor = "text-slate-100";
 
-                {/* Result Icon */}
-                {showFeedback && isSelected && (
-                  <MotiView
-                    from={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', duration: 400 }}
-                    className="ml-3"
-                  >
-                    {isCorrect ? (
-                      <CheckCircle size={24} color="#10b981" />
-                    ) : (
-                      <XCircle size={24} color="#ef4444" />
-                    )}
-                  </MotiView>
-                )}
+  if (showFeedback) {
+    if (isSelected && isCorrect) {
+      optionStyle =
+        "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
+      textColor = "text-emerald-100";
+    } else if (showAsWrong) {
+      optionStyle =
+        "bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60";
+      textColor = "text-red-100";
+    } else if (showAsCorrect) {
+      optionStyle =
+        "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
+      textColor = "text-emerald-100";
+    }
+  }
 
-                {/* Correct Answer Indicator */}
-                {showFeedback && showAsCorrect && (
-                  <MotiView
-                    from={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', duration: 400, delay: 200 }}
-                    className="ml-3"
-                  >
-                    <CheckCircle size={24} color="#10b981" />
-                  </MotiView>
-                )}
-              </Pressable>
-            </MotiView>
-          );
-        })}
+  return (
+    <Pressable
+      key={`${mcq.id}-${opt.uiLabel}`}
+      onPress={() => !showFeedback && onAnswer(opt.value, opt.uiLabel)}
+      disabled={showFeedback}
+      className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center shadow-lg`}
+    >
+      {/* Option Label */}
+      <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4 shadow-md">
+        <Text className="text-white font-bold text-sm">{opt.uiLabel}</Text>
+      </View>
+
+      {/* Option Text */}
+      <View className="flex-1">
+        <Text className={`${textColor} text-base`}>{opt.value}</Text>
+      </View>
+
+      {/* Result Icon */}
+      {showFeedback && isSelected && (
+        isCorrect ? <CheckCircle size={24} color="#10b981" /> : <XCircle size={24} color="#ef4444" />
+      )}
+
+      {/* Correct Answer Highlight */}
+      {showFeedback && showAsCorrect && <CheckCircle size={24} color="#10b981" />}
+    </Pressable>
+  );
+})}
+
       </View>
 
       {/* Feedback Section */}
@@ -433,7 +435,9 @@ export default function ConversationPhase({
 }: ConversationPhaseProps) {
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>(undefined);
+  const [selectedValue, setSelectedValue] = useState<string | undefined>(undefined);
+const [correctUiLabel, setCorrectUiLabel] = useState<string>("");
+
   const [showFeedback, setShowFeedback] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -482,17 +486,20 @@ export default function ConversationPhase({
     }
   };
 
-  const handleMCQAnswer = (selectedIndex: number) => {
-    setSelectedAnswer(selectedIndex);
-    setShowFeedback(true);
-    
-    if (selectedIndex === currentMCQ?.answerIndex) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-  };
+const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
+  setSelectedValue(selectedValue);
+  setCorrectUiLabel(correctUiLabel);
+  setShowFeedback(true);
 
-  const isCorrect = selectedAnswer === currentMCQ?.answerIndex;
+  const correctValue = currentMCQ?.options[currentMCQ.correct_answer];
+  if (selectedValue === correctValue) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000);
+  }
+};
+
+const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
+
 
   return (
     <View className="flex-1 bg-slate-900">
