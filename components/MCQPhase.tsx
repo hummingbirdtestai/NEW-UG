@@ -193,30 +193,44 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-  const handleAnswer = (selectedValue: string, correctUiLabel: string) => {
-    const currentMCQ = mcqs[currentMCQIndex];
-    const correctValue = currentMCQ.options[currentMCQ.correct_answer];
-    const isCorrect = selectedValue === correctValue;
+  const handleAnswer = (selectedValue: string) => {
+  const currentMCQ = mcqs[currentMCQIndex];
 
-    const newAnswered: AnsweredMCQ = {
-      mcq: currentMCQ,
-      selectedValue,
-      isCorrect,
-      correctUiLabel,
-      showFeedback: true,
-    };
+  // 1. Correct dbKey (from MCQ definition)
+  const correctDbKey = currentMCQ.correct_answer;
 
-    setAnsweredMCQs((prev) => {
-      const updated = [...prev];
-      updated[currentMCQIndex] = newAnswered;
-      return updated;
-    });
+  // 2. Correct option’s UI label (A/B/C/D)
+  const correctUiLabel =
+    shuffledOptionsList[currentMCQIndex].find((opt) => opt.dbKey === correctDbKey)?.uiLabel || "?";
 
-    if (isCorrect) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 1500);
-    }
+  // 3. Selected dbKey (find which option was clicked)
+  const selectedDbKey = shuffledOptionsList[currentMCQIndex]
+    .find((opt) => opt.value === selectedValue)?.dbKey;
+
+  // 4. Correctness check
+  const isCorrect = selectedDbKey === correctDbKey;
+
+  // 5. Store result
+  const newAnswered: AnsweredMCQ = {
+    mcq: currentMCQ,
+    selectedValue,
+    isCorrect,
+    correctUiLabel,
+    showFeedback: true,
   };
+
+  setAnsweredMCQs((prev) => {
+    const updated = [...prev];
+    updated[currentMCQIndex] = newAnswered;
+    return updated;
+  });
+
+  if (isCorrect) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 1500);
+  }
+};
+
 
   const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
