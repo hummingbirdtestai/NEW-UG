@@ -552,13 +552,13 @@ export default function ConversationPhase({
                 animate={{ opacity: 1, translateX: 0 }}
                 transition={{ type: 'spring', duration: 800, delay: 400 }}
               >
-                <Text className="text-sm text-teal-400 font-semibold mb-2 uppercase tracking-wide">
+                <Text className="text-xs text-teal-400 font-semibold mb-1 uppercase tracking-wider">
                   High-Yield Facts Phase
                 </Text>
-                <Text className="text-4xl font-extrabold text-slate-50 mb-3 leading-tight tracking-wide">
+                <Text className="text-2xl font-bold text-slate-100 mb-2 leading-tight">
                   Interactive Learning
                 </Text>
-                <Text className="text-xl font-medium text-slate-200 tracking-wide">
+                <Text className="text-base text-slate-300">
                   Master key concepts through guided practice
                 </Text>
               </MotiView>
