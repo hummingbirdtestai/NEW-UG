@@ -450,8 +450,8 @@ const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
   }
 };
 
+const isCorrect = answeredMCQ?.isCorrect ?? false;
 
-  const isCorrect = selectedAnswer === currentMCQ?.answerIndex;
 
   return (
     <View className="flex-1 bg-slate-900">
@@ -580,36 +580,36 @@ const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
 
 
                 {/* Next Button */}
-                {showFeedback && (
-                  <MotiView
-                    from={{ opacity: 0, translateY: 20 }}
-                    animate={{ opacity: 1, translateY: 0 }}
-                    transition={{ type: 'spring', duration: 600, delay: 800 }}
-                    className="flex-row justify-end"
-                  >
-                    <Pressable
-                      onPress={handleNextMCQ}
-                     className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 border border-emerald-500/30 shadow-2xl active:scale-95"
-                      style={{
-                        shadowColor: '#10b981',
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.4,
-                        shadowRadius: 16,
-                        elevation: 8,
-                      }}
-                    >
-                      <Text className="text-white font-bold text-lg mr-3">
-                        {isCorrect 
-                          ? 'Next HYF' 
-                          : currentMCQIndex < currentHYF.mcqs.length - 1 
-                            ? 'Next MCQ' 
-                            : 'Next HYF'
-                        }
-                      </Text>
-                      <ChevronRight size={20} color="#ffffff" />
-                    </Pressable>
-                  </MotiView>
-                )}
+               {answeredMCQ?.showFeedback && (
+  <MotiView
+    from={{ opacity: 0, translateY: 20 }}
+    animate={{ opacity: 1, translateY: 0 }}
+    transition={{ type: 'spring', duration: 600, delay: 800 }}
+    className="flex-row justify-end"
+  >
+    <Pressable
+      onPress={handleNextMCQ}
+      className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 border border-emerald-500/30 shadow-2xl active:scale-95"
+      style={{
+        shadowColor: '#10b981',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.4,
+        shadowRadius: 16,
+        elevation: 8,
+      }}
+    >
+      <Text className="text-white font-bold text-lg mr-3">
+        {answeredMCQ?.isCorrect
+          ? 'Next HYF'
+          : currentMCQIndex < currentHYF.mcqs.length - 1
+            ? 'Next MCQ'
+            : 'Next HYF'}
+      </Text>
+      <ChevronRight size={20} color="#ffffff" />
+    </Pressable>
+  </MotiView>
+)}
+
               </>
             )}
           </>
