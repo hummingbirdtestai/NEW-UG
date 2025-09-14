@@ -311,7 +311,8 @@ function MCQCard({
       {/* Question Card */}
       <View className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden mb-4">
         <View className="p-6">
-          <MarkdownWithLatex content={mcq.question} markdownStyles={markdownStyles} />
+          <MarkdownWithLatex content={mcq.stem} markdownStyles={markdownStyles} />
+
         </View>
       </View>
 
@@ -457,7 +458,8 @@ const [correctUiLabel, setCorrectUiLabel] = useState<string>("");
   const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
 
   const handleNextMCQ = () => {
-    const isCorrect = selectedAnswer === currentMCQ?.answerIndex;
+    const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
+
 
     if (isCorrect) {
       // Correct answer - move to next HYF
@@ -628,13 +630,15 @@ const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answe
             {currentMCQIndex >= 0 && currentMCQ && (
               <>
                 <MCQCard
-                  mcq={currentMCQ}
-                  mcqIndex={currentMCQIndex}
-                  onAnswer={handleMCQAnswer}
-                  selectedAnswer={selectedAnswer}
-                  showFeedback={showFeedback}
-                  isCorrect={isCorrect}
-                />
+  mcq={currentMCQ}
+  mcqIndex={currentMCQIndex}
+  shuffledOptions={shuffleOptions(currentMCQ)}
+  onAnswer={handleMCQAnswer}
+  selectedValue={selectedValue}
+  showFeedback={showFeedback}
+  isCorrect={isCorrect}
+/>
+
 
                 {/* Next Button */}
                 {showFeedback && (
