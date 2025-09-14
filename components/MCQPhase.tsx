@@ -197,25 +197,29 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-  const handleAnswer = (selectedOption: keyof MCQOption) => {
-    const currentMCQ = mcqs[currentMCQIndex];
-    const isCorrect = selectedOption === currentMCQ.correct_answer;
-    const newAnswered: AnsweredMCQ = {
-      mcq: currentMCQ,
-      selectedOption,
-      isCorrect,
-      showFeedback: true,
-    };
-    setAnsweredMCQs((prev) => {
-      const updated = [...prev];
-      updated[currentMCQIndex] = newAnswered;
-      return updated;
-    });
-    if (isCorrect) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 2000);
-    }
+ const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption) => {
+  const currentMCQ = mcqs[currentMCQIndex];
+  const isCorrect = dbKey === currentMCQ.correct_answer;
+
+  const newAnswered: AnsweredMCQ = {
+    mcq: currentMCQ,
+    selectedOption: uiLabel,  // store what student clicked
+    isCorrect,
+    showFeedback: true,
   };
+
+  setAnsweredMCQs((prev) => {
+    const updated = [...prev];
+    updated[currentMCQIndex] = newAnswered;
+    return updated;
+  });
+
+  if (isCorrect) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 1500);
+  }
+};
+
 
   const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
