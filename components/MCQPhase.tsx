@@ -48,8 +48,8 @@ interface AnsweredMCQ {
   showFeedback: boolean;
 }
 function shuffleOptions(mcq: MCQ) {
-  const entries = Object.entries(mcq.options).map(([key, value]) => ({
-    key: key as keyof MCQOption,
+  const entries = Object.entries(mcq.options).map(([dbKey, value]) => ({
+    dbKey: dbKey as keyof MCQOption, // original DB key
     value,
   }));
 
@@ -59,8 +59,15 @@ function shuffleOptions(mcq: MCQ) {
     [entries[i], entries[j]] = [entries[j], entries[i]];
   }
 
-  return entries;
+  // Assign fixed UI labels (A, B, C, D) in order
+  const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  return entries.map((entry, idx) => ({
+    uiLabel: uiLabels[idx], // what you SHOW on the left
+    dbKey: entry.dbKey,     // what you CHECK against correct_answer
+    value: entry.value,     // the text content
+  }));
 }
+
 
 function MCQCard({
   mcq,
@@ -218,89 +225,32 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
           {/* Enhanced Options Grid */}
           <View className="space-y-4">
             {shuffledOptions.map((opt, optionIndex) => {
-  const isSelected = answeredMCQ?.selectedOption === opt.key;
-  const isCorrect = opt.key === mcq.correct_answer;
+  const isSelected = answeredMCQ?.selectedOption === opt.dbKey; // ✅ use dbKey for checking
+  const isCorrect = opt.dbKey === mcq.correct_answer;
   const isDisabled = !!answeredMCQ;
 
-  let optionStyle =
-    "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60 hover:bg-slate-700/80 active:scale-[0.98]";
-  let textColor = "text-slate-100";
-  let borderWidth = "border-2";
-
-  if (isDisabled) {
-    if (isSelected) {
-      if (answeredMCQ?.isCorrect) {
-        optionStyle =
-          "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
-        textColor = "text-emerald-100";
-        borderWidth = "border-3";
-      } else {
-        optionStyle =
-          "bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60";
-        textColor = "text-red-100";
-        borderWidth = "border-3";
-      }
-    } else if (isCorrect && !answeredMCQ?.isCorrect) {
-      optionStyle =
-        "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
-      textColor = "text-emerald-100";
-      borderWidth = "border-3";
-    }
-  }
+  ...
 
   return (
-    <MotiView
-      key={`${mcq.id}-${opt.key}`}
-      from={{ opacity: 0, translateX: -30, scale: 0.9 }}
-      animate={{ opacity: 1, translateX: 0, scale: 1 }}
-      transition={{
-        type: "spring",
-        duration: 600,
-        delay: 600 + optionIndex * 150,
-      }}
-    >
+    <MotiView key={`${mcq.id}-${opt.uiLabel}`} ...>
       <Pressable
-        onPress={() => !isDisabled && onAnswer(opt.key)}
+        onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ send dbKey back
         disabled={isDisabled}
         className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
       >
-        {/* Option Circle */}
-        <MotiView
-          from={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{
-            type: "spring",
-            duration: 500,
-            delay: 800 + optionIndex * 150,
-          }}
-          className="w-12 h-12 rounded-2xl items-center justify-center mr-6 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600"
-          style={{
-            shadowColor: "#3b82f6",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
-            elevation: 4,
-          }}
-        >
-          <Text className="text-white font-bold text-xl">{opt.key}</Text>
+        {/* Show fixed A–D label */}
+        <MotiView ...>
+          <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
         </MotiView>
 
-        {/* Option Text */}
+        {/* Shuffled value text */}
         <View className="flex-1">
-          <MarkdownWithLatex
-            content={opt.value}
-            markdownStyles={markdownStyles}
-          />
+          <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
         </View>
 
         {/* Selection Indicator */}
         {isSelected && (
-          <MotiView
-            from={{ scale: 0, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: "spring", duration: 400 }}
-            className="ml-4"
-          >
+          <MotiView ...>
             {answeredMCQ?.isCorrect ? (
               <CheckCircle size={24} color="#10b981" />
             ) : (
@@ -312,6 +262,7 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
     </MotiView>
   );
 })}
+
 
           </View>
         </View>
