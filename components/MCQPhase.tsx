@@ -36,8 +36,9 @@ interface MCQPhaseProps {
 }
 interface AnsweredMCQ {
   mcq: MCQ;
-  selectedValue: string; // store chosen value, not A/B/C/D
+  selectedValue: string; // chosen text value
   isCorrect: boolean;
+  correctUiLabel: string; // A, B, C, or D
   showFeedback: boolean;
 }
 
@@ -46,7 +47,7 @@ function shuffleOptions(mcq: MCQ) {
   const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
   const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
 
-  // Fisher-Yates shuffle
+  // Fisher–Yates shuffle
   for (let i = values.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [values[i], values[j]] = [values[j], values[i]];
@@ -69,11 +70,14 @@ function MCQCard({
 }: {
   mcq: MCQ;
   index: number;
-  onAnswer: (selectedValue: string) => void;
+  onAnswer: (selectedValue: string, correctUiLabel: string) => void;
   answeredMCQ?: AnsweredMCQ;
   isActive: boolean;
 }) {
   const shuffledOptions = useRef(shuffleOptions(mcq)).current;
+  const correctValue = mcq.options[mcq.correct_answer];
+  const correctUiLabel =
+    shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
 
   return (
     <MotiView
@@ -96,7 +100,6 @@ function MCQCard({
           <View className="space-y-4">
             {shuffledOptions.map((opt) => {
               const isSelected = answeredMCQ?.selectedValue === opt.value;
-              const correctValue = mcq.options[mcq.correct_answer];
               const isCorrect = opt.value === correctValue;
               const isDisabled = !!answeredMCQ;
 
@@ -115,7 +118,9 @@ function MCQCard({
               return (
                 <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  onPress={() => !isDisabled && onAnswer(opt.value)} // ✅ pass value
+                  onPress={() =>
+                    !isDisabled && onAnswer(opt.value, correctUiLabel)
+                  }
                   disabled={isDisabled}
                   className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
@@ -130,7 +135,9 @@ function MCQCard({
                   <View className="flex-1">
                     <MarkdownWithLatex
                       content={opt.value}
-                      markdownStyles={{ body: { color: "#f1f5f9", fontSize: 16 } }}
+                      markdownStyles={{
+                        body: { color: "#f1f5f9", fontSize: 16 },
+                      }}
                     />
                   </View>
 
@@ -161,8 +168,6 @@ function FeedbackCard({
   mcq: MCQ;
   answered: AnsweredMCQ;
 }) {
-  const correctValue = mcq.options[mcq.correct_answer];
-
   return (
     <View className="mb-8">
       {!answered.isCorrect && (
@@ -187,10 +192,9 @@ function FeedbackCard({
         </Text>
         <MarkdownWithLatex content={mcq.feedback?.correct} />
 
-        {/* Show correct UI option */}
+        {/* Show correct UI key (A/B/C/D) */}
         <Text className="text-emerald-200 mt-2">
-          Correct Option:{" "}
-          {Object.entries(mcq.options).find(([key, val]) => val === correctValue)?.[0]}
+          Correct Option: {answered.correctUiLabel}
         </Text>
       </View>
     </View>
@@ -207,11 +211,14 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
 
   useEffect(() => {
     if (scrollViewRef.current) {
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
+      setTimeout(
+        () => scrollViewRef.current?.scrollToEnd({ animated: true }),
+        300
+      );
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-  const handleAnswer = (selectedValue: string) => {
+  const handleAnswer = (selectedValue: string, correctUiLabel: string) => {
     const currentMCQ = mcqs[currentMCQIndex];
     const correctValue = currentMCQ.options[currentMCQ.correct_answer];
     const isCorrect = selectedValue === correctValue;
@@ -220,6 +227,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
       mcq: currentMCQ,
       selectedValue,
       isCorrect,
+      correctUiLabel, // save correct UI key
       showFeedback: true,
     };
 
@@ -248,7 +256,12 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   return (
     <View className="flex-1 bg-slate-900">
       {showConfetti && (
-        <ConfettiCannon count={120} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
+        <ConfettiCannon
+          count={120}
+          origin={{ x: width / 2, y: 0 }}
+          autoStart
+          fadeOut
+        />
       )}
 
       {/* Header */}
@@ -279,7 +292,9 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
               answeredMCQ={ans}
               isActive={false}
             />
-            {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
+            {ans.showFeedback && (
+              <FeedbackCard mcq={ans.mcq} answered={ans} />
+            )}
             {idx === currentMCQIndex && (
               <Pressable
                 onPress={handleNext}
@@ -293,14 +308,16 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
           </View>
         ))}
 
-        {!isComplete && currentMCQIndex < mcqs.length && !answeredMCQs[currentMCQIndex] && (
-          <MCQCard
-            mcq={mcqs[currentMCQIndex]}
-            index={currentMCQIndex}
-            onAnswer={handleAnswer}
-            isActive={true}
-          />
-        )}
+        {!isComplete &&
+          currentMCQIndex < mcqs.length &&
+          !answeredMCQs[currentMCQIndex] && (
+            <MCQCard
+              mcq={mcqs[currentMCQIndex]}
+              index={currentMCQIndex}
+              onAnswer={handleAnswer}
+              isActive={true}
+            />
+          )}
 
         {isComplete && (
           <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
@@ -316,7 +333,9 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
               className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
             >
               <Sparkles size={20} color="#fff" />
-              <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
+              <Text className="text-white font-bold text-lg ml-2">
+                Next Concept
+              </Text>
               <ChevronRight size={20} color="#fff" />
             </Pressable>
           </View>
