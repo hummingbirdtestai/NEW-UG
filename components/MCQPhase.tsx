@@ -113,7 +113,7 @@ function MCQCard({
               return (
                 <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  onPress={() => !isDisabled && onAnswer(opt.dbKey)}
+                  onPress={() => !isDisabled && onAnswer(opt.uiLabel, opt.dbKey)}
                   disabled={isDisabled}
                   className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
