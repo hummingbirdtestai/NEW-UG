@@ -259,11 +259,11 @@ const handleAnswer = (uiLabel: keyof MCQOption, dbKey: keyof MCQOption)=> {
         {answeredMCQs.map((ans, idx) => (
           <View key={ans.mcq.id || idx}>
             <MCQCard
-  mcq={mcqs[currentMCQIndex]}
-  index={currentMCQIndex}
-  onAnswer={handleAnswer}
-  isActive={true}
-/>
+              mcq={mcqs[currentMCQIndex]}
+              index={currentMCQIndex}
+              onAnswer={handleAnswer}
+              isActive={true}
+            />
 
 
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} isCorrect={ans.isCorrect} />}
