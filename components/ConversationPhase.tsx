@@ -398,8 +398,8 @@ const [shuffledOptionsList, setShuffledOptionsList] = useState<ReturnType<typeof
   const scrollViewRef = useRef<ScrollView>(null);
   const isMobile = Dimensions.get('window').width < 768;
 
-  const currentHYF = hyfs[currentHYFIndex];
-  const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
+   const currentHYF = normalizedHyfs[currentHYFIndex];
+const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
 
 const handleNextMCQ = () => {
   if (answeredMCQ?.isCorrect) {
@@ -414,7 +414,7 @@ const handleNextMCQ = () => {
 
 
   const handleNextHYF = () => {
-    if (currentHYFIndex < hyfs.length - 1) {
+    if (currentHYFIndex < normalizedHyfs.length - 1) {
       setCurrentHYFIndex(currentHYFIndex + 1);
       setCurrentMCQIndex(-1);
       setSelectedAnswer(undefined);
@@ -539,7 +539,7 @@ const isCorrect = answeredMCQ?.isCorrect ?? false;
                 {currentHYFIndex + 1}
               </Text>
               <Text className="text-teal-300/80 text-xs text-center">
-                of {hyfs.length}
+                of {normalizedHyfs.length}
               </Text>
             </View>
           </MotiView>
@@ -632,7 +632,7 @@ const isCorrect = answeredMCQ?.isCorrect ?? false;
               🎉 All HYFs Completed!
             </Text>
             <Text className="text-slate-300 text-lg text-center">
-              You've mastered {hyfs.length} high-yield concepts
+              You've mastered {normalizedHyfs.length} high-yield concepts
             </Text>
           </MotiView>
         )}
