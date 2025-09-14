@@ -1,24 +1,35 @@
-import React, { useState, useRef } from "react";
-import { View, Text, Pressable, ScrollView, Dimensions } from "react-native";
-import { MotiView } from "moti";
-import {
-  MessageCircle,
-  Bookmark,
-  BookmarkCheck,
-  ChevronRight,
-  CircleCheck as CheckCircle,
-} from "lucide-react-native";
-import ConfettiCannon from "react-native-confetti-cannon";
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
+import { MotiView, AnimatePresence } from 'moti';
+import { 
+  MessageCircle, 
+  Bookmark, 
+  BookmarkCheck, 
+  ChevronRight, 
+  CircleCheck as CheckCircle, 
+  Circle as XCircle, 
+  TriangleAlert as AlertTriangle 
+} from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import MCQPhase from "@/components/MCQPhase"; // <-- use your existing MCQPhase
+import ConfettiCannon from 'react-native-confetti-cannon';
 
+interface MCQOption {
+  A: string;
+  B: string;
+  C: string;
+  D: string;
+}
+interface MCQFeedback {
+  correct: string;
+  wrong: string;
+}
 interface MCQ {
   id: string;
   stem: string;
-  options: Record<string, string>;
-  correct_answer: string;
-  feedback: { correct: string; wrong: string };
+  options: MCQOption;
+  feedback: MCQFeedback;
   learning_gap?: string;
+  correct_answer: keyof MCQOption;
 }
 
 interface HYF {
@@ -41,13 +52,7 @@ interface HYFCardProps {
   isBookmarked?: boolean;
 }
 
-function HYFCard({
-  hyf,
-  index,
-  onGotIt,
-  onBookmark,
-  isBookmarked = false,
-}: HYFCardProps) {
+function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFCardProps) {
   const [localBookmark, setLocalBookmark] = useState(isBookmarked);
 
   const handleBookmarkToggle = () => {
@@ -57,69 +62,119 @@ function HYFCard({
   };
 
   const markdownStyles = {
-    body: { color: "#ffffff", fontSize: 18, lineHeight: 28 },
-    paragraph: { color: "#ffffff", marginBottom: 12, lineHeight: 28 },
-    strong: {
-      color: "#5eead4",
-      fontWeight: "700",
-      backgroundColor: "rgba(94, 234, 212, 0.15)",
-      paddingHorizontal: 8,
-      paddingVertical: 3,
-      borderRadius: 6,
-    },
-    em: { color: "#34d399", fontStyle: "italic" },
+    body: { color: '#ffffff', fontSize: 18, lineHeight: 28 },
+    strong: { color: '#5eead4', fontWeight: '700' },
+    em: { color: '#34d399', fontStyle: 'italic' },
   };
 
   return (
-    <MotiView
-      from={{ opacity: 0, translateY: 20 }}
-      animate={{ opacity: 1, translateY: 0 }}
-      transition={{ type: "spring", duration: 600 }}
-      className="flex-row items-end mb-4 px-1"
-    >
-      {/* Avatar */}
-      <MotiView className="w-10 h-10 rounded-full bg-teal-500 items-center justify-center mr-3 shadow-xl">
-        <MessageCircle size={20} color="#ffffff" />
-      </MotiView>
-
-      {/* HYF Card */}
+    <MotiView className="flex-row items-end mb-4 px-1">
       <View className="w-[70%] relative">
-        <MotiView className="bg-teal-600 rounded-2xl px-4 py-3 shadow-xl">
+        <MotiView className="bg-gradient-to-br from-teal-600 to-cyan-700 rounded-2xl px-4 py-3 shadow-xl">
           <View className="flex-row items-center mb-4">
-            <View className="w-8 h-8 bg-amber-500 rounded-full items-center justify-center mr-3">
-              <Text className="text-white font-bold text-sm">HYF</Text>
-            </View>
-            <Text className="text-teal-100 font-bold text-lg">
-              High-Yield Fact #{index + 1}
-            </Text>
+            <Text className="text-teal-100 font-bold text-lg">High-Yield Fact #{index + 1}</Text>
           </View>
-
           <MarkdownWithLatex content={hyf.text} markdownStyles={markdownStyles} />
-
-          {/* Bookmark + Got It */}
-          <View className="mt-6 flex-row justify-between items-center">
-            <Pressable
-              onPress={handleBookmarkToggle}
-              className="w-10 h-10 rounded-full bg-white/10 items-center justify-center"
-            >
-              {localBookmark ? (
-                <BookmarkCheck size={20} color="#fbbf24" fill="#fbbf24" />
-              ) : (
-                <Bookmark size={20} color="#ffffff" />
-              )}
-            </Pressable>
-
-            <Pressable
-              onPress={onGotIt}
-              className="bg-emerald-600 rounded-2xl py-3 px-6 shadow-2xl"
-            >
-              <View className="flex-row items-center">
-                <ChevronRight size={20} color="#ffffff" />
-                <Text className="text-white font-bold text-lg ml-2">Got it!</Text>
-              </View>
-            </Pressable>
-          </View>
+          <Pressable onPress={onGotIt} className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-5 px-8 mt-6">
+            <Text className="text-white font-bold text-xl">Got it!</Text>
+          </Pressable>
         </MotiView>
+      </View>
+    </MotiView>
+  );
+}
+
+function shuffleOptions(mcq: MCQ) {
+  const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
+
+  for (let i = values.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+
+  const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  return values.map((entry, idx) => ({
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey,
+    value: entry.value,
+  }));
+}
+
+function MCQCard({
+  mcq,
+  mcqIndex,
+  shuffledOptions,
+  onAnswer,
+  selectedValue,
+  showFeedback,
+  isCorrect,
+}: {
+  mcq: MCQ;
+  mcqIndex: number;
+  shuffledOptions: ReturnType<typeof shuffleOptions>;
+  onAnswer: (selectedValue: string, correctUiLabel: string) => void;
+  selectedValue?: string;
+  showFeedback?: boolean;
+  isCorrect?: boolean;
+}) {
+  const markdownStyles = {
+    body: { color: '#ffffff', fontSize: 16, lineHeight: 24 },
+    strong: { color: '#5eead4', fontWeight: '700' },
+    em: { color: '#34d399', fontStyle: 'italic' },
+  };
+
+  return (
+    <MotiView className="mb-6">
+      {/* 🔹 Question Stem */}
+      <View className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-2xl border border-slate-700/50 shadow-xl mb-4">
+        <View className="p-6">
+          <MarkdownWithLatex content={mcq.stem} markdownStyles={markdownStyles} />
+        </View>
+      </View>
+
+      {/* Options */}
+      <View className="space-y-3 mb-4">
+        {shuffledOptions.map((opt) => {
+          const isSelected = selectedValue === opt.value;
+          const isCorrectOption = opt.dbKey === mcq.correct_answer;
+          const showAsCorrect = showFeedback && isCorrectOption && !isCorrect;
+          const showAsWrong = showFeedback && isSelected && !isCorrect;
+
+          let optionStyle = "bg-slate-800/80 border-slate-600/50";
+          let textColor = "text-slate-100";
+
+          if (showFeedback) {
+            if (isSelected && isCorrect) {
+              optionStyle = "bg-emerald-500/20 border-emerald-500/60";
+              textColor = "text-emerald-100";
+            } else if (showAsWrong) {
+              optionStyle = "bg-red-500/20 border-red-500/60";
+              textColor = "text-red-100";
+            } else if (showAsCorrect) {
+              optionStyle = "bg-emerald-500/20 border-emerald-500/60";
+              textColor = "text-emerald-100";
+            }
+          }
+
+          return (
+            <Pressable
+              key={`${mcq.id}-${opt.uiLabel}`}
+              onPress={() => !showFeedback && onAnswer(opt.value, opt.uiLabel)}
+              disabled={showFeedback}
+              className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
+            >
+              <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4">
+                <Text className="text-white font-bold text-sm">{opt.uiLabel}</Text>
+              </View>
+              <Text className={`${textColor} text-base`}>{opt.value}</Text>
+              {showFeedback && isSelected && (
+                isCorrect ? <CheckCircle size={20} color="#10b981" /> : <XCircle size={20} color="#ef4444" />
+              )}
+              {showFeedback && showAsCorrect && <CheckCircle size={20} color="#10b981" />}
+            </Pressable>
+          );
+        })}
       </View>
     </MotiView>
   );
@@ -129,105 +184,134 @@ export default function ConversationPhase({
   hyfs = [],
   onComplete,
   onBookmark,
-  bookmarkedHYFs = new Set(),
+  bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
-  const [showMCQ, setShowMCQ] = useState(false);
+  const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
+  const [selectedValue, setSelectedValue] = useState<string>();
+  const [correctUiLabel, setCorrectUiLabel] = useState<string>("");
+  const [showFeedback, setShowFeedback] = useState(false);
   const [isComplete, setIsComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-
   const scrollViewRef = useRef<ScrollView>(null);
-  const isMobile = Dimensions.get("window").width < 768;
+  const isMobile = Dimensions.get('window').width < 768;
 
   const currentHYF = hyfs[currentHYFIndex];
+  const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
+
+  const handleNextMCQ = () => {
+    const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
+    if (isCorrect) {
+      handleNextHYF();
+    } else {
+      if (currentMCQIndex < currentHYF.mcqs.length - 1) {
+        setCurrentMCQIndex(currentMCQIndex + 1);
+        setSelectedValue(undefined);
+        setShowFeedback(false);
+      } else {
+        handleNextHYF();
+      }
+    }
+  };
 
   const handleNextHYF = () => {
     if (currentHYFIndex < hyfs.length - 1) {
       setCurrentHYFIndex(currentHYFIndex + 1);
-      setShowMCQ(false);
+      setCurrentMCQIndex(-1);
+      setSelectedValue(undefined);
+      setShowFeedback(false);
     } else {
       setIsComplete(true);
       onComplete?.();
     }
   };
 
+  const handleGotIt = () => {
+    if (currentHYF.mcqs.length > 0) {
+      setCurrentMCQIndex(0);
+    } else {
+      handleNextHYF();
+    }
+  };
+
+  const handleMCQAnswer = (selected: string, uiLabel: string) => {
+    setSelectedValue(selected);
+    setCorrectUiLabel(uiLabel);
+    setShowFeedback(true);
+
+    const correctValue = currentMCQ?.options[currentMCQ.correct_answer];
+    if (selected === correctValue) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 2000);
+    }
+  };
+
+  const isCorrect = selectedValue === currentMCQ?.options[currentMCQ.correct_answer];
+
   return (
     <View className="flex-1 bg-slate-900">
-      {/* Header */}
-      <MotiView className="p-8 pt-16 border-b border-slate-700/30">
-        <View className="flex-row items-center">
-          <MotiView className="w-16 h-16 bg-teal-500 rounded-3xl items-center justify-center mr-6 shadow-2xl">
-            <MessageCircle size={32} color="#ffffff" />
-          </MotiView>
-          <View className="flex-1">
-            <Text className="text-sm text-teal-400 font-semibold mb-2 uppercase">
-              High-Yield Facts Phase
-            </Text>
-            <Text className="text-3xl font-extrabold text-slate-50 mb-2">
-              Interactive Learning
-            </Text>
-            <Text className="text-lg text-slate-200">
-              Master key concepts through guided practice
-            </Text>
-          </View>
-        </View>
-      </MotiView>
-
-      {/* Content */}
-      <ScrollView
+      <ScrollView 
         ref={scrollViewRef}
         className="flex-1"
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: isMobile ? 16 : 24,
           paddingVertical: 24,
           paddingBottom: 120,
+          flexGrow: 1,
         }}
       >
         {!isComplete ? (
           <>
-            {!showMCQ && (
+            {currentMCQIndex === -1 && (
               <HYFCard
                 hyf={currentHYF}
                 index={currentHYFIndex}
-                onGotIt={() => setShowMCQ(true)}
+                onGotIt={handleGotIt}
                 onBookmark={onBookmark}
                 isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
               />
             )}
-
-            {showMCQ && (
-              <MCQPhase
-                mcqs={currentHYF.mcqs}
-                onComplete={() => {
-                  setShowConfetti(true);
-                  setTimeout(() => setShowConfetti(false), 2000);
-                  handleNextHYF();
-                }}
-              />
+            {currentMCQIndex >= 0 && currentMCQ && (
+              <>
+                <MCQCard
+                  mcq={currentMCQ}
+                  mcqIndex={currentMCQIndex}
+                  shuffledOptions={shuffleOptions(currentMCQ)}
+                  onAnswer={handleMCQAnswer}
+                  selectedValue={selectedValue}
+                  showFeedback={showFeedback}
+                  isCorrect={isCorrect}
+                />
+                {showFeedback && (
+                  <Pressable
+                    onPress={handleNextMCQ}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 mt-4 self-end"
+                  >
+                    <Text className="text-white font-bold">
+                      {isCorrect 
+                        ? 'Next HYF' 
+                        : currentMCQIndex < currentHYF.mcqs.length - 1 
+                          ? 'Next MCQ' 
+                          : 'Next HYF'
+                      }
+                    </Text>
+                  </Pressable>
+                )}
+              </>
             )}
           </>
         ) : (
           <MotiView className="items-center justify-center flex-1 py-12">
-            <View className="w-20 h-20 bg-emerald-500 rounded-3xl items-center justify-center mb-6 shadow-2xl">
-              <CheckCircle size={40} color="#ffffff" />
-            </View>
+            <CheckCircle size={40} color="#ffffff" />
             <Text className="text-3xl font-bold text-slate-100 mb-2 text-center">
               🎉 All HYFs Completed!
-            </Text>
-            <Text className="text-slate-300 text-lg text-center">
-              You've mastered {hyfs.length} high-yield concepts
             </Text>
           </MotiView>
         )}
       </ScrollView>
-
       {showConfetti && (
-        <ConfettiCannon
-          count={80}
-          origin={{ x: Dimensions.get("window").width / 2, y: 0 }}
-          autoStart
-          fadeOut
-        />
+        <ConfettiCannon count={80} origin={{ x: Dimensions.get('window').width / 2, y: 0 }} autoStart fadeOut />
       )}
     </View>
   );
