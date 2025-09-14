@@ -5,14 +5,33 @@ import { MessageCircle, User, GraduationCap, Lightbulb, BookOpen, Bookmark, Book
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import ConfettiCannon from 'react-native-confetti-cannon';
 
-interface MCQ {
-  question: string;
-  options: string[];
-  answerIndex: number;
-  feedback: string;
-  correctExplanation: string;
-  learningGap?: string;
+interface MCQOption {
+  A: string;
+  B: string;
+  C: string;
+  D: string;
 }
+interface MCQFeedback {
+  correct: string;
+  wrong: string;
+}
+interface MCQ {
+  id: string;
+  stem: string;
+  options: MCQOption;
+  feedback: MCQFeedback;
+  learning_gap?: string;
+  correct_answer: keyof MCQOption;
+}
+
+interface AnsweredMCQ {
+  mcq: MCQ;
+  selectedValue: string;
+  isCorrect: boolean;
+  correctUiLabel: string;
+  showFeedback: boolean;
+}
+
 
 interface HYF {
   text: string;
@@ -41,6 +60,24 @@ interface MCQCardProps {
   selectedAnswer?: number;
   showFeedback?: boolean;
   isCorrect?: boolean;
+}
+
+function shuffleOptions(mcq: MCQ) {
+  const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
+  const values = dbKeys.map((k) => ({ dbKey: k, value: mcq.options[k] }));
+
+  // Fisher–Yates shuffle
+  for (let i = values.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+
+  const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  return values.map((entry, idx) => ({
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey,
+    value: entry.value,
+  }));
 }
 
 
@@ -225,45 +262,31 @@ function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFC
   );
 }
 
-function MCQCard({ mcq, mcqIndex, onAnswer, selectedAnswer, showFeedback, isCorrect }: MCQCardProps) {
-  const markdownStyles = {
-    body: {
-      color: '#ffffff',
-      backgroundColor: 'transparent',
-      fontSize: 16,
-      lineHeight: 24,
-      margin: 0,
-      fontFamily: 'System',
-    },
-    paragraph: {
-      color: '#ffffff',
-      marginBottom: 8,
-      lineHeight: 24,
-      fontSize: 16,
-    },
-    strong: {
-      color: '#5eead4',
-      fontWeight: '700',
-      backgroundColor: 'rgba(94, 234, 212, 0.15)',
-      paddingHorizontal: 6,
-      paddingVertical: 2,
-      borderRadius: 6,
-    },
-    em: {
-      color: '#34d399',
-      fontStyle: 'italic',
-      backgroundColor: 'transparent',
-    },
-  };
+function MCQCard({
+  mcq,
+  shuffledOptions,
+  onAnswer,
+  answeredMCQ,
+  mcqIndex,
+}: {
+  mcq: MCQ;
+  shuffledOptions: ReturnType<typeof shuffleOptions>;
+  onAnswer: (selectedValue: string, correctUiLabel: string) => void;
+  answeredMCQ?: AnsweredMCQ;
+  mcqIndex: number;
+}) {
+  const correctValue = mcq.options[mcq.correct_answer];
+  const correctUiLabel =
+    shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
 
   return (
     <MotiView
       from={{ opacity: 0, translateY: 30, scale: 0.95 }}
       animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: 'spring', duration: 600, delay: 200 }}
+      transition={{ type: "spring", duration: 600, delay: 200 }}
       className="mb-6"
     >
-      {/* MCQ Header */}
+      {/* Header */}
       <View className="flex-row items-center mb-4">
         <View className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg items-center justify-center mr-3">
           <Text className="text-white font-bold text-sm">Q{mcqIndex + 1}</Text>
@@ -271,155 +294,86 @@ function MCQCard({ mcq, mcqIndex, onAnswer, selectedAnswer, showFeedback, isCorr
         <Text className="text-indigo-300 font-bold text-lg">Practice Question</Text>
       </View>
 
-      {/* Question Card */}
+      {/* Question */}
       <View className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-2xl border border-slate-700/50 shadow-xl overflow-hidden mb-4">
         <View className="p-6">
-          <MarkdownWithLatex content={mcq.question} markdownStyles={markdownStyles} />
+          <MarkdownWithLatex
+            content={mcq.stem}
+            markdownStyles={{ body: { color: "#fff", fontSize: 16 } }}
+          />
         </View>
       </View>
 
       {/* Options */}
       <View className="space-y-3 mb-4">
-        {mcq.options.map((option, optionIndex) => {
-          const isSelected = selectedAnswer === optionIndex;
-          const isCorrectOption = optionIndex === mcq.answerIndex;
-          const showAsCorrect = showFeedback && isCorrectOption && !isCorrect;
-          const showAsWrong = showFeedback && isSelected && !isCorrect;
-          
-          let optionStyle = 'bg-slate-800/80 border-slate-600/50 active:bg-slate-700/95';
-          let textColor = 'text-slate-100';
-          
-          if (showFeedback) {
-            if (isSelected && isCorrect) {
-              optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-              textColor = 'text-emerald-100';
-            } else if (showAsWrong) {
-              optionStyle = 'bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60';
-              textColor = 'text-red-100';
-            } else if (showAsCorrect) {
-              optionStyle = 'bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60';
-              textColor = 'text-emerald-100';
+        {shuffledOptions.map((opt) => {
+          const isSelected = answeredMCQ?.selectedValue === opt.value;
+          const isCorrect = opt.value === correctValue;
+          const isDisabled = !!answeredMCQ;
+
+          let optionStyle = "bg-slate-800/80 border-slate-600/50";
+          if (isDisabled) {
+            if (isSelected) {
+              optionStyle = answeredMCQ?.isCorrect
+                ? "bg-emerald-500/20 border-emerald-500/60"
+                : "bg-red-500/20 border-red-500/60";
+            } else if (isCorrect && !answeredMCQ?.isCorrect) {
+              optionStyle = "bg-emerald-500/20 border-emerald-500/60";
             }
           }
 
           return (
-            <MotiView
-              key={optionIndex}
-              from={{ opacity: 0, translateX: -30, scale: 0.9 }}
-              animate={{ opacity: 1, translateX: 0, scale: 1 }}
-              transition={{ type: 'spring', duration: 500, delay: optionIndex * 100 + 400 }}
+            <Pressable
+              key={`${mcq.id}-${opt.uiLabel}`}
+              onPress={() => !isDisabled && onAnswer(opt.value, correctUiLabel)}
+              disabled={isDisabled}
+              className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
             >
-              <Pressable
-                onPress={() => !showFeedback && onAnswer(optionIndex)}
-                disabled={showFeedback}
-                className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center shadow-lg`}
-              >
-                {/* Option Letter */}
-                <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4 shadow-md">
-                  <Text className="text-white font-bold text-sm">
-                    {String.fromCharCode(65 + optionIndex)}
-                  </Text>
-                </View>
-                
-                {/* Option Text */}
-                <View className="flex-1">
-                  <Text className={`${textColor} text-base`}>
-                    {option}
-                  </Text>
-                </View>
-
-                {/* Result Icon */}
-                {showFeedback && isSelected && (
-                  <MotiView
-                    from={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', duration: 400 }}
-                    className="ml-3"
-                  >
-                    {isCorrect ? (
-                      <CheckCircle size={24} color="#10b981" />
-                    ) : (
-                      <XCircle size={24} color="#ef4444" />
-                    )}
-                  </MotiView>
-                )}
-
-                {/* Correct Answer Indicator */}
-                {showFeedback && showAsCorrect && (
-                  <MotiView
-                    from={{ scale: 0, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', duration: 400, delay: 200 }}
-                    className="ml-3"
-                  >
+              <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4">
+                <Text className="text-white font-bold text-sm">{opt.uiLabel}</Text>
+              </View>
+              <Text className="text-slate-100 flex-1">{opt.value}</Text>
+              {isSelected && (
+                <View className="ml-3">
+                  {answeredMCQ?.isCorrect ? (
                     <CheckCircle size={24} color="#10b981" />
-                  </MotiView>
-                )}
-              </Pressable>
-            </MotiView>
+                  ) : (
+                    <XCircle size={24} color="#ef4444" />
+                  )}
+                </View>
+              )}
+            </Pressable>
           );
         })}
       </View>
 
-      {/* Feedback Section */}
-      {showFeedback && (
-        <AnimatePresence>
-          {/* Wrong Answer Feedback */}
-          {!isCorrect && (
-            <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'spring', duration: 600, delay: 300 }}
-              className="mb-4"
-            >
-              <View className="bg-gradient-to-br from-red-900/60 to-rose-900/60 rounded-2xl border border-red-500/40 p-4 shadow-lg">
-                <View className="flex-row items-center mb-3">
-                  <XCircle size={20} color="#ef4444" />
-                  <Text className="text-red-200 font-bold text-lg ml-2">Not quite right</Text>
+      {/* Feedback */}
+      {answeredMCQ?.showFeedback && (
+        <View>
+          {!answeredMCQ.isCorrect && (
+            <>
+              <View className="bg-red-900/40 rounded-2xl border border-red-500/40 p-4 mb-3">
+                <Text className="text-red-300 font-bold mb-2">❌ Incorrect</Text>
+                <MarkdownWithLatex content={mcq.feedback.wrong} />
+              </View>
+              {mcq.learning_gap && (
+                <View className="bg-amber-900/40 rounded-2xl border border-amber-500/40 p-4 mb-3">
+                  <Text className="text-amber-300 font-bold mb-2">💡 Learning Gap</Text>
+                  <Text className="text-amber-100">{mcq.learning_gap}</Text>
                 </View>
-                <MarkdownWithLatex content={mcq.feedback} markdownStyles={markdownStyles} />
-              </View>
-            </MotiView>
+              )}
+            </>
           )}
-
-          {/* Learning Gap */}
-          {!isCorrect && mcq.learningGap && (
-            <MotiView
-              from={{ opacity: 0, translateY: 20 }}
-              animate={{ opacity: 1, translateY: 0 }}
-              transition={{ type: 'spring', duration: 600, delay: 500 }}
-              className="mb-4"
-            >
-              <View className="bg-gradient-to-br from-amber-900/60 to-orange-900/60 rounded-2xl border border-amber-500/40 p-4 shadow-lg">
-                <View className="flex-row items-center mb-3">
-                  <AlertTriangle size={20} color="#f59e0b" />
-                  <Text className="text-amber-200 font-bold text-lg ml-2">Learning Gap</Text>
-                </View>
-                <Text className="text-amber-100 text-base leading-6">
-                  💡 {mcq.learningGap}
-                </Text>
-              </View>
-            </MotiView>
-          )}
-
-          {/* Correct Answer Explanation */}
-          <MotiView
-            from={{ opacity: 0, translateY: 20 }}
-            animate={{ opacity: 1, translateY: 0 }}
-            transition={{ type: 'spring', duration: 600, delay: isCorrect ? 300 : 700 }}
-            className="mb-4"
-          >
-            <View className="bg-gradient-to-br from-emerald-900/60 to-teal-900/60 rounded-2xl border border-emerald-500/40 p-4 shadow-lg">
-              <View className="flex-row items-center mb-3">
-                <CheckCircle size={20} color="#10b981" />
-                <Text className="text-emerald-200 font-bold text-lg ml-2">
-                  {isCorrect ? 'Excellent!' : 'Correct Answer'}
-                </Text>
-              </View>
-              <MarkdownWithLatex content={mcq.correctExplanation} markdownStyles={markdownStyles} />
-            </View>
-          </MotiView>
-        </AnimatePresence>
+          <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
+            <Text className="text-emerald-300 font-bold mb-2">
+              ✅ {answeredMCQ.isCorrect ? "Correct!" : "Correct Answer"}
+            </Text>
+            <MarkdownWithLatex content={mcq.feedback.correct} />
+            <Text className="text-emerald-200 mt-2">
+              Correct Option: {answeredMCQ.correctUiLabel}
+            </Text>
+          </View>
+        </View>
       )}
     </MotiView>
   );
@@ -433,8 +387,8 @@ export default function ConversationPhase({
 }: ConversationPhaseProps) {
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
-  const [selectedAnswer, setSelectedAnswer] = useState<number | undefined>(undefined);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [answeredMCQ, setAnsweredMCQ] = useState<AnsweredMCQ | undefined>(undefined);
+const [shuffledOptionsList, setShuffledOptionsList] = useState<ReturnType<typeof shuffleOptions>[]>([]);
   const [isComplete, setIsComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -443,24 +397,17 @@ export default function ConversationPhase({
   const currentHYF = hyfs[currentHYFIndex];
   const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
 
-  const handleNextMCQ = () => {
-    const isCorrect = selectedAnswer === currentMCQ?.answerIndex;
+const handleNextMCQ = () => {
+  if (answeredMCQ?.isCorrect) {
+    handleNextHYF();
+  } else if (currentMCQIndex < currentHYF.mcqs.length - 1) {
+    setCurrentMCQIndex((i) => i + 1);
+    setAnsweredMCQ(undefined);
+  } else {
+    handleNextHYF();
+  }
+};
 
-    if (isCorrect) {
-      // Correct answer - move to next HYF
-      handleNextHYF();
-    } else {
-      // Wrong answer - show next MCQ or move to next HYF if no more MCQs
-      if (currentMCQIndex < currentHYF.mcqs.length - 1) {
-        setCurrentMCQIndex(currentMCQIndex + 1);
-        setSelectedAnswer(undefined);
-        setShowFeedback(false);
-      } else {
-        // No more MCQs, move to next HYF
-        handleNextHYF();
-      }
-    }
-  };
 
   const handleNextHYF = () => {
     if (currentHYFIndex < hyfs.length - 1) {
@@ -474,23 +421,35 @@ export default function ConversationPhase({
     }
   };
 
-  const handleGotIt = () => {
-    if (currentHYF.mcqs.length > 0) {
-      setCurrentMCQIndex(0);
-    } else {
-      handleNextHYF();
-    }
-  };
+ const handleGotIt = () => {
+  if (currentHYF.mcqs.length > 0) {
+    setShuffledOptionsList(currentHYF.mcqs.map(shuffleOptions));
+    setCurrentMCQIndex(0);
+  } else {
+    handleNextHYF();
+  }
+};
 
-  const handleMCQAnswer = (selectedIndex: number) => {
-    setSelectedAnswer(selectedIndex);
-    setShowFeedback(true);
-    
-    if (selectedIndex === currentMCQ?.answerIndex) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
-    }
-  };
+
+const handleMCQAnswer = (selectedValue: string, correctUiLabel: string) => {
+  const currentMCQ = currentHYF.mcqs[currentMCQIndex];
+  const correctValue = currentMCQ.options[currentMCQ.correct_answer];
+  const isCorrect = selectedValue === correctValue;
+
+  setAnsweredMCQ({
+    mcq: currentMCQ,
+    selectedValue,
+    isCorrect,
+    correctUiLabel,
+    showFeedback: true,
+  });
+
+  if (isCorrect) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
+  }
+};
+
 
   const isCorrect = selectedAnswer === currentMCQ?.answerIndex;
 
@@ -612,13 +571,13 @@ export default function ConversationPhase({
             {currentMCQIndex >= 0 && currentMCQ && (
               <>
                 <MCQCard
-                  mcq={currentMCQ}
-                  mcqIndex={currentMCQIndex}
-                  onAnswer={handleMCQAnswer}
-                  selectedAnswer={selectedAnswer}
-                  showFeedback={showFeedback}
-                  isCorrect={isCorrect}
-                />
+  mcq={currentMCQ}
+  mcqIndex={currentMCQIndex}
+  shuffledOptions={shuffledOptionsList[currentMCQIndex]}
+  onAnswer={handleMCQAnswer}
+  answeredMCQ={answeredMCQ}
+/>
+
 
                 {/* Next Button */}
                 {showFeedback && (
