@@ -426,7 +426,7 @@ function FeedbackCard({
         from={{ opacity: 0, translateY: 30, scale: 0.95 }}
         animate={{ opacity: 1, translateY: 0, scale: 1 }}
         transition={{ type: 'spring', duration: 800, delay: isCorrect ? 300 : 600 }}
-        className="relative overflow-hidden"
+        className="bg-slate-800/90 border-b border-slate-700/50"
       >
         <View 
           className="bg-gradient-to-br from-emerald-900/60 to-teal-900/60 rounded-3xl border border-emerald-500/40 shadow-2xl"
@@ -854,90 +854,25 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
                       <Text className="text-emerald-200 text-3xl font-bold">
                         {Math.round((correctCount / mcqs.length) * 100)}%
                       </Text>
-                    </View>
-                    <View className="items-center">
-                      <Text className="text-cyan-400 text-sm font-semibold uppercase tracking-wide">
-                        Correct
-                      </Text>
-                      <Text className="text-cyan-200 text-3xl font-bold">
-                        {correctCount}
-                      </Text>
-                    </View>
-                    <View className="items-center">
-                      <Text className="text-blue-400 text-sm font-semibold uppercase tracking-wide">
-                        Total
-                      </Text>
-                      <Text className="text-blue-200 text-3xl font-bold">
-                        {mcqs.length}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-
-                {/* Next Concept Button */}
-                <Pressable
-                  onPress={onComplete}
-                  className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-6 px-8 flex-row items-center justify-center shadow-2xl active:scale-95"
-                  style={{
-                    shadowColor: '#10b981',
-                    shadowOffset: { width: 0, height: 12 },
-                    shadowOpacity: 0.5,
-                    shadowRadius: 24,
-                    elevation: 12,
-                  }}
-                >
-                  <Sparkles size={24} color="#ffffff" />
-                  <Text className="text-white font-bold text-xl ml-3 mr-2">
-                    Next Concept
-                  </Text>
-                  <ChevronRight size={24} color="#ffffff" />
-                </Pressable>
-              </View>
-
-              {/* Self Signals Panel */}
-              <View className="mt-4">
-                <SelfSignalsPanel
-                  objectType="mcq"
-                  objectUuid={mcq.id}
-                  topicName={mcq.stem.substring(0, 50) + '...'}
-                />
-              </View>
-
-              {/* Celebration particles */}
-              <View className="absolute inset-0 pointer-events-none">
-                {[...Array(12)].map((_, i) => (
-                  <MotiView
-                    key={`celebration-particle-${i}`}
-                    from={{ 
-                      opacity: 0, 
-                      translateY: Math.random() * 100,
-                      translateX: Math.random() * 200 - 100,
-                      scale: 0
-                    }}
-                    animate={{ 
-                      opacity: [0, 1, 0],
-                      translateY: Math.random() * -150,
-                      translateX: Math.random() * 100 - 50,
-                      scale: [0, 1.2, 0]
-                    }}
-                    transition={{
-                      loop: true,
-                      type: 'timing',
-                      duration: 4000,
-                      delay: i * 300,
-                    }}
-                    className="absolute"
-                    style={{
-                      left: `${Math.random() * 80 + 10}%`,
-                      top: `${Math.random() * 80 + 10}%`,
-                    }}
-                  >
-                    <View className="w-3 h-3 bg-emerald-400 rounded-full shadow-lg" />
-                  </MotiView>
-                ))}
-              </View>
+        <View className="flex-row items-center justify-between p-6">
+          <View className="flex-row items-center">
+            <View className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl items-center justify-center mr-3">
+              <Sparkles size={20} color="#ffffff" />
             </View>
-          </MotiView>
+            <View>
+              <Text className="text-sm text-teal-400 font-semibold uppercase tracking-wide">
+                MCQ Practice
+              </Text>
+              <Text className="text-xl font-bold text-slate-100">
+                Interactive Questions
+              </Text>
+            </View>
+          </View>
+          <View className="bg-teal-500/20 rounded-lg px-3 py-2 border border-teal-500/30">
+            <Text className="text-teal-400 font-bold text-lg">
+              {Math.min(currentMCQIndex + 1, mcqs.length)} / {mcqs.length}
+            </Text>
+          </View>
         )}
       </ScrollView>
     </View>
