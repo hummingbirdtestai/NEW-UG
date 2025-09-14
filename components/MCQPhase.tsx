@@ -6,10 +6,7 @@ import ConfettiCannon from "react-native-confetti-cannon";
 import {
   CheckCircle,
   XCircle,
-  MessageCircle,
-  Lightbulb,
   ChevronRight,
-  Target,
   Award,
   Sparkles,
 } from "lucide-react-native";
@@ -48,7 +45,7 @@ interface AnsweredMCQ {
   showFeedback: boolean;
 }
 
-// 🔀 Shuffle logic (preserve dbKey but assign new UI labels)
+// 🔀 Shuffle logic
 function shuffleOptions(mcq: MCQ) {
   const entries = Object.entries(mcq.options).map(([dbKey, value]) => ({
     dbKey: dbKey as keyof MCQOption,
@@ -63,8 +60,8 @@ function shuffleOptions(mcq: MCQ) {
 
   const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
   return entries.map((entry, idx) => ({
-    uiLabel: uiLabels[idx], // shown on UI
-    dbKey: entry.dbKey, // real DB key
+    uiLabel: uiLabels[idx],
+    dbKey: entry.dbKey,
     value: entry.value,
   }));
 }
@@ -82,16 +79,15 @@ function MCQCard({
   answeredMCQ?: AnsweredMCQ;
   isActive: boolean;
 }) {
-  // shuffle once per question
   const shuffledOptions = useRef(shuffleOptions(mcq)).current;
 
   const markdownStyles = {
-    body: { color: "#f1f5f9", fontSize: 18, lineHeight: 28, fontFamily: "System" },
-    paragraph: { color: "#f1f5f9", marginBottom: 16, lineHeight: 28, fontSize: 18 },
+    body: { color: "#f1f5f9", fontSize: 18, lineHeight: 28 },
+    paragraph: { color: "#f1f5f9", marginBottom: 16, fontSize: 18 },
     strong: {
       color: "#5eead4",
       fontWeight: "700",
-      backgroundColor: "rgba(94, 234, 212, 0.15)",
+      backgroundColor: "rgba(94,234,212,0.15)",
       paddingHorizontal: 6,
       paddingVertical: 2,
       borderRadius: 6,
@@ -103,36 +99,23 @@ function MCQCard({
     <MotiView
       from={{ opacity: 0, translateY: 50, scale: 0.95 }}
       animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: "spring", duration: 800, delay: 200 }}
+      transition={{ type: "spring", duration: 800 }}
       className="mb-8"
     >
-      <View
-        className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden"
-        style={{
-          shadowColor: isActive ? "#14b8a6" : "#475569",
-          shadowOffset: { width: 0, height: 12 },
-          shadowOpacity: 0.25,
-          shadowRadius: 24,
-          elevation: 12,
-        }}
-      >
+      <View className="bg-slate-800/90 rounded-3xl border border-slate-700 shadow-xl overflow-hidden">
         {/* Header */}
-        <View className="relative overflow-hidden">
-          <View className="flex-row items-center p-6 border-b border-slate-700/30 bg-slate-800/40">
-            <View className="flex-1">
-              <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider mb-1">
-                MCQ Practice
-              </Text>
-              <Text className="text-slate-100 text-2xl font-bold">
-                Question {index + 1}
-              </Text>
-            </View>
-          </View>
+        <View className="flex-row items-center p-6 border-b border-slate-700 bg-slate-800/40">
+          <Text className="text-teal-400 text-sm font-bold uppercase tracking-wider flex-1">
+            MCQ Practice
+          </Text>
+          <Text className="text-slate-100 text-xl font-bold">
+            Q{index + 1}
+          </Text>
         </View>
 
-        {/* Question Stem */}
-        <View className="p-8">
-          <View className="bg-slate-900/40 rounded-2xl p-6 border border-slate-600/30 mb-8 shadow-inner">
+        {/* Stem */}
+        <View className="p-6">
+          <View className="bg-slate-900/40 rounded-2xl p-6 border border-slate-600/30 mb-6">
             <MarkdownWithLatex content={mcq.stem} markdownStyles={markdownStyles} />
           </View>
 
@@ -144,7 +127,7 @@ function MCQCard({
               const isDisabled = !!answeredMCQ;
 
               let optionStyle =
-                "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60 hover:bg-slate-700/80 active:scale-[0.98]";
+                "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60 hover:bg-slate-700/80";
               let textColor = "text-slate-100";
               let borderWidth = "border-2";
 
@@ -152,18 +135,18 @@ function MCQCard({
                 if (isSelected) {
                   if (answeredMCQ?.isCorrect) {
                     optionStyle =
-                      "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
+                      "bg-emerald-500/20 border-emerald-500/60";
                     textColor = "text-emerald-100";
                     borderWidth = "border-3";
                   } else {
                     optionStyle =
-                      "bg-gradient-to-r from-red-500/20 to-rose-500/20 border-red-500/60";
+                      "bg-red-500/20 border-red-500/60";
                     textColor = "text-red-100";
                     borderWidth = "border-3";
                   }
                 } else if (isCorrect && !answeredMCQ?.isCorrect) {
                   optionStyle =
-                    "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-500/60";
+                    "bg-emerald-500/20 border-emerald-500/60";
                   textColor = "text-emerald-100";
                   borderWidth = "border-3";
                 }
@@ -172,44 +155,34 @@ function MCQCard({
               return (
                 <MotiView
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  from={{ opacity: 0, translateX: -30, scale: 0.9 }}
-                  animate={{ opacity: 1, translateX: 0, scale: 1 }}
-                  transition={{ type: "spring", duration: 600, delay: 600 + optionIndex * 150 }}
+                  from={{ opacity: 0, translateX: -30 }}
+                  animate={{ opacity: 1, translateX: 0 }}
+                  transition={{ type: "spring", duration: 500, delay: optionIndex * 100 }}
                 >
                   <Pressable
-                    onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ use dbKey
+                    onPress={() => !isDisabled && onAnswer(opt.dbKey)}
                     disabled={isDisabled}
-                    className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
+                    className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center`}
                   >
                     {/* Fixed A–D label */}
-                    <MotiView
-                      from={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", duration: 500, delay: 800 + optionIndex * 150 }}
-                      className="w-12 h-12 rounded-2xl items-center justify-center mr-6 shadow-lg bg-gradient-to-br from-blue-500 to-indigo-600"
-                    >
+                    <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
                       <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
-                    </MotiView>
+                    </View>
 
-                    {/* Shuffled value */}
+                    {/* Shuffled text */}
                     <View className="flex-1">
                       <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
                     </View>
 
-                    {/* Selection indicator */}
+                    {/* Indicator */}
                     {isSelected && (
-                      <MotiView
-                        from={{ scale: 0, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ type: "spring", duration: 400 }}
-                        className="ml-4"
-                      >
+                      <View className="ml-4">
                         {answeredMCQ?.isCorrect ? (
                           <CheckCircle size={24} color="#10b981" />
                         ) : (
                           <XCircle size={24} color="#ef4444" />
                         )}
-                      </MotiView>
+                      </View>
                     )}
                   </Pressable>
                 </MotiView>
@@ -224,22 +197,15 @@ function MCQCard({
 
 export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   const { width } = Dimensions.get("window");
-  const isMobile = width < 768;
-
   const [answeredMCQs, setAnsweredMCQs] = useState<AnsweredMCQ[]>([]);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
-  const [conceptComplete, setConceptComplete] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
-
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // Auto scroll when new feedback appears
   useEffect(() => {
     if (scrollViewRef.current) {
-      setTimeout(() => {
-        scrollViewRef.current?.scrollToEnd({ animated: true });
-      }, 300);
+      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 300);
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
@@ -247,7 +213,7 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     const currentMCQ = mcqs[currentMCQIndex];
     const isCorrect = selectedOption === currentMCQ.correct_answer;
 
-    const newAnsweredMCQ: AnsweredMCQ = {
+    const newAnswered: AnsweredMCQ = {
       mcq: currentMCQ,
       selectedOption,
       isCorrect,
@@ -256,20 +222,19 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
 
     setAnsweredMCQs((prev) => {
       const updated = [...prev];
-      updated[currentMCQIndex] = newAnsweredMCQ;
+      updated[currentMCQIndex] = newAnswered;
       return updated;
     });
 
     if (isCorrect) {
-      setConceptComplete(true);
       setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 3000);
+      setTimeout(() => setShowConfetti(false), 2000);
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
-      setCurrentMCQIndex((prev) => prev + 1);
+      setCurrentMCQIndex((i) => i + 1);
     } else {
       setIsComplete(true);
     }
@@ -280,20 +245,66 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   return (
     <View className="flex-1 bg-slate-900">
       {showConfetti && (
-        <ConfettiCannon count={120} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
+        <ConfettiCannon count={100} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
       )}
 
-      {/* TODO: Add your header / feedback / completion UI here like before */}
-      {/* I left only MCQCard part for clarity. 
-          You can reuse your previous FeedbackCard + CompletionCard without changing logic. */}
-      <ScrollView ref={scrollViewRef} className="flex-1" showsVerticalScrollIndicator={false}>
-        {!isComplete && !conceptComplete && currentMCQIndex < mcqs.length && !answeredMCQs[currentMCQIndex] && (
-          <MCQCard
-            mcq={mcqs[currentMCQIndex]}
-            index={currentMCQIndex}
-            onAnswer={handleAnswer}
-            isActive={true}
-          />
+      <ScrollView ref={scrollViewRef} className="flex-1 p-4">
+        {/* Show already answered */}
+        {answeredMCQs.map((ans, idx) => (
+          <View key={ans.mcq.id || idx}>
+            <MCQCard
+              mcq={ans.mcq}
+              index={idx}
+              onAnswer={() => {}}
+              answeredMCQ={ans}
+              isActive={false}
+            />
+
+            {/* Next button after feedback */}
+            {idx === currentMCQIndex && (
+              <Pressable
+                onPress={handleNext}
+                className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-4"
+              >
+                <Text className="text-white font-bold">
+                  {ans.isCorrect ? "Next Concept" : "Next Question"}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        ))}
+
+        {/* Active question */}
+        {!isComplete &&
+          currentMCQIndex < mcqs.length &&
+          !answeredMCQs[currentMCQIndex] && (
+            <MCQCard
+              mcq={mcqs[currentMCQIndex]}
+              index={currentMCQIndex}
+              onAnswer={handleAnswer}
+              isActive={true}
+            />
+          )}
+
+        {/* Completion card */}
+        {isComplete && (
+          <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
+            <Award size={40} color="#10b981" />
+            <Text className="text-emerald-100 text-2xl font-bold mt-4">
+              🎉 All MCQs Completed!
+            </Text>
+            <Text className="text-emerald-200 text-lg mt-2">
+              You scored {correctCount} / {mcqs.length}
+            </Text>
+            <Pressable
+              onPress={onComplete}
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
+            >
+              <Sparkles size={20} color="#fff" />
+              <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
+              <ChevronRight size={20} color="#fff" />
+            </Pressable>
+          </View>
         )}
       </ScrollView>
     </View>
