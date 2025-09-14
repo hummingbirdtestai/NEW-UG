@@ -224,43 +224,73 @@ const shuffledOptions = useRef(shuffleOptions(mcq)).current;
           </View>
 
           {/* Enhanced Options Grid */}
-          <View className="space-y-4">
-            {shuffledOptions.map((opt, optionIndex) => {
-  const isSelected = answeredMCQ?.selectedOption === opt.dbKey; // ✅ use dbKey
-  const isCorrect = opt.dbKey === mcq.correct_answer;
-  const isDisabled = !!answeredMCQ;
+              const isSelected = answeredMCQ?.selectedOption === opt.dbKey;
+              const isCorrect = opt.dbKey === mcq.correct_answer;
+              const isDisabled = !!answeredMCQ;
 
-  return (
-    <MotiView key={`${mcq.id}-${opt.uiLabel}`} ...>
-      <Pressable
-        onPress={() => !isDisabled && onAnswer(opt.dbKey)} // ✅ pass dbKey
-        disabled={isDisabled}
-        className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
-      >
-        {/* Show fixed A–D label */}
-        <MotiView ...>
-          <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
-        </MotiView>
+              // Define option styling based on state
+              const optionStyle = isSelected
+                ? isCorrect
+                  ? 'bg-gradient-to-r from-emerald-900/60 to-teal-900/60 border-emerald-500/60'
+                  : 'bg-gradient-to-r from-red-900/60 to-rose-900/60 border-red-500/60'
+                : isDisabled
+                ? 'bg-slate-800/40 border-slate-600/30'
+                : 'bg-slate-800/60 border-slate-600/40 hover:bg-slate-700/60 hover:border-slate-500/50';
 
-        {/* Shuffled value text */}
-        <View className="flex-1">
-          <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
-        </View>
+              const borderWidth = isSelected ? 'border-2' : 'border';
 
-        {/* Selection Indicator */}
-        {isSelected && (
-          <MotiView ...>
-            {answeredMCQ?.isCorrect ? (
-              <CheckCircle size={24} color="#10b981" />
-            ) : (
-              <XCircle size={24} color="#ef4444" />
-            )}
-          </MotiView>
-        )}
-      </Pressable>
-    </MotiView>
-  );
-})}
+              return (
+                <MotiView 
+                  key={`${mcq.id}-${opt.uiLabel}`}
+                  from={{ opacity: 0, translateY: 20, scale: 0.95 }}
+                  animate={{ opacity: 1, translateY: 0, scale: 1 }}
+                  transition={{ type: 'spring', duration: 600, delay: optionIndex * 100 }}
+                >
+                  <Pressable
+                    onPress={() => !isDisabled && onAnswer(opt.dbKey)}
+                    disabled={isDisabled}
+                    className={`${optionStyle} ${borderWidth} rounded-2xl p-6 flex-row items-center transition-all duration-200`}
+                  >
+                    {/* Show fixed A–D label */}
+                    <MotiView
+                      from={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: 'spring', duration: 400, delay: optionIndex * 100 + 200 }}
+                      className={`w-12 h-12 rounded-2xl items-center justify-center mr-4 ${
+                        isSelected
+                          ? isCorrect
+                            ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                            : 'bg-gradient-to-br from-red-500 to-rose-600'
+                          : 'bg-gradient-to-br from-slate-600 to-slate-700'
+                      }`}
+                    >
+                      <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
+                    </MotiView>
+
+                    {/* Shuffled value text */}
+                    <View className="flex-1">
+                      <MarkdownWithLatex content={opt.value} markdownStyles={markdownStyles} />
+                    </View>
+
+                    {/* Selection Indicator */}
+                    {isSelected && (
+                      <MotiView
+                        from={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: 'spring', duration: 400 }}
+                        className="ml-4"
+                      >
+                        {answeredMCQ?.isCorrect ? (
+                          <CheckCircle size={24} color="#10b981" />
+                        ) : (
+                          <XCircle size={24} color="#ef4444" />
+                        )}
+                      </MotiView>
+                    )}
+                  </Pressable>
+                </MotiView>
+              );
+            })}
 
 
 
