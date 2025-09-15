@@ -364,14 +364,15 @@ function MCQCard({
                 </View>
               )}
 
-              {/* Correct Answer Section */}
+             {/* Correct Answer Section */}
 <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
   <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
   <MarkdownWithLatex content={mcq.feedback.correct} />
   <Text className="text-emerald-200 mt-2">
-    Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue}
+    Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue || "Value missing"}
   </Text>
 </View>
+
 
             </>
           )}
@@ -459,14 +460,14 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer.trim().toUpperCase();
 
-  // ✅ Resolve values (trimmed for safety)
+  // ✅ Resolve values from DB
   const correctValueFromDB = currentMCQ.options[correctDbKey]?.trim();
   const selectedValueFromDB = currentMCQ.options[selectedDbKey]?.trim();
 
   // ✅ Compare by value
   const isCorrect = selectedValueFromDB === correctValueFromDB;
 
-  // ✅ Find correct option in shuffled array (by value)
+  // ✅ Find correct option in shuffled array
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
   const correctOption = currentShuffle.find(
     opt => opt.value.trim() === correctValueFromDB
@@ -474,10 +475,10 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
 
   setAnsweredMCQ({
     mcq: currentMCQ,
-    selectedValue: selectedValueFromDB, // chosen VALUE
+    selectedValue: selectedValueFromDB ?? "",
     isCorrect,
-    correctUiLabel: correctOption?.uiLabel || correctDbKey, // fallback to dbKey only if needed
-    correctValue: correctValueFromDB, // always DB value
+    correctUiLabel: correctOption?.uiLabel ?? correctDbKey, // fallback if not found
+    correctValue: correctValueFromDB ?? "(not found)",       // always safe string
     showFeedback: true,
   });
 
@@ -486,6 +487,7 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
+
 
 
 
