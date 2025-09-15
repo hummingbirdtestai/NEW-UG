@@ -340,23 +340,38 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
 
             )}
             {phase === 1 && (
- <ConversationPhase
-  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
+<ConversationPhase
+  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, idx: number) => ({
+    uuid: `${currentConcept.concept_json_unicode?.uuid}-hyf-${idx}`,   // 👈 unique id
     text: hyf.HYF,
     mcqs: (hyf.MCQs || []).map((mcq: any) => ({
       id: mcq.id ?? crypto.randomUUID(),
       stem: mcq.stem,
-      options: mcq.options, // ✅ keep as object {A,B,C,D}
+      options: mcq.options,
       feedback: {
         correct: mcq.feedback?.correct ?? "",
         wrong: mcq.feedback?.wrong ?? "",
       },
       learning_gap: mcq.learning_gap,
-      correct_answer: mcq.correct_answer, // ✅ A/B/C/D direct from DB
+      correct_answer: mcq.correct_answer,
     })),
   }))}
   onComplete={handleNextPhase}
+  onBookmark={async (hyfIndex, newValue) => {
+    if (!user) return;
+    const objectUuid = `${currentConcept.concept_json_unicode?.uuid}-hyf-${hyfIndex}`;
+    await supabase.from("student_signals").upsert(
+      {
+        student_id: user.id,
+        object_type: "hyf",
+        object_uuid: objectUuid,
+        bookmark: newValue,
+      },
+      { onConflict: "student_id,object_type,object_uuid" }
+    );
+  }}
 />
+
 
 )}
 
@@ -436,9 +451,22 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
               <MCQPhase
   key={currentIdx}
   mcqs={mcqs}
-  mode="concept"   // 👈 explicit for clarity
+  mode="concept"
   onComplete={handleCompleteConcept}
+  onBookmarkMCQ={async (mcqId, newValue) => {
+    if (!user) return;
+    await supabase.from("student_signals").upsert(
+      {
+        student_id: user.id,
+        object_type: "hyf_mcq",   // 👈 for conversation MCQs use "hyf_mcq"
+        object_uuid: mcqId,
+        bookmark: newValue,
+      },
+      { onConflict: "student_id,object_type,object_uuid" }
+    );
+  }}
 />
+
 
             )}
           </>
