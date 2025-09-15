@@ -325,11 +325,12 @@ function MCQCard({
 
           return (
             <Pressable
-              key={`${mcq.id}-${opt.uiLabel}`}
-              onPress={() => !isDisabled && onAnswer(opt.value, correctUiLabel)}
-              disabled={isDisabled}
-              className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
-            >
+  key={`${mcq.id}-${opt.uiLabel}`}
+  onPress={() => !isDisabled && onAnswer(opt.dbKey, correctUiLabel)}   // pass dbKey not value
+  disabled={isDisabled}
+  className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
+>
+
               <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4">
                 <Text className="text-white font-bold text-sm">{opt.uiLabel}</Text>
               </View>
