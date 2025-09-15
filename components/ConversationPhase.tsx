@@ -275,7 +275,6 @@ export default function ConversationPhase({
   const isMobile = Dimensions.get('window').width < 768;
 
    const currentHYF = normalizedHyfs[currentHYFIndex];
-const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
 
 
 
@@ -283,8 +282,6 @@ const currentMCQ = currentHYF?.mcqs[currentMCQIndex];
   const handleNextHYF = () => {
   if (currentHYFIndex < normalizedHyfs.length - 1) {
     setCurrentHYFIndex(currentHYFIndex + 1);
-    setCurrentMCQIndex(-1);
-    setAnsweredMCQ(undefined);   // reset instead of setSelectedAnswer / setShowFeedback
   } else {
     setIsComplete(true);
     onComplete?.();
@@ -301,11 +298,6 @@ const handleGotIt = () => {
     handleNextHYF();
   }
 };
-
-
-
-
-const isCorrect = answeredMCQ?.isCorrect ?? false;
 
 
   return (
@@ -412,15 +404,16 @@ const isCorrect = answeredMCQ?.isCorrect ?? false;
         {!isComplete ? (
           <>
             {/* Current HYF */}
-            {currentMCQIndex === -1 && (
-              <HYFCard
-                hyf={currentHYF}
-                index={currentHYFIndex}
-                onGotIt={handleGotIt}
-                onBookmark={onBookmark}
-                isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
-              />
-            )}
+{!showMCQs && (
+  <HYFCard
+    hyf={currentHYF}
+    index={currentHYFIndex}
+    onGotIt={handleGotIt}
+    onBookmark={onBookmark}
+    isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
+  />
+)}
+
 
             {/* Current MCQ */}
             {showMCQs && currentHYF?.mcqs?.length > 0 && (
