@@ -398,23 +398,26 @@ export default function ConversationPhase({
   onBookmark,
   bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
-mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any) => {
-  const rawKey = m.correct_answer?.toString().trim().toUpperCase();
-  const validKeys: (keyof MCQOption)[] = ["A", "B", "C", "D"];
-  const finalKey = validKeys.includes(rawKey as keyof MCQOption)
-    ? (rawKey as keyof MCQOption)
-    : null;
+  // Normalize HYFs data
+  const normalizedHyfs = hyfs.map((h: any) => ({
+    text: h.text,
+    mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any) => {
+      const rawKey = m.correct_answer?.toString().trim().toUpperCase();
+      const validKeys: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+      const finalKey = validKeys.includes(rawKey as keyof MCQOption)
+        ? (rawKey as keyof MCQOption)
+        : null;
 
-  return {
-    id: m.id ?? crypto.randomUUID(),
-    stem: m.stem ?? m.question ?? "",
-    options: m.options,
-    feedback: m.feedback,
-    learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
-    correct_answer: finalKey,   // ✅ null if invalid/missing
-  };
-}),
-
+      return {
+        id: m.id ?? crypto.randomUUID(),
+        stem: m.stem ?? m.question ?? "",
+        options: m.options,
+        feedback: m.feedback,
+        learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
+        correct_answer: finalKey,   // ✅ null if invalid/missing
+      };
+    }),
+  }));
 
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
