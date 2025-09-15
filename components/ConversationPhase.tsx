@@ -462,7 +462,7 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
   const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
 
-  const correctUiLabel = correctOption?.uiLabel || "?";
+const correctUiLabel = correctOption?.uiLabel || selectedUiLabel || "?";
   const correctValue = correctOption?.value || "";
 
   setAnsweredMCQ({
