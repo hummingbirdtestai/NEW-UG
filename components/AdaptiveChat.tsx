@@ -178,10 +178,26 @@ const preloadConcept = async (idx: number) => {
     .eq("chapter_id", chapterId)
     .order("react_order", { ascending: true })
     .range(idx, idx);
+
   if (!error && data && data[0]) {
-    setNextConcept(data[0]);
+    let concept = data[0];
+
+    if (user && concept.concept_json_unicode?.uuid) {
+      const { data: signal } = await supabase
+        .from("student_signals")
+        .select("bookmark")
+        .eq("student_id", user.id)
+        .eq("object_type", "concept")
+        .eq("object_uuid", concept.concept_json_unicode.uuid)
+        .maybeSingle();
+
+      concept.isBookmarked = signal?.bookmark ?? false;
+    }
+
+    setNextConcept(concept);
   }
 };
+
 
 
   const handleNextPhase = () => {
