@@ -343,7 +343,6 @@ export default function MCQPhase({
                     >
                       <Text className="text-white font-bold">Next Concept</Text>
                     </Pressable>
-                    </Pressable>
                   )
                 )}
               </>
