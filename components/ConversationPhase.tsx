@@ -264,6 +264,7 @@ function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFC
     </MotiView>
   );
 }
+
 function MCQCard({
   mcq,
   shuffledOptions,
@@ -300,17 +301,17 @@ function MCQCard({
       <View className="space-y-3 mb-4">
         {shuffledOptions.map((opt) => {
           const isSelected = answeredMCQ?.selectedValue === opt.value;
-          const isDisabled = !!answeredMCQ;
 
           let optionStyle = "bg-slate-800/80 border-slate-600/50";
-          if (isDisabled) {
+          if (answeredMCQ?.showFeedback) {
             if (isSelected) {
-              optionStyle = answeredMCQ?.isCorrect
+              optionStyle = answeredMCQ.isCorrect
                 ? "bg-emerald-500/20 border-emerald-500/60"
                 : "bg-red-500/20 border-red-500/60";
-            } else if (answeredMCQ &&
-  opt.value === answeredMCQ.correctValue &&  // ✅ highlight correct value
-  !answeredMCQ.isCorrect) {
+            } else if (
+              !answeredMCQ.isCorrect &&
+              opt.value === answeredMCQ.correctValue
+            ) {
               optionStyle = "bg-emerald-500/20 border-emerald-500/60";
             }
           }
@@ -318,13 +319,14 @@ function MCQCard({
           return (
             <Pressable
               key={`${mcq.id}-${opt.uiLabel}`}
-  onPress={() => {
-    if (!answeredMCQ?.showFeedback) {
-      onAnswer(opt.dbKey, opt.uiLabel);
-    }
-  }}
-  disabled={answeredMCQ?.showFeedback}  // disable only after answer is locked
-  className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
+              onPress={() => {
+                console.log("Pressed:", opt.uiLabel, opt.dbKey, opt.value);
+                if (!answeredMCQ?.showFeedback) {
+                  onAnswer(opt.dbKey, opt.uiLabel);
+                }
+              }}
+              disabled={answeredMCQ?.showFeedback === true} // ✅ always boolean
+              className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
             >
               <View className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full items-center justify-center mr-4">
                 <Text className="text-white font-bold text-sm">{opt.uiLabel}</Text>
@@ -349,13 +351,11 @@ function MCQCard({
         <View>
           {!answeredMCQ.isCorrect && (
             <>
-              {/* Wrong Feedback */}
               <View className="bg-red-900/40 rounded-2xl border border-red-500/40 p-4 mb-3">
                 <Text className="text-red-300 font-bold mb-2">❌ Incorrect</Text>
                 <MarkdownWithLatex content={mcq.feedback.wrong} />
               </View>
 
-              {/* Learning Gap */}
               {mcq.learning_gap && (
                 <View className="bg-amber-900/40 rounded-2xl border border-amber-500/40 p-4 mb-3">
                   <Text className="text-amber-300 font-bold mb-2">💡 Learning Gap</Text>
@@ -363,16 +363,13 @@ function MCQCard({
                 </View>
               )}
 
-             {/* Correct Answer Section */}
-<View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
-  <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
-  <MarkdownWithLatex content={mcq.feedback.correct} />
-  <Text className="text-emerald-200 mt-2">
-    ✅ Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue}
-  </Text>
-</View>
-
-
+              <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
+                <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
+                <MarkdownWithLatex content={mcq.feedback.correct} />
+                <Text className="text-emerald-200 mt-2">
+                  ✅ Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue}
+                </Text>
+              </View>
             </>
           )}
 
@@ -387,6 +384,7 @@ function MCQCard({
     </MotiView>
   );
 }
+
 
 
 
