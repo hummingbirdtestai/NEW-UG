@@ -113,7 +113,23 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
       setFetchError(true);
       return;
     }
-    setCurrentConcept(data[0]);
+        let concept = data[0];
+
+    // ✅ Check if this concept is already bookmarked by this user
+    if (user && concept.concept_json_unicode?.uuid) {
+      const { data: signal } = await supabase
+        .from("student_signals")
+        .select("bookmark")
+        .eq("student_id", user.id)
+        .eq("object_type", "concept")
+        .eq("object_uuid", concept.concept_json_unicode.uuid)
+        .maybeSingle();
+
+      concept.isBookmarked = signal?.bookmark ?? false;
+    }
+
+    setCurrentConcept(concept);
+
     setLoadingConcept(false);
     setFetchError(false);
 
@@ -294,12 +310,17 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
           <>
             {phase === 0 && (
               <ConceptPhase
-                concept={currentConcept.concept_json_unicode?.Concept}
-                explanation={currentConcept.concept_json_unicode?.Explanation}
-                onNext={handleNextPhase}
-                current={currentIdx + 1}
-                total={totalConcepts}
-              />
+  concept={currentConcept.concept_json_unicode?.Concept}
+  explanation={currentConcept.concept_json_unicode?.Explanation}
+  onNext={handleNextPhase}
+  current={currentIdx + 1}
+  total={totalConcepts}
+  isBookmarked={currentConcept.isBookmarked}
+  onBookmark={(newValue) =>
+    handleBookmarkToggle(newValue, currentConcept)
+  }
+/>
+
             )}
             {phase === 1 && (
  <ConversationPhase
