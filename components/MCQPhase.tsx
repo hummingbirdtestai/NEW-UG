@@ -273,16 +273,30 @@ const handleAnswer = (selectedValue: string) => {
               answeredMCQ={ans}
             />
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
-            {idx === currentMCQIndex && mode !== "conversation" && (
-  <Pressable
-    onPress={handleNext}
-    className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
-  >
-    <Text className="text-white font-bold">
-      {ans.isCorrect ? "Next Concept" : "Next Question"}
-    </Text>
-  </Pressable>
+           {idx === currentMCQIndex && (
+  <>
+    {!ans.isCorrect ? (
+      // ❌ Wrong answer → always show Next Question
+      <Pressable
+        onPress={handleNext}
+        className="bg-red-600 rounded-2xl px-6 py-4 items-center mt-2"
+      >
+        <Text className="text-white font-bold">Next Question</Text>
+      </Pressable>
+    ) : (
+      mode === "concept" && (
+        // ✅ Correct answer → only in concept mode
+        <Pressable
+          onPress={handleNext}
+          className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+        >
+          <Text className="text-white font-bold">Next Concept</Text>
+        </Pressable>
+      )
+    )}
+  </>
 )}
+
 
           </View>
         ))}
