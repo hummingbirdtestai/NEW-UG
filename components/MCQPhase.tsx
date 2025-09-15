@@ -3,14 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Dimensions } from "react-native";
 import { MotiView } from "moti";
 import ConfettiCannon from "react-native-confetti-cannon";
-import {
-  CheckCircle,
-  XCircle,
-  ChevronRight,
-  Sparkles,
-  Bookmark,
-  BookmarkCheck,
-} from "lucide-react-native";
+import { CircleCheck as CheckCircle, Circle as XCircle, ChevronRight, Sparkles, Bookmark, BookmarkCheck } from "lucide-react-native";
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 
 interface MCQOption {
