@@ -454,23 +454,20 @@ const handleGotIt = () => {
 
 const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
-  const correctDbKey = currentMCQ.correct_answer;
+  const correctDbKey = currentMCQ.correct_answer.trim().toUpperCase();
 
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // Always recompute correct option from shuffled
+  // ✅ Find the correct option in the current shuffle
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
   const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
-
-const correctUiLabel = correctOption?.uiLabel || selectedUiLabel || "?";
-  const correctValue = correctOption?.value || "";
 
   setAnsweredMCQ({
     mcq: currentMCQ,
     selectedValue: selectedDbKey,
     isCorrect,
-    correctUiLabel,   // proper UI label (A/B/C/D)
-    correctValue,     // option text
+    correctUiLabel: correctOption?.uiLabel || correctDbKey,   // always fallback to dbKey
+    correctValue: correctOption?.value || currentMCQ.options[correctDbKey], // fallback to DB text
     showFeedback: true,
   });
 
@@ -479,6 +476,7 @@ const correctUiLabel = correctOption?.uiLabel || selectedUiLabel || "?";
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
+
 
 
 
