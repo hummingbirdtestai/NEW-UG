@@ -370,7 +370,7 @@ function MCQCard({
   <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
   <MarkdownWithLatex content={mcq.feedback.correct} />
   <Text className="text-emerald-200 mt-2">
-    Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue || "Value missing"}
+    ✅ Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue}
   </Text>
 </View>
 
@@ -467,31 +467,29 @@ const handleGotIt = () => {
 const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer?.toString().trim().toUpperCase() as keyof MCQOption | undefined;
-if (!correctDbKey) {
-  console.warn("⚠️ No valid correct_answer found for MCQ:", currentMCQ.id);
-  return;
-}
 
+  if (!correctDbKey) {
+    console.warn("⚠️ No valid correct_answer found for MCQ:", currentMCQ.id);
+    return;
+  }
 
-  // ✅ Resolve values from DB
+  // ✅ Values from DB
   const correctValueFromDB = currentMCQ.options[correctDbKey]?.trim();
   const selectedValueFromDB = currentMCQ.options[selectedDbKey]?.trim();
 
-  // ✅ Compare by value
+  // ✅ Compare values
   const isCorrect = selectedValueFromDB === correctValueFromDB;
 
-  // ✅ Find correct option in shuffled array
+  // ✅ Find correct option in shuffled array to get its UI label
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
-  const correctOption = currentShuffle.find(
-    opt => opt.value.trim() === correctValueFromDB
-  );
+  const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
 
   setAnsweredMCQ({
     mcq: currentMCQ,
     selectedValue: selectedValueFromDB ?? "",
     isCorrect,
-    correctUiLabel: correctOption?.uiLabel ?? correctDbKey, // fallback if not found
-    correctValue: correctValueFromDB ?? "(not found)",       // always safe string
+    correctUiLabel: correctOption?.uiLabel ?? correctDbKey,  // 👈 UI label like C
+    correctValue: correctValueFromDB ?? "(not found)",       // 👈 DB option text
     showFeedback: true,
   });
 
