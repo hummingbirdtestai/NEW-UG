@@ -308,7 +308,7 @@ function MCQCard({
       {/* Options */}
       <View className="space-y-3 mb-4">
         {shuffledOptions.map((opt) => {
-          const isSelected = answeredMCQ?.selectedValue === opt.value;
+          const isSelected = answeredMCQ?.selectedValue === opt.dbKey;  // compare dbKeys
           const isCorrect = opt.value === correctValue;
           const isDisabled = !!answeredMCQ;
 
@@ -447,27 +447,21 @@ const handleGotIt = () => {
 };
 
 
-const handleMCQAnswer = (selectedValue: string) => {
+const handleMCQAnswer = (selectedDbKey: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
-
-  // 1. Get the correct dbKey from MCQ definition
   const correctDbKey = currentMCQ.correct_answer;
 
-  // 2. Find the correct option’s UI label (A/B/C/D) from shuffled list
+  // Find correct UI label for showing
   const correctUiLabel =
     shuffledOptionsList[currentMCQIndex].find((opt) => opt.dbKey === correctDbKey)?.uiLabel || "?";
 
-  // 3. Find which dbKey was selected
-  const selectedDbKey = shuffledOptionsList[currentMCQIndex]
-    .find((opt) => opt.value === selectedValue)?.dbKey;
-
-  // 4. Correctness check
+  // Check correctness
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // 5. Save answer with proper correctUiLabel
+  // Save answer
   setAnsweredMCQ({
     mcq: currentMCQ,
-    selectedValue,
+    selectedValue: selectedDbKey, // now stores dbKey
     isCorrect,
     correctUiLabel,
     showFeedback: true,
@@ -478,6 +472,7 @@ const handleMCQAnswer = (selectedValue: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
+
 
 
 const isCorrect = answeredMCQ?.isCorrect ?? false;
