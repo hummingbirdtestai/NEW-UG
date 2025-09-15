@@ -460,23 +460,22 @@ const handleMCQAnswer = (selectedDbKey: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer;
 
-  const correctOption = shuffledOptionsList[currentMCQIndex].find(
-    (opt) => opt.dbKey === correctDbKey
-  );
+ const correctOption = shuffledOptionsList[currentMCQIndex].find(
+  (opt) => opt.dbKey === correctDbKey
+);
 
-  const correctUiLabel = correctOption?.uiLabel || "?";
-  const correctValue = correctOption?.value || "";
+const correctUiLabel = correctOption?.uiLabel || "?";
+const correctValue = correctOption?.value || "";
 
-  const isCorrect = selectedDbKey === correctDbKey;
+setAnsweredMCQ({
+  mcq: currentMCQ,
+  selectedValue: selectedDbKey,
+  isCorrect,
+  correctUiLabel,
+  correctValue,   // 👈 added
+  showFeedback: true,
+});
 
-  setAnsweredMCQ({
-    mcq: currentMCQ,
-    selectedValue: selectedDbKey,
-    isCorrect,
-    correctUiLabel,
-    correctValue,   // 👈 added
-    showFeedback: true,
-  });
 
   if (isCorrect) {
     setShowConfetti(true);
