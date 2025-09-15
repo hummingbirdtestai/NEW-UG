@@ -393,8 +393,9 @@ export default function ConversationPhase({
   stem: m.stem ?? m.question ?? "",   // normalize
   options: m.options,
   feedback: m.feedback,
-  learning_gap: m.learning_gap,
-  correct_answer: m.correct_answer,
+  learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
+  correct_answer: (m.correct_answer ?? "A").trim().toUpperCase() as keyof MCQOption,
+
 }))
 
 }));
