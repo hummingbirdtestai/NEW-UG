@@ -335,7 +335,6 @@ export default function MCQPhase({
                   >
                     <Text className="text-white font-bold">Next Question</Text>
                   </Pressable>
-                  </Pressable>
                 ) : (
                   mode === "concept" && (
                     <Pressable
