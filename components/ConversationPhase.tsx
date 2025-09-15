@@ -404,12 +404,14 @@ const handleGotIt = () => {
             {/* Current MCQ */}
             {showMCQs && currentHYF?.mcqs?.length > 0 && (
   <MCQPhase
-    mcqs={currentHYF.mcqs}
-    onComplete={() => {
-      setShowMCQs(false);   // reset
-      handleNextHYF();      // go to next HYF
-    }}
-  />
+  mcqs={currentHYF.mcqs}
+  mode="conversation"   // 👈 add this
+  onComplete={() => {
+    setShowMCQs(false);
+    handleNextHYF();
+  }}
+/>
+
 )}
 
           </>
