@@ -295,25 +295,40 @@ const handleAnswer = (selectedValue: string) => {
         )}
 
         {isComplete && (
-          <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
-            <Award size={40} color="#10b981" />
-            <Text className="text-emerald-100 text-2xl font-bold mt-4">🎉 All MCQs Completed!</Text>
-            <Text className="text-emerald-200 text-lg mt-2">
-              You scored {correctCount} / {mcqs.length}
-            </Text>
-            <Pressable
-              onPress={onComplete}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
-            >
-              <Sparkles size={20} color="#fff" />
-              <Text className="text-white font-bold text-lg ml-2">
-  {mode === "conversation" ? "Next HYF" : "Next Concept"}
-</Text>
+  <>
+    {mode === "conversation" ? (
+      // 🔹 Conversation mode → Only show Next HYF button
+      <View className="items-center justify-center mt-12">
+        <Pressable
+          onPress={onComplete}
+          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
+        >
+          <Sparkles size={20} color="#fff" />
+          <Text className="text-white font-bold text-lg ml-2">Next HYF</Text>
+          <ChevronRight size={20} color="#fff" />
+        </Pressable>
+      </View>
+    ) : (
+      // 🔹 Concept mode → Show full score card
+      <View className="items-center justify-center mt-12 p-8 rounded-3xl bg-emerald-900/40 border border-emerald-500/40">
+        <Award size={40} color="#10b981" />
+        <Text className="text-emerald-100 text-2xl font-bold mt-4">🎉 All MCQs Completed!</Text>
+        <Text className="text-emerald-200 text-lg mt-2">
+          You scored {correctCount} / {mcqs.length}
+        </Text>
+        <Pressable
+          onPress={onComplete}
+          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
+        >
+          <Sparkles size={20} color="#fff" />
+          <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
+          <ChevronRight size={20} color="#fff" />
+        </Pressable>
+      </View>
+    )}
+  </>
+)}
 
-              <ChevronRight size={20} color="#fff" />
-            </Pressable>
-          </View>
-        )}
       </ScrollView>
     </View>
   );
