@@ -275,12 +275,15 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
   hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
     text: hyf.HYF,
     mcqs: (hyf.MCQs || []).map((mcq: any) => ({
-      question: mcq.stem,
-      options: mcq.options ? Object.values(mcq.options) : [],
-      answerIndex: ["A", "B", "C", "D"].indexOf(mcq.correct_answer),
-      feedback: mcq.feedback?.wrong,
-      correctExplanation: mcq.feedback?.correct,
-      learningGap: mcq.learning_gap,
+      id: mcq.id ?? crypto.randomUUID(),
+      stem: mcq.stem,
+      options: mcq.options, // ✅ keep as object {A,B,C,D}
+      feedback: {
+        correct: mcq.feedback?.correct ?? "",
+        wrong: mcq.feedback?.wrong ?? "",
+      },
+      learning_gap: mcq.learning_gap,
+      correct_answer: mcq.correct_answer, // ✅ A/B/C/D direct from DB
     })),
   }))}
   onComplete={handleNextPhase}
