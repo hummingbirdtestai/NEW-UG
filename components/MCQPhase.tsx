@@ -335,6 +335,7 @@ export default function MCQPhase({
                   >
                     <Text className="text-white font-bold">Next Question</Text>
                   </Pressable>
+                  </Pressable>
                 ) : (
                   mode === "concept" && (
                     <Pressable
@@ -342,6 +343,7 @@ export default function MCQPhase({
                       className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
                     >
                       <Text className="text-white font-bold">Next Concept</Text>
+                    </Pressable>
                     </Pressable>
                   )
                 )}
