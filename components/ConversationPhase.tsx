@@ -77,7 +77,7 @@ function shuffleOptions(mcq: MCQ) {
   const uiLabels: (keyof MCQOption)[] = ["A", "B", "C", "D"];
   return values.map((entry, idx) => ({
     uiLabel: uiLabels[idx],
-    dbKey: entry.dbKey,
+    dbKey: entry.dbKey.trim().toUpperCase(),
     value: entry.value,
   }));
 }
