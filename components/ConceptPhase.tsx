@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView, Dimensions, Linking, Platform } from
 import { MotiView } from 'moti';
 import { Atom, Bookmark, BookmarkCheck, ExternalLink, ChevronRight, Sparkles } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-
+import React, { useState, useEffect } from 'react';
 interface ConceptPhaseProps {
   concept: string;
   explanation: string;
