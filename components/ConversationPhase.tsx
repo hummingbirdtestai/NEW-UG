@@ -456,24 +456,22 @@ const handleMCQAnswer = (selectedDbKey: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer;
 
-  // Calculate correctness
+  // check correctness
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // Find correct UI + text from shuffled list
-  const correctOption = shuffledOptionsList[currentMCQIndex].find(
-    (opt) => opt.dbKey === correctDbKey
-  );
+  // ✅ always recompute correct option from shuffled list
+  const currentShuffle = shuffledOptionsList[currentMCQIndex];
+  const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
 
   const correctUiLabel = correctOption?.uiLabel || "?";
   const correctValue = correctOption?.value || "";
 
-  // Save answer
   setAnsweredMCQ({
     mcq: currentMCQ,
     selectedValue: selectedDbKey,
-    isCorrect,              // ✅ now correct
-    correctUiLabel,
-    correctValue,
+    isCorrect,
+    correctUiLabel,   // ✅ always label (A/B/C/D) after shuffle
+    correctValue,     // ✅ actual option text
     showFeedback: true,
   });
 
