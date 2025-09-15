@@ -304,7 +304,7 @@ function MCQCard({
       {/* Options */}
       <View className="space-y-3 mb-4">
         {shuffledOptions.map((opt) => {
-          const isSelected = answeredMCQ?.selectedValue === opt.dbKey;
+          const isSelected = answeredMCQ?.selectedValue === opt.value;
           const isDisabled = !!answeredMCQ;
 
           let optionStyle = "bg-slate-800/80 border-slate-600/50";
@@ -457,18 +457,25 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer.trim().toUpperCase();
 
-  const isCorrect = selectedDbKey === correctDbKey;
+  // ✅ Resolve correct value from DB key
+  const correctValueFromDB = currentMCQ.options[correctDbKey];
 
-  // ✅ Always resolve the correct option from the shuffled array
+  // ✅ Resolve user’s chosen value from dbKey
+  const selectedValueFromDB = currentMCQ.options[selectedDbKey];
+
+  // ✅ Check correctness by VALUE comparison
+  const isCorrect = selectedValueFromDB === correctValueFromDB;
+
+  // ✅ Find correct option in shuffled array (to get its UI label)
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
-  const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
+  const correctOption = currentShuffle.find(opt => opt.value === correctValueFromDB);
 
   setAnsweredMCQ({
     mcq: currentMCQ,
-    selectedValue: selectedDbKey,
+    selectedValue: selectedValueFromDB,              // store chosen VALUE
     isCorrect,
-    correctUiLabel: correctOption?.uiLabel || correctDbKey,   // use UI label from shuffle
-    correctValue: correctOption?.value || currentMCQ.options[correctDbKey],
+    correctUiLabel: correctOption?.uiLabel || correctDbKey, 
+    correctValue: correctValueFromDB,                // always from DB
     showFeedback: true,
   });
 
