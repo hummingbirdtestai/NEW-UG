@@ -14,6 +14,7 @@ import PerformanceTimeTradeoff from './PerformanceTimeTradeoff';
 import GapChains from './GapChains';
 import ErrorFingerprintProfile from './ErrorFingerprintProfile';
 import RootCausesPage from './RootCausesPage';
+import MasteryMap from './MasteryMap';
 
 interface AnalyticsPageProps {
   route: string;
@@ -148,6 +149,11 @@ export default function AnalyticsPage({ route }: AnalyticsPageProps) {
   // Special case for Root Causes - render the error fingerprint component
   if (route === '/analytics/root-causes') {
     return <RootCausesPage />;
+  }
+  
+  // Special case for Mastery Map - render the mastery map component
+  if (route === '/analytics/mastery-map') {
+    return <MasteryMap />;
   }
   
   // Special case for Mentor Flight Path - render the correlation chart
