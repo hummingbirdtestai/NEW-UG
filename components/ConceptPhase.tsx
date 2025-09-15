@@ -4,6 +4,7 @@ import { MotiView } from 'moti';
 import { Atom, Bookmark, BookmarkCheck, ExternalLink, ChevronRight, Sparkles } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import React, { useState, useEffect } from 'react';
+
 interface ConceptPhaseProps {
   concept: string;
   explanation: string;
@@ -27,12 +28,15 @@ export default function ConceptPhase({
   const isMobile = width < 768;
   
   const [localBookmark, setLocalBookmark] = useState(isBookmarked);
+  useEffect(() => {
+  setLocalBookmark(isBookmarked);
+}, [isBookmarked]);
 
-  const handleBookmarkToggle = () => {
-    const newValue = !localBookmark;
-    setLocalBookmark(newValue);
-    onBookmark?.(newValue);
-  };
+const handleBookmarkToggle = () => {
+  const newValue = !localBookmark;
+  setLocalBookmark(newValue);
+  onBookmark?.(newValue);
+};
 
   const handleLearnMore = () => {
     // Extract concept name for search (remove markdown formatting)
