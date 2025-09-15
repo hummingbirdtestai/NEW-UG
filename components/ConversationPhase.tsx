@@ -363,13 +363,14 @@ function MCQCard({
               )}
 
               {/* Correct Answer Section */}
-              <View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
-                <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
-                <MarkdownWithLatex content={mcq.feedback.correct} />
-                <Text className="text-emerald-200 mt-2">
-                  Correct Option: {answeredMCQ.correctUiLabel} — {answeredMCQ.correctValue}
-                </Text>
-              </View>
+<View className="bg-emerald-900/40 rounded-2xl border border-emerald-500/40 p-4">
+  <Text className="text-emerald-300 font-bold mb-2">✅ Correct Answer</Text>
+  <MarkdownWithLatex content={mcq.feedback.correct} />
+  <Text className="text-emerald-200 mt-2">
+    Correct Option: {answeredMCQ?.correctUiLabel} — {answeredMCQ?.correctValue}
+  </Text>
+</View>
+
             </>
           )}
 
@@ -458,7 +459,7 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
 
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // ✅ Find the correct option in the current shuffle
+  // ✅ Always resolve the correct option from the shuffled array
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
   const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
 
@@ -466,8 +467,8 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
     mcq: currentMCQ,
     selectedValue: selectedDbKey,
     isCorrect,
-    correctUiLabel: correctOption?.uiLabel || correctDbKey,   // always fallback to dbKey
-    correctValue: correctOption?.value || currentMCQ.options[correctDbKey], // fallback to DB text
+    correctUiLabel: correctOption?.uiLabel || correctDbKey,   // use UI label from shuffle
+    correctValue: correctOption?.value || currentMCQ.options[correctDbKey],
     showFeedback: true,
   });
 
@@ -476,8 +477,6 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
-
-
 
 
 const isCorrect = answeredMCQ?.isCorrect ?? false;
