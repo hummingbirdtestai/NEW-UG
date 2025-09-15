@@ -434,10 +434,12 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             )}
             {phase === 4 && (
               <MCQPhase
-                key={currentIdx}
-                mcqs={mcqs}
-                onComplete={handleCompleteConcept}
-              />
+  key={currentIdx}
+  mcqs={mcqs}
+  mode="concept"   // 👈 explicit for clarity
+  onComplete={handleCompleteConcept}
+/>
+
             )}
           </>
         ) : (
