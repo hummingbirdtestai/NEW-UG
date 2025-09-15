@@ -273,16 +273,17 @@ const handleAnswer = (selectedValue: string) => {
               answeredMCQ={ans}
             />
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
-            {idx === currentMCQIndex && (
-              <Pressable
-                onPress={handleNext}
-                className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
-              >
-                <Text className="text-white font-bold">
-                  {ans.isCorrect ? "Next Concept" : "Next Question"}
-                </Text>
-              </Pressable>
-            )}
+            {idx === currentMCQIndex && mode !== "conversation" && (
+  <Pressable
+    onPress={handleNext}
+    className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+  >
+    <Text className="text-white font-bold">
+      {ans.isCorrect ? "Next Concept" : "Next Question"}
+    </Text>
+  </Pressable>
+)}
+
           </View>
         ))}
 
