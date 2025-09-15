@@ -178,7 +178,7 @@ function FeedbackCard({ mcq, answered }: { mcq: MCQ; answered: AnsweredMCQ }) {
   );
 }
 
-export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
+export default function MCQPhase({ mcqs = [], onComplete, mode = "concept" }: MCQPhaseProps) {
   const { width } = Dimensions.get("window");
   const [answeredMCQs, setAnsweredMCQs] = useState<AnsweredMCQ[]>([]);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(0);
