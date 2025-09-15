@@ -59,11 +59,11 @@ interface HYFCardProps {
 interface MCQCardProps {
   mcq: MCQ;
   mcqIndex: number;
-  onAnswer: (selectedIndex: number) => void;
-  selectedAnswer?: number;
-  showFeedback?: boolean;
-  isCorrect?: boolean;
+  shuffledOptions: ReturnType<typeof shuffleOptions>;
+  onAnswer: (selectedDbKey: string, selectedUiLabel: string) => void; // ✅ fix
+  answeredMCQ?: AnsweredMCQ;
 }
+
 
 function shuffleOptions(mcq: MCQ) {
   const dbKeys = Object.keys(mcq.options) as (keyof MCQOption)[];
@@ -270,13 +270,7 @@ function MCQCard({
   onAnswer,
   answeredMCQ,
   mcqIndex,
-}: {
-  mcq: MCQ;
-  shuffledOptions: ReturnType<typeof shuffleOptions>;
-  onAnswer: (selectedDbKey: string, selectedUiLabel: string) => void; // ✅ two args
-  answeredMCQ?: AnsweredMCQ;
-  mcqIndex: number;
-}) {
+}: MCQCardProps) {
   return (
     <MotiView
       from={{ opacity: 0, translateY: 30, scale: 0.95 }}
