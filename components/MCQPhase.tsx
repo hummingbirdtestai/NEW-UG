@@ -3,9 +3,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { View, Text, Pressable, ScrollView, Dimensions } from "react-native";
 import { MotiView } from "moti";
 import ConfettiCannon from "react-native-confetti-cannon";
-import { CheckCircle, XCircle, ChevronRight, Award, Sparkles } from "lucide-react-native";
+import {
+  CheckCircle,
+  XCircle,
+  ChevronRight,
+  Sparkles,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react-native";
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-
 
 interface MCQOption {
   A: string;
@@ -29,14 +35,15 @@ interface MCQ {
 interface MCQPhaseProps {
   mcqs: MCQ[];
   onComplete?: () => void;
-  mode?: "conversation" | "concept";  // 👈 add this
+  mode?: "conversation" | "concept";
+  onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void; // 👈 NEW
 }
 
 interface AnsweredMCQ {
   mcq: MCQ;
   selectedValue: string;
   isCorrect: boolean;
-  correctUiLabel: string; // UI label of correct answer
+  correctUiLabel: string;
   showFeedback: boolean;
 }
 
@@ -63,15 +70,28 @@ function MCQCard({
   shuffledOptions,
   onAnswer,
   answeredMCQ,
+  onBookmarkMCQ,
+  isBookmarked = false,
 }: {
   mcq: MCQ;
   shuffledOptions: ReturnType<typeof shuffleOptions>;
   onAnswer: (selectedValue: string, correctUiLabel: string) => void;
   answeredMCQ?: AnsweredMCQ;
+  onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void;
+  isBookmarked?: boolean;
 }) {
   const correctValue = mcq.options[mcq.correct_answer];
   const correctUiLabel =
     shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
+
+  const [localBookmark, setLocalBookmark] = useState(isBookmarked);
+  useEffect(() => setLocalBookmark(isBookmarked), [isBookmarked]);
+
+  const handleBookmarkToggle = () => {
+    const newValue = !localBookmark;
+    setLocalBookmark(newValue);
+    onBookmarkMCQ?.(mcq.id, newValue);
+  };
 
   return (
     <MotiView
@@ -81,6 +101,25 @@ function MCQCard({
       className="mb-8"
     >
       <View className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 rounded-3xl border border-slate-700/50 shadow-2xl overflow-hidden">
+        {/* Header with Bookmark */}
+        <View className="flex-row items-center justify-between p-4 border-b border-slate-700/40">
+          <Text className="text-slate-300 font-bold">MCQ</Text>
+          <Pressable
+            onPress={handleBookmarkToggle}
+            className={`w-10 h-10 rounded-xl items-center justify-center ${
+              localBookmark
+                ? "bg-gradient-to-br from-amber-500 to-orange-600"
+                : "bg-slate-700/60 border border-slate-600/50"
+            }`}
+          >
+            {localBookmark ? (
+              <BookmarkCheck size={18} color="#fff" />
+            ) : (
+              <Bookmark size={18} color="#94a3b8" />
+            )}
+          </Pressable>
+        </View>
+
         {/* Question Stem */}
         <View className="p-6">
           <View className="bg-slate-900/40 rounded-2xl p-6 border border-slate-600/30 mb-6 shadow-inner">
@@ -97,7 +136,8 @@ function MCQCard({
               const isCorrect = opt.value === correctValue;
               const isDisabled = !!answeredMCQ;
 
-              let optionStyle = "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60";
+              let optionStyle =
+                "bg-slate-800/80 border-slate-600/50 hover:border-teal-500/60";
               if (isDisabled) {
                 if (isSelected) {
                   optionStyle = answeredMCQ?.isCorrect
@@ -111,13 +151,17 @@ function MCQCard({
               return (
                 <Pressable
                   key={`${mcq.id}-${opt.uiLabel}`}
-                  onPress={() => !isDisabled && onAnswer(opt.value, correctUiLabel)}
+                  onPress={() =>
+                    !isDisabled && onAnswer(opt.value, correctUiLabel)
+                  }
                   disabled={isDisabled}
                   className={`${optionStyle} border-2 rounded-2xl p-6 flex-row items-center`}
                 >
                   {/* Fixed A–D label */}
                   <View className="w-12 h-12 rounded-2xl items-center justify-center mr-6 bg-gradient-to-br from-blue-500 to-indigo-600">
-                    <Text className="text-white font-bold text-xl">{opt.uiLabel}</Text>
+                    <Text className="text-white font-bold text-xl">
+                      {opt.uiLabel}
+                    </Text>
                   </View>
 
                   {/* Option value */}
@@ -172,13 +216,20 @@ function FeedbackCard({ mcq, answered }: { mcq: MCQ; answered: AnsweredMCQ }) {
           ✅ {answered.isCorrect ? "Correct!" : "Correct Answer"}
         </Text>
         <MarkdownWithLatex content={mcq.feedback?.correct} />
-        <Text className="text-emerald-200 mt-2">Correct Option: {answered.correctUiLabel}</Text>
+        <Text className="text-emerald-200 mt-2">
+          Correct Option: {answered.correctUiLabel}
+        </Text>
       </View>
     </View>
   );
 }
 
-export default function MCQPhase({ mcqs = [], onComplete, mode = "concept" }: MCQPhaseProps) {
+export default function MCQPhase({
+  mcqs = [],
+  onComplete,
+  mode = "concept",
+  onBookmarkMCQ,
+}: MCQPhaseProps) {
   const { width } = Dimensions.get("window");
   const [answeredMCQs, setAnsweredMCQs] = useState<AnsweredMCQ[]>([]);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(0);
@@ -186,7 +237,6 @@ export default function MCQPhase({ mcqs = [], onComplete, mode = "concept" }: MC
   const [showConfetti, setShowConfetti] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  // 🔐 Pre-shuffle once
   const [shuffledOptionsList] = useState(() => mcqs.map(shuffleOptions));
 
   useEffect(() => {
@@ -195,43 +245,44 @@ export default function MCQPhase({ mcqs = [], onComplete, mode = "concept" }: MC
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-const handleAnswer = (selectedValue: string) => {
-  const currentMCQ = mcqs[currentMCQIndex];
-  const correctDbKey = currentMCQ.correct_answer;
+  const handleAnswer = (selectedValue: string) => {
+    const currentMCQ = mcqs[currentMCQIndex];
+    const correctDbKey = currentMCQ.correct_answer;
 
-  const correctUiLabel =
-    shuffledOptionsList[currentMCQIndex].find((opt) => opt.dbKey === correctDbKey)?.uiLabel || "?";
+    const correctUiLabel =
+      shuffledOptionsList[currentMCQIndex].find(
+        (opt) => opt.dbKey === correctDbKey
+      )?.uiLabel || "?";
 
-  const selectedDbKey = shuffledOptionsList[currentMCQIndex]
-    .find((opt) => opt.value === selectedValue)?.dbKey;
+    const selectedDbKey = shuffledOptionsList[currentMCQIndex].find(
+      (opt) => opt.value === selectedValue
+    )?.dbKey;
 
-  const isCorrect = selectedDbKey === correctDbKey;
+    const isCorrect = selectedDbKey === correctDbKey;
 
-  const newAnswered: AnsweredMCQ = {
-    mcq: currentMCQ,
-    selectedValue,
-    isCorrect,
-    correctUiLabel,
-    showFeedback: true,
-  };
+    const newAnswered: AnsweredMCQ = {
+      mcq: currentMCQ,
+      selectedValue,
+      isCorrect,
+      correctUiLabel,
+      showFeedback: true,
+    };
 
-  setAnsweredMCQs((prev) => {
-    const updated = [...prev];
-    updated[currentMCQIndex] = newAnswered;
-    return updated;
-  });
+    setAnsweredMCQs((prev) => {
+      const updated = [...prev];
+      updated[currentMCQIndex] = newAnswered;
+      return updated;
+    });
 
-  if (isCorrect) {
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 1500);
+    if (isCorrect) {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 1500);
 
-    // 👇 Stop immediately depending on mode
-    if (mode === "conversation" || mode === "concept") {
-      setIsComplete(true);
+      if (mode === "conversation" || mode === "concept") {
+        setIsComplete(true);
+      }
     }
-  }
-};
-
+  };
 
   const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
@@ -241,12 +292,15 @@ const handleAnswer = (selectedValue: string) => {
     }
   };
 
-  const correctCount = answeredMCQs.filter((a) => a?.isCorrect).length;
-
   return (
     <View className="flex-1 bg-slate-900">
       {showConfetti && (
-        <ConfettiCannon count={120} origin={{ x: width / 2, y: 0 }} autoStart fadeOut />
+        <ConfettiCannon
+          count={120}
+          origin={{ x: width / 2, y: 0 }}
+          autoStart
+          fadeOut
+        />
       )}
 
       {/* Header */}
@@ -256,8 +310,12 @@ const handleAnswer = (selectedValue: string) => {
         transition={{ type: "spring", duration: 700 }}
         className="p-6 border-b border-slate-700/50 bg-slate-800/60"
       >
-        <Text className="text-teal-400 text-sm font-bold uppercase">Interactive Questions</Text>
-        <Text className="text-slate-100 text-2xl font-bold mt-1">Test Your Understanding</Text>
+        <Text className="text-teal-400 text-sm font-bold uppercase">
+          Interactive Questions
+        </Text>
+        <Text className="text-slate-100 text-2xl font-bold mt-1">
+          Test Your Understanding
+        </Text>
         <Text className="text-slate-400 text-sm mt-1">
           Question {currentMCQIndex + 1} / {mcqs.length}
         </Text>
@@ -271,73 +329,76 @@ const handleAnswer = (selectedValue: string) => {
               shuffledOptions={shuffledOptionsList[idx]}
               onAnswer={handleAnswer}
               answeredMCQ={ans}
+              onBookmarkMCQ={onBookmarkMCQ}
             />
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
-           {idx === currentMCQIndex && (
-  <>
-    {!ans.isCorrect ? (
-      // ❌ Wrong answer → always show Next Question
-      <Pressable
-        onPress={handleNext}
-        className="bg-red-600 rounded-2xl px-6 py-4 items-center mt-2"
-      >
-        <Text className="text-white font-bold">Next Question</Text>
-      </Pressable>
-    ) : (
-      mode === "concept" && (
-        // ✅ Correct answer → only in concept mode
-        <Pressable
-          onPress={handleNext}
-          className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
-        >
-          <Text className="text-white font-bold">Next Concept</Text>
-        </Pressable>
-      )
-    )}
-  </>
-)}
 
-
+            {idx === currentMCQIndex && (
+              <>
+                {!ans.isCorrect ? (
+                  <Pressable
+                    onPress={handleNext}
+                    className="bg-red-600 rounded-2xl px-6 py-4 items-center mt-2"
+                  >
+                    <Text className="text-white font-bold">Next Question</Text>
+                  </Pressable>
+                ) : (
+                  mode === "concept" && (
+                    <Pressable
+                      onPress={handleNext}
+                      className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+                    >
+                      <Text className="text-white font-bold">Next Concept</Text>
+                    </Pressable>
+                  )
+                )}
+              </>
+            )}
           </View>
         ))}
 
-        {!isComplete && currentMCQIndex < mcqs.length && !answeredMCQs[currentMCQIndex] && (
-          <MCQCard
-            mcq={mcqs[currentMCQIndex]}
-            shuffledOptions={shuffledOptionsList[currentMCQIndex]}
-            onAnswer={handleAnswer}
-          />
-        )}
+        {!isComplete &&
+          currentMCQIndex < mcqs.length &&
+          !answeredMCQs[currentMCQIndex] && (
+            <MCQCard
+              mcq={mcqs[currentMCQIndex]}
+              shuffledOptions={shuffledOptionsList[currentMCQIndex]}
+              onAnswer={handleAnswer}
+              onBookmarkMCQ={onBookmarkMCQ}
+            />
+          )}
 
         {isComplete && (
-  <>
-    {mode === "conversation" ? (
-      // 🔹 Conversation mode → Only show Next HYF button
-      <View className="items-center justify-center mt-12">
-        <Pressable
-          onPress={onComplete}
-          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
-        >
-          <Sparkles size={20} color="#fff" />
-          <Text className="text-white font-bold text-lg ml-2">Next HYF</Text>
-          <ChevronRight size={20} color="#fff" />
-        </Pressable>
-      </View>
-    ) : (
-      // 🔹 Concept mode → Only Next Concept button (no score card)
-      <View className="items-center justify-center mt-12">
-        <Pressable
-          onPress={onComplete}
-          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
-        >
-          <Sparkles size={20} color="#fff" />
-          <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
-          <ChevronRight size={20} color="#fff" />
-        </Pressable>
-      </View>
-    )}
-  </>
-)}
+          <>
+            {mode === "conversation" ? (
+              <View className="items-center justify-center mt-12">
+                <Pressable
+                  onPress={onComplete}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
+                >
+                  <Sparkles size={20} color="#fff" />
+                  <Text className="text-white font-bold text-lg ml-2">
+                    Next HYF
+                  </Text>
+                  <ChevronRight size={20} color="#fff" />
+                </Pressable>
+              </View>
+            ) : (
+              <View className="items-center justify-center mt-12">
+                <Pressable
+                  onPress={onComplete}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
+                >
+                  <Sparkles size={20} color="#fff" />
+                  <Text className="text-white font-bold text-lg ml-2">
+                    Next Concept
+                  </Text>
+                  <ChevronRight size={20} color="#fff" />
+                </Pressable>
+              </View>
+            )}
+          </>
+        )}
       </ScrollView>
     </View>
   );
