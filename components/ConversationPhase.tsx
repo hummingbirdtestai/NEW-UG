@@ -21,8 +21,9 @@ interface MCQ {
   options: MCQOption;
   feedback: MCQFeedback;
   learning_gap?: string;
-  correct_answer: keyof MCQOption;
+  correct_answer: keyof MCQOption | null;  // ✅ allow null
 }
+
 
 interface AnsweredMCQ {
   mcq: MCQ;
@@ -397,19 +398,23 @@ export default function ConversationPhase({
   onBookmark,
   bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
-  const normalizedHyfs: HYF[] = hyfs.map((h: any) => ({
-  text: h.text ?? h.HYF ?? "",
-  mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any) => ({
-  id: m.id ?? crypto.randomUUID(),
-  stem: m.stem ?? m.question ?? "",   // normalize
-  options: m.options,
-  feedback: m.feedback,
-  learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
-  correct_answer: (m.correct_answer ?? "A").trim().toUpperCase() as keyof MCQOption,
+mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any) => {
+  const rawKey = m.correct_answer?.toString().trim().toUpperCase();
+  const validKeys: (keyof MCQOption)[] = ["A", "B", "C", "D"];
+  const finalKey = validKeys.includes(rawKey as keyof MCQOption)
+    ? (rawKey as keyof MCQOption)
+    : null;
 
-}))
+  return {
+    id: m.id ?? crypto.randomUUID(),
+    stem: m.stem ?? m.question ?? "",
+    options: m.options,
+    feedback: m.feedback,
+    learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
+    correct_answer: finalKey,   // ✅ null if invalid/missing
+  };
+}),
 
-}));
 
   const [currentHYFIndex, setCurrentHYFIndex] = useState(0);
   const [currentMCQIndex, setCurrentMCQIndex] = useState(-1);
@@ -458,7 +463,12 @@ const handleGotIt = () => {
 
 const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
-  const correctDbKey = currentMCQ.correct_answer.trim().toUpperCase();
+  const correctDbKey = currentMCQ.correct_answer?.toString().trim().toUpperCase() as keyof MCQOption | undefined;
+if (!correctDbKey) {
+  console.warn("⚠️ No valid correct_answer found for MCQ:", currentMCQ.id);
+  return;
+}
+
 
   // ✅ Resolve values from DB
   const correctValueFromDB = currentMCQ.options[correctDbKey]?.trim();
