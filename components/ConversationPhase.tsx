@@ -3,7 +3,6 @@ import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
 import { MessageCircle, User, GraduationCap, Lightbulb, BookOpen, Bookmark, BookmarkCheck, ChevronRight, ChevronDown, ChevronUp, CircleCheck as CheckCircle, Circle as XCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
-import ConfettiCannon from 'react-native-confetti-cannon';
 import MCQPhase from "@/components/MCQPhase";
 
 
@@ -25,19 +24,6 @@ interface MCQ {
   learning_gap?: string;
   correct_answer: keyof MCQOption | null;  // ✅ allow null
 }
-
-
-interface AnsweredMCQ {
-  mcq: MCQ;
-  selectedValue: string;     // dbKey chosen
-  isCorrect: boolean;
-  correctUiLabel: string;    // Shuffled UI label
-  correctValue: string;      // Correct option text
-  showFeedback: boolean;
-}
-
-
-
 interface HYF {
   text: string;
   mcqs: MCQ[];
