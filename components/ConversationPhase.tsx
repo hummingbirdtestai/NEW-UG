@@ -313,7 +313,9 @@ function MCQCard({
               optionStyle = answeredMCQ?.isCorrect
                 ? "bg-emerald-500/20 border-emerald-500/60"
                 : "bg-red-500/20 border-red-500/60";
-            } else if (answeredMCQ && opt.dbKey === mcq.correct_answer && !answeredMCQ.isCorrect) {
+            } else if (answeredMCQ &&
+  opt.value === answeredMCQ.correctValue &&  // ✅ highlight correct value
+  !answeredMCQ.isCorrect) {
               optionStyle = "bg-emerald-500/20 border-emerald-500/60";
             }
           }
