@@ -692,38 +692,41 @@ const isCorrect = answeredMCQ?.isCorrect ?? false;
       )}
 
       {/* Floating Action Elements */}
-      <View className="absolute top-32 right-8 pointer-events-none">
-        {[...Array(5)].map((_, i) => (
-          <MotiView
-            key={i}
-            from={{ 
-              opacity: 0, 
-              translateY: Math.random() * 80,
-              translateX: Math.random() * 80,
-              scale: 0
-            }}
-            animate={{ 
-              opacity: [0, 0.4, 0],
-              translateY: Math.random() * -150,
-              translateX: Math.random() * 40 - 20,
-              scale: [0, 1, 0]
-            }}
-            transition={{
-              loop: true,
-              type: 'timing',
-              duration: 5000,
-              delay: i * 1000,
-            }}
-            className="absolute"
-            style={{
-              left: Math.random() * 100,
-              top: Math.random() * 150,
-            }}
-          >
-            <View className="w-2 h-2 bg-cyan-400 rounded-full shadow-lg" />
-          </MotiView>
-        ))}
-      </View>
+      {/* Floating Action Elements */}
+<View className="absolute top-32 right-8 pointer-events-none">
+  {[...Array(5)].map((_, i) => (
+    <MotiView
+      key={i}
+      pointerEvents="none"   // 👈 add this line
+      from={{ 
+        opacity: 0, 
+        translateY: Math.random() * 80,
+        translateX: Math.random() * 80,
+        scale: 0
+      }}
+      animate={{ 
+        opacity: [0, 0.4, 0],
+        translateY: Math.random() * -150,
+        translateX: Math.random() * 40 - 20,
+        scale: [0, 1, 0]
+      }}
+      transition={{
+        loop: true,
+        type: 'timing',
+        duration: 5000,
+        delay: i * 1000,
+      }}
+      className="absolute"
+      style={{
+        left: Math.random() * 100,
+        top: Math.random() * 150,
+      }}
+    >
+      <View className="w-2 h-2 bg-cyan-400 rounded-full shadow-lg" />
+    </MotiView>
+  ))}
+</View>
+
     </View>
   );
 }
