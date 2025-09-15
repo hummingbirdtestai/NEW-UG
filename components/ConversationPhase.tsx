@@ -276,10 +276,6 @@ function MCQCard({
   answeredMCQ?: AnsweredMCQ;
   mcqIndex: number;
 }) {
-  const correctValue = mcq.options[mcq.correct_answer];
-  const correctUiLabel =
-    shuffledOptions.find((opt) => opt.dbKey === mcq.correct_answer)?.uiLabel || "?";
-
   return (
     <MotiView
       from={{ opacity: 0, translateY: 30, scale: 0.95 }}
@@ -309,7 +305,6 @@ function MCQCard({
       <View className="space-y-3 mb-4">
         {shuffledOptions.map((opt) => {
           const isSelected = answeredMCQ?.selectedValue === opt.dbKey;
-          const isCorrect = opt.value === correctValue;
           const isDisabled = !!answeredMCQ;
 
           let optionStyle = "bg-slate-800/80 border-slate-600/50";
@@ -318,7 +313,7 @@ function MCQCard({
               optionStyle = answeredMCQ?.isCorrect
                 ? "bg-emerald-500/20 border-emerald-500/60"
                 : "bg-red-500/20 border-red-500/60";
-            } else if (isCorrect && !answeredMCQ?.isCorrect) {
+            } else if (answeredMCQ && opt.dbKey === mcq.correct_answer && !answeredMCQ.isCorrect) {
               optionStyle = "bg-emerald-500/20 border-emerald-500/60";
             }
           }
@@ -326,7 +321,7 @@ function MCQCard({
           return (
             <Pressable
               key={`${mcq.id}-${opt.uiLabel}`}
-              onPress={() => !isDisabled && onAnswer(opt.dbKey, correctUiLabel)}
+              onPress={() => !isDisabled && onAnswer(opt.dbKey, opt.uiLabel)}
               disabled={isDisabled}
               className={`${optionStyle} border-2 rounded-xl p-4 flex-row items-center`}
             >
@@ -389,6 +384,7 @@ function MCQCard({
     </MotiView>
   );
 }
+
 
 
 export default function ConversationPhase({
