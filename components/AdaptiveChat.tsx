@@ -140,7 +140,8 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
   const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     if (!user) return;
 
-    const objectUuid = concept.concept_json_unicode?.uuid;
+    const objectUuid = concept.concept_json_unicode?.uuid || concept.vertical_id;
+
     if (!objectUuid) {
       console.error("❌ No concept UUID found");
       return;
