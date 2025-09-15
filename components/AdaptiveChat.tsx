@@ -120,7 +120,38 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
     if (preloadNext && idx + 1 < totalConcepts) preloadConcept(idx + 1);
   };
 
-  // preload next concept
+  // ✅ Toggle bookmark in student_signals
+  const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
+    if (!user) return;
+
+    const objectUuid = concept.concept_json_unicode?.uuid;
+    if (!objectUuid) {
+      console.error("❌ No concept UUID found");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("student_signals")
+      .upsert(
+        {
+          student_id: user.id,
+          object_type: "concept",
+          object_uuid: objectUuid,
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+
+    if (error) {
+      console.error("❌ Error updating bookmark:", error);
+    } else {
+      console.log(`✅ Bookmark set to ${newValue} for concept ${objectUuid}`);
+      setCurrentConcept((prev: any) =>
+        prev ? { ...prev, isBookmarked: newValue } : prev
+      );
+    }
+  };
+
 // preload next concept
 const preloadConcept = async (idx: number) => {
   const { data, error } = await supabase
