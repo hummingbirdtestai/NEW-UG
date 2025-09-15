@@ -272,7 +272,7 @@ function MCQCard({
 }: {
   mcq: MCQ;
   shuffledOptions: ReturnType<typeof shuffleOptions>;
-  onAnswer: (selectedValue: string, correctUiLabel: string) => void;
+  onAnswer: (selectedDbKey: string, selectedUiLabel: string) => void; // ✅ two args
   answeredMCQ?: AnsweredMCQ;
   mcqIndex: number;
 }) {
@@ -452,14 +452,13 @@ const handleGotIt = () => {
   }
 };
 
-const handleMCQAnswer = (selectedDbKey: string) => {
+const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer;
 
-  // check correctness
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // ✅ always recompute correct option from shuffled list
+  // Always recompute correct option from shuffled
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
   const correctOption = currentShuffle.find(opt => opt.dbKey === correctDbKey);
 
@@ -470,8 +469,8 @@ const handleMCQAnswer = (selectedDbKey: string) => {
     mcq: currentMCQ,
     selectedValue: selectedDbKey,
     isCorrect,
-    correctUiLabel,   // ✅ always label (A/B/C/D) after shuffle
-    correctValue,     // ✅ actual option text
+    correctUiLabel,   // proper UI label (A/B/C/D)
+    correctValue,     // option text
     showFeedback: true,
   });
 
@@ -480,7 +479,6 @@ const handleMCQAnswer = (selectedDbKey: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
-
 
 
 
