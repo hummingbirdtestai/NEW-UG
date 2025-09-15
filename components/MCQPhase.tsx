@@ -338,10 +338,6 @@ const handleAnswer = (selectedValue: string) => {
     )}
   </>
 )}
-
-  </>
-)}
-
       </ScrollView>
     </View>
   );
