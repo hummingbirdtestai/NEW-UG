@@ -29,7 +29,9 @@ interface MCQ {
 interface MCQPhaseProps {
   mcqs: MCQ[];
   onComplete?: () => void;
+  mode?: "conversation" | "concept";  // 👈 add this
 }
+
 interface AnsweredMCQ {
   mcq: MCQ;
   selectedValue: string;
@@ -193,24 +195,18 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-  const handleAnswer = (selectedValue: string) => {
+const handleAnswer = (selectedValue: string) => {
   const currentMCQ = mcqs[currentMCQIndex];
-
-  // 1. Correct dbKey (from MCQ definition)
   const correctDbKey = currentMCQ.correct_answer;
 
-  // 2. Correct option’s UI label (A/B/C/D)
   const correctUiLabel =
     shuffledOptionsList[currentMCQIndex].find((opt) => opt.dbKey === correctDbKey)?.uiLabel || "?";
 
-  // 3. Selected dbKey (find which option was clicked)
   const selectedDbKey = shuffledOptionsList[currentMCQIndex]
     .find((opt) => opt.value === selectedValue)?.dbKey;
 
-  // 4. Correctness check
   const isCorrect = selectedDbKey === correctDbKey;
 
-  // 5. Store result
   const newAnswered: AnsweredMCQ = {
     mcq: currentMCQ,
     selectedValue,
@@ -228,6 +224,11 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
   if (isCorrect) {
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 1500);
+
+    // 👇 Stop immediately depending on mode
+    if (mode === "conversation" || mode === "concept") {
+      setIsComplete(true);
+    }
   }
 };
 
@@ -305,7 +306,10 @@ export default function MCQPhase({ mcqs = [], onComplete }: MCQPhaseProps) {
               className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 mt-6 flex-row items-center"
             >
               <Sparkles size={20} color="#fff" />
-              <Text className="text-white font-bold text-lg ml-2">Next Concept</Text>
+              <Text className="text-white font-bold text-lg ml-2">
+  {mode === "conversation" ? "Next HYF" : "Next Concept"}
+</Text>
+
               <ChevronRight size={20} color="#fff" />
             </Pressable>
           </View>
