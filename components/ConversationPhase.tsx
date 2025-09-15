@@ -459,25 +459,25 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
   const currentMCQ = currentHYF.mcqs[currentMCQIndex];
   const correctDbKey = currentMCQ.correct_answer.trim().toUpperCase();
 
-  // ✅ Resolve correct value from DB key
-  const correctValueFromDB = currentMCQ.options[correctDbKey];
+  // ✅ Resolve values (trimmed for safety)
+  const correctValueFromDB = currentMCQ.options[correctDbKey]?.trim();
+  const selectedValueFromDB = currentMCQ.options[selectedDbKey]?.trim();
 
-  // ✅ Resolve user’s chosen value from dbKey
-  const selectedValueFromDB = currentMCQ.options[selectedDbKey];
-
-  // ✅ Check correctness by VALUE comparison
+  // ✅ Compare by value
   const isCorrect = selectedValueFromDB === correctValueFromDB;
 
-  // ✅ Find correct option in shuffled array (to get its UI label)
+  // ✅ Find correct option in shuffled array (by value)
   const currentShuffle = shuffledOptionsList[currentMCQIndex];
-  const correctOption = currentShuffle.find(opt => opt.value === correctValueFromDB);
+  const correctOption = currentShuffle.find(
+    opt => opt.value.trim() === correctValueFromDB
+  );
 
   setAnsweredMCQ({
     mcq: currentMCQ,
-    selectedValue: selectedValueFromDB,              // store chosen VALUE
+    selectedValue: selectedValueFromDB, // chosen VALUE
     isCorrect,
-    correctUiLabel: correctOption?.uiLabel || correctDbKey, 
-    correctValue: correctValueFromDB,                // always from DB
+    correctUiLabel: correctOption?.uiLabel || correctDbKey, // fallback to dbKey only if needed
+    correctValue: correctValueFromDB, // always DB value
     showFeedback: true,
   });
 
@@ -486,6 +486,7 @@ const handleMCQAnswer = (selectedDbKey: string, selectedUiLabel: string) => {
     setTimeout(() => setShowConfetti(false), 2000);
   }
 };
+
 
 
 const isCorrect = answeredMCQ?.isCorrect ?? false;
