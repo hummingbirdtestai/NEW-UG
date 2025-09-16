@@ -25,9 +25,11 @@ interface MCQ {
   correct_answer: keyof MCQOption | null;  // ✅ allow null
 }
 interface HYF {
+  uuid: string;   // 👈 add this
   text: string;
   mcqs: MCQ[];
 }
+
 
 interface ConversationPhaseProps {
   hyfs?: HYF[];
