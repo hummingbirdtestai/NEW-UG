@@ -32,18 +32,12 @@ interface HYF {
 
 
 interface ConversationPhaseProps {
-  hyfs?: HYF[];
-  onComplete?: () => void;
-  onBookmark?: (hyfIndex: number, isBookmarked: boolean) => void;
-  bookmarkedHYFs?: Set<number>;
+  onBookmark?: (hyfUuid: string, isBookmarked: boolean) => void;
 }
 
 interface HYFCardProps {
   hyf: HYF;
-  index: number;
-  onGotIt: () => void;
-  onBookmark?: (index: number, isBookmarked: boolean) => void;
-  isBookmarked?: boolean;
+  onBookmark?: (uuid: string, isBookmarked: boolean) => void;
 }
 
 
@@ -54,7 +48,7 @@ function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFC
   const handleBookmarkToggle = () => {
     const newValue = !localBookmark;
     setLocalBookmark(newValue);
-    onBookmark?.(index, newValue);
+    onBookmark?.(hyf.uuid, newValue);   // 👈 use real uuid
   };
 
 
