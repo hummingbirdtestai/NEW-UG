@@ -339,26 +339,39 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
 />
 
             )}
-            {phase === 1 && (
-<ConversationPhase
-  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
-    uuid: hyf.uuid,    // 👈 use real HYF uuid from DB
-    text: hyf.HYF,
-    mcqs: (hyf.MCQs || []).map((mcq: any) => ({
-      id: mcq.id,      // 👈 use real MCQ id from DB
-      stem: mcq.stem,
-      options: mcq.options,
-      feedback: {
-        correct: mcq.feedback?.correct ?? "",
-        wrong: mcq.feedback?.wrong ?? "",
-      },
-      learning_gap: mcq.learning_gap,
-      correct_answer: mcq.correct_answer,
-    })),
-  }))}
-
-
+           {phase === 1 && (
+  <ConversationPhase
+    hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
+      uuid: hyf.uuid,   // ✅ real HYF uuid from DB
+      text: hyf.HYF,
+      mcqs: (hyf.MCQs || []).map((mcq: any) => ({
+        id: mcq.id,     // ✅ real MCQ id from DB
+        stem: mcq.stem,
+        options: mcq.options,
+        feedback: {
+          correct: mcq.feedback?.correct ?? "",
+          wrong: mcq.feedback?.wrong ?? "",
+        },
+        learning_gap: mcq.learning_gap,
+        correct_answer: mcq.correct_answer,
+      })),
+    }))}
+    onComplete={handleNextPhase}
+    onBookmark={async (hyfUuid, newValue) => {
+      if (!user) return;
+      await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "hyf",
+          object_uuid: hyfUuid,  // ✅ real uuid
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+    }}
+  />
 )}
+
 
 
             {phase === 2 && (
