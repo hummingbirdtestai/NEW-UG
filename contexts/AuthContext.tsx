@@ -24,16 +24,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const init = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      if (session) {
-        const { data: profile } = await supabase
-          .from("users")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
+        if (session) {
+          const { data: profile } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", session.user.id)
+            .single();
 
-        setSession({ raw: session, profile });
+          setSession({ raw: session, profile });
+        }
+      } catch (error) {
+        console.error('❌ Error initializing auth session:', error);
+        // Continue with null session on error
       }
       setLoading(false);
     };
@@ -42,15 +47,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const { data: subscription } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-        if (session) {
-          const { data: profile } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", session.user.id)
-            .maybeSingle();
+        try {
+          if (session) {
+            const { data: profile } = await supabase
+              .from("users")
+              .select("*")
+              .eq("id", session.user.id)
+              .maybeSingle();
 
-          setSession({ raw: session, profile });
-        } else {
+            setSession({ raw: session, profile });
+          } else {
+            setSession(null);
+          }
+        } catch (error) {
+          console.error('❌ Error in auth state change:', error);
           setSession(null);
         }
       }

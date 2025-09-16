@@ -446,26 +446,25 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
               />
             )}
             {phase === 4 && (
-              key={currentIdx}
-  mcqs={mcqs}
-  mode="concept"
-  onComplete={handleCompleteConcept}
-  onBookmark={async (hyfUuid, newValue) =>  {
-  if (!user) return;
-  await supabase.from("student_signals").upsert(
-    {
-      student_id: user.id,
-      object_type: "hyf",
-      object_uuid: hyfUuid,   // 👈 use real uuid
-      bookmark: newValue,
-    },
-    { onConflict: "student_id,object_type,object_uuid" }
-  );
-}}
-
-/>
-
-
+              <MCQPhase
+              <MCQPhase
+                key={currentIdx}
+                mcqs={mcqs}
+                mode="concept"
+                onComplete={handleCompleteConcept}
+                onBookmarkMCQ={async (mcqId, newValue) => {
+                  if (!user) return;
+                  await supabase.from("student_signals").upsert(
+                    {
+                      student_id: user.id,
+                      object_type: "hyf_mcq",
+                      object_uuid: mcqId,
+                      bookmark: newValue,
+                    },
+                    { onConflict: "student_id,object_type,object_uuid" }
+                  );
+                }}
+              />
             )}
           </>
         ) : (
