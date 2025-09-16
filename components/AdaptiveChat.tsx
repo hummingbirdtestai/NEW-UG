@@ -114,17 +114,23 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
         let concept = data[0];
 
     // ✅ Check if this concept is already bookmarked by this user
-    if (user && concept.concept_json_unicode?.uuid) {
+    // ✅ Prepare MCQs with bookmark state
+if (user && Array.isArray(concept.mcq_1_6_unicode)) {
+  for (let mcq of concept.mcq_1_6_unicode) {
+    if (mcq?.id) {
       const { data: signal } = await supabase
         .from("student_signals")
         .select("bookmark")
         .eq("student_id", user.id)
-        .eq("object_type", "concept")
-        .eq("object_uuid", concept.concept_json_unicode.uuid)
+        .eq("object_type", "hyf_mcq")
+        .eq("object_uuid", mcq.id)
         .maybeSingle();
 
-      concept.isBookmarked = signal?.bookmark ?? false;
+      mcq.isBookmarked = signal?.bookmark ?? false;
     }
+  }
+}
+
 
     setCurrentConcept(concept);
 
