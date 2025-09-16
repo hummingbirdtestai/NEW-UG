@@ -391,9 +391,13 @@ const handleGotIt = () => {
   hyf={currentHYF}
   index={currentHYFIndex}
   onGotIt={handleGotIt}
-  onBookmark={onBookmark}
-  isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
+  onBookmark={(uuid, newValue) => {
+    // Save to DB
+    onBookmark?.(uuid, newValue);
+  }}
+  isBookmarked={bookmarkedHYFs.has(currentHYF.uuid)} // use uuid not index
 />
+
 
 )}
 
