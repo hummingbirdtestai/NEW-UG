@@ -388,12 +388,13 @@ const handleGotIt = () => {
             {/* Current HYF */}
 {!showMCQs && (
   <HYFCard
-    hyf={currentHYF}
-    index={currentHYFIndex}
-    onGotIt={handleGotIt}
-    onBookmark={onBookmark}
-    isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
-  />
+  hyf={currentHYF}
+  index={currentHYFIndex}
+  onGotIt={handleGotIt}
+  onBookmark={onBookmark}
+  isBookmarked={bookmarkedHYFs.has(currentHYFIndex)}
+/>
+
 )}
 
 
