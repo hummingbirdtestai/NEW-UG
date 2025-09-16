@@ -341,11 +341,11 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             )}
             {phase === 1 && (
 <ConversationPhase
-  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, idx: number) => ({
-    uuid: `${currentConcept.concept_json_unicode?.uuid}-hyf-${idx}`,   // 👈 unique id
+  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
+    uuid: hyf.uuid,    // 👈 use real HYF uuid from DB
     text: hyf.HYF,
     mcqs: (hyf.MCQs || []).map((mcq: any) => ({
-      id: mcq.id ?? crypto.randomUUID(),
+      id: mcq.id,      // 👈 use real MCQ id from DB
       stem: mcq.stem,
       options: mcq.options,
       feedback: {
@@ -356,21 +356,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
       correct_answer: mcq.correct_answer,
     })),
   }))}
-  onComplete={handleNextPhase}
-  onBookmark={async (hyfIndex, newValue) => {
-    if (!user) return;
-    const objectUuid = `${currentConcept.concept_json_unicode?.uuid}-hyf-${hyfIndex}`;
-    await supabase.from("student_signals").upsert(
-      {
-        student_id: user.id,
-        object_type: "hyf",
-        object_uuid: objectUuid,
-        bookmark: newValue,
-      },
-      { onConflict: "student_id,object_type,object_uuid" }
-    );
-  }}
-/>
 
 
 )}
