@@ -100,8 +100,6 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
       .select(
   "vertical_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
 )
-
-
       .eq("chapter_id", chapterId)
       .order("react_order", { ascending: true })
       .range(idx, idx);
@@ -199,8 +197,6 @@ const preloadConcept = async (idx: number) => {
   }
 };
 
-
-
   const handleNextPhase = () => {
     if (phase === 0) setPhase(1);
     else if (phase === 1) setPhase(2);
@@ -264,7 +260,6 @@ const preloadConcept = async (idx: number) => {
 
   // ✅ Prepare MCQs
 const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
-
 
   // ✅ Prepare Q&A data
   const qaData = currentConcept.flash_cards_unicode
@@ -337,7 +332,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     handleBookmarkToggle(newValue, currentConcept)
   }
 />
-
             )}
            {phase === 1 && (
   <ConversationPhase
@@ -371,8 +365,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     }}
   />
 )}
-
-
 
             {phase === 2 && (
               <View className="flex-1 bg-slate-900">
@@ -446,7 +438,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
               />
             )}
             {phase === 4 && (
-              <MCQPhase
               <MCQPhase
                 key={currentIdx}
                 mcqs={mcqs}
