@@ -446,22 +446,48 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             {phase === 4 && (
               <MCQPhase
   key={currentIdx}
-  mcqs={mcqs}
+  mcqs={mcqs.map((mcq: any) => ({
+    ...mcq,
+    isBookmarked: mcq.isBookmarked ?? false, // ✅ preload bookmark state
+  }))}
   mode="concept"
   onComplete={handleCompleteConcept}
   onBookmarkMCQ={async (mcqId, newValue) => {
     if (!user) return;
-    await supabase.from("student_signals").upsert(
-      {
-        student_id: user.id,
-        object_type: "hyf_mcq",
-        object_uuid: mcqId,
-        bookmark: newValue,
-      },
-      { onConflict: "student_id,object_type,object_uuid" }
-    );
+
+    try {
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "hyf_mcq",   // ✅ type for MCQ
+          object_uuid: mcqId,       // ✅ MCQ id
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+
+      if (error) {
+        console.error("❌ Failed to update MCQ bookmark:", error);
+      } else {
+        console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
+        // also update local state so UI reflects immediately
+        setCurrentConcept((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
+                  m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+                ),
+              }
+            : prev
+        );
+      }
+    } catch (err) {
+      console.error("❌ Exception updating MCQ bookmark:", err);
+    }
   }}
 />
+
 
             )}
           </>
