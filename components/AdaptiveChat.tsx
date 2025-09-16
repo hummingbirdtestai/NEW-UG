@@ -446,12 +446,11 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
               />
             )}
             {phase === 4 && (
-              <MCQPhase
-  key={currentIdx}
+              key={currentIdx}
   mcqs={mcqs}
   mode="concept"
   onComplete={handleCompleteConcept}
- onBookmark={async (hyfUuid, newValue) => {
+  onBookmark={async (hyfUuid, newValue) =>  {
   if (!user) return;
   await supabase.from("student_signals").upsert(
     {
