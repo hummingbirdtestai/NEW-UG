@@ -152,43 +152,43 @@ const fetchConcept = async (
 };
 
 
-  // ✅ Toggle bookmark in student_signals
-    const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
-    if (!user) return;
+const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
+  if (!user) return;
 
-    const objectUuid = concept.concept_json_unicode?.uuid;
-    if (!objectUuid) {
-      console.error("❌ Concept missing uuid — cannot bookmark");
-      return;
-    }
+  const objectUuid = concept.concept_json_unicode?.uuid;
+  if (!objectUuid) {
+    console.error("❌ Concept missing uuid — cannot bookmark");
+    return;
+  }
 
-    try {
-      const { data, error } = await supabase
-        .from("student_signals")
-        .insert({
+  try {
+    const { data, error } = await supabase
+      .from("student_signals")
+      .upsert(
+        {
           student_id: user.id,
           object_type: "concept",
           object_uuid: objectUuid,
           bookmark: newValue,
           updated_at: new Date().toISOString(),
-        })
-        .onConflict("student_id,object_type,object_uuid")
-        .merge()
-        .select();
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      )
+      .select();
 
-      if (error) {
-        console.error("❌ Error updating bookmark:", error);
-      } else {
-        console.log("✅ Bookmark updated:", data);
-        // Update local state so UI reflects immediately
-        setCurrentConcept((prev: any) =>
-          prev ? { ...prev, isBookmarked: newValue } : prev
-        );
-      }
-    } catch (err) {
-      console.error("❌ Exception updating bookmark:", err);
+    if (error) {
+      console.error("❌ Error updating bookmark:", error);
+    } else {
+      console.log("✅ Bookmark updated:", data);
+      setCurrentConcept((prev: any) =>
+        prev ? { ...prev, isBookmarked: newValue } : prev
+      );
     }
-  };
+  } catch (err) {
+    console.error("❌ Exception updating bookmark:", err);
+  }
+};
+
 
   // preload next concept
   const preloadConcept = async (idx: number) => {
