@@ -451,6 +451,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     isBookmarked: mcq.isBookmarked ?? false, // ✅ preload bookmark state
   }))}
   mode="concept"
+   stopOnFirstCorrect             
   onComplete={handleCompleteConcept}
   onBookmarkMCQ={async (mcqId, newValue) => {
     if (!user) return;
