@@ -430,14 +430,14 @@ const handleGotIt = () => {
   } else {
     console.log(`✅ Bookmark set to ${newValue} for MCQ ${mcqId}`);
 
-+   // update local state so UI reacts immediately
-+   setShowMCQs((prev) => {
-+     const updated = { ...currentHYF };
-+     updated.mcqs = updated.mcqs.map((m) =>
-+       m.id === mcqId ? { ...m, isBookmarked: newValue } : m
-+     );
-+     return prev; // state doesn’t hold mcqs directly, but ensures UI re-render
-+   });
+    // update local state so UI reacts immediately
+    setShowMCQs((prev) => {
+      const updated = { ...currentHYF };
+      updated.mcqs = updated.mcqs.map((m) =>
+        m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+      );
+      return prev; // state doesn't hold mcqs directly, but ensures UI re-render
+    });
   }
 }}
 
