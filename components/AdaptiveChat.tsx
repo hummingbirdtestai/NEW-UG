@@ -98,8 +98,8 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
     const { data, error } = await supabase
       .from("concepts_vertical")
       .select(
-    "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order")
-
+        "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
+      )
       .eq("chapter_id", chapterId)
       .order("react_order", { ascending: true })
       .range(idx, idx);
@@ -111,26 +111,25 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
       setFetchError(true);
       return;
     }
-        let concept = data[0];
+    let concept = data[0];
 
     // ✅ Check if this concept is already bookmarked by this user
     // ✅ Prepare MCQs with bookmark state
-if (user && Array.isArray(concept.mcq_1_6_unicode)) {
-  for (let mcq of concept.mcq_1_6_unicode) {
-    if (mcq?.id) {
-      const { data: signal } = await supabase
-        .from("student_signals")
-        .select("bookmark")
-        .eq("student_id", user.id)
-        .eq("object_type", "hyf_mcq")
-        .eq("object_uuid", mcq.id)
-        .maybeSingle();
+    if (user && Array.isArray(concept.mcq_1_6_unicode)) {
+      for (let mcq of concept.mcq_1_6_unicode) {
+        if (mcq?.id) {
+          const { data: signal } = await supabase
+            .from("student_signals")
+            .select("bookmark")
+            .eq("student_id", user.id)
+            .eq("object_type", "hyf_mcq")
+            .eq("object_uuid", mcq.id)
+            .maybeSingle();
 
-      mcq.isBookmarked = signal?.bookmark ?? false;
+          mcq.isBookmarked = signal?.bookmark ?? false;
+        }
+      }
     }
-  }
-}
-
 
     setCurrentConcept(concept);
 
@@ -141,69 +140,68 @@ if (user && Array.isArray(concept.mcq_1_6_unicode)) {
   };
 
   // ✅ Toggle bookmark in student_signals
- const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
-  if (!user) return;
+  const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
+    if (!user) return;
 
-  const objectUuid = concept.concept_json_unicode?.uuid;
-  if (!objectUuid) {
-    console.error("❌ Concept missing uuid — cannot bookmark");
-    return;
-  }
+    const objectUuid = concept.concept_json_unicode?.uuid;
+    if (!objectUuid) {
+      console.error("❌ Concept missing uuid — cannot bookmark");
+      return;
+    }
 
-  const { data, error } = await supabase
-    .from("student_signals")
-    .upsert(
-      {
-        student_id: user.id,
-        object_type: "concept",
-        object_uuid: objectUuid,
-        bookmark: newValue, // ✅ always send true/false
-      },
-      { onConflict: "student_id,object_type,object_uuid" }
-    )
-    .select();
+    const { data, error } = await supabase
+      .from("student_signals")
+      .upsert(
+        {
+          student_id: user.id,
+          object_type: "concept",
+          object_uuid: objectUuid,
+          bookmark: newValue, // ✅ always send true/false
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      )
+      .select();
 
-  if (error) {
-    console.error("❌ Error updating bookmark:", error);
-  } else {
-    console.log("✅ Bookmark upsert result:", data);
-    setCurrentConcept((prev: any) =>
-      prev ? { ...prev, isBookmarked: newValue } : prev
-    );
-  }
-};
+    if (error) {
+      console.error("❌ Error updating bookmark:", error);
+    } else {
+      console.log("✅ Bookmark upsert result:", data);
+      setCurrentConcept((prev: any) =>
+        prev ? { ...prev, isBookmarked: newValue } : prev
+      );
+    }
+  };
 
-// preload next concept
-const preloadConcept = async (idx: number) => {
-  const { data, error } = await supabase
-    .from("concepts_vertical")
-    .select(
-  "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order")
+  // preload next concept
+  const preloadConcept = async (idx: number) => {
+    const { data, error } = await supabase
+      .from("concepts_vertical")
+      .select(
+        "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
+      )
+      .eq("chapter_id", chapterId)
+      .order("react_order", { ascending: true })
+      .range(idx, idx);
 
-    .eq("chapter_id", chapterId)
-    .order("react_order", { ascending: true })
-    .range(idx, idx);
+    if (!error && data && data[0]) {
+      let concept = data[0];
 
-  if (!error && data && data[0]) {
-   let concept = data[0];
+      // ✅ Load concept bookmark state
+      if (user && concept.concept_json_unicode?.uuid) {
+        const { data: signal } = await supabase
+          .from("student_signals")
+          .select("bookmark")
+          .eq("student_id", user.id)
+          .eq("object_type", "concept")
+          .eq("object_uuid", concept.concept_json_unicode.uuid)
+          .maybeSingle();
 
-// ✅ Load concept bookmark state
-if (user && concept.concept_json_unicode?.uuid) {
-  const { data: signal } = await supabase
-    .from("student_signals")
-    .select("bookmark")
-    .eq("student_id", user.id)
-    .eq("object_type", "concept")
-    .eq("object_uuid", concept.concept_json_unicode.uuid)
-    .maybeSingle();
+        concept.isBookmarked = signal?.bookmark ?? false;
+      }
 
-  concept.isBookmarked = signal?.bookmark ?? false;
-}
-
-
-    setNextConcept(concept);
-  }
-};
+      setNextConcept(concept);
+    }
+  };
 
   const handleNextPhase = () => {
     if (phase === 0) setPhase(1);
@@ -267,7 +265,7 @@ if (user && concept.concept_json_unicode?.uuid) {
     );
 
   // ✅ Prepare MCQs
-const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
+  const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
 
   // ✅ Prepare Q&A data
   const qaData = currentConcept.flash_cards_unicode
@@ -330,49 +328,49 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
           <>
             {phase === 0 && (
               <ConceptPhase
-  concept={currentConcept.concept_json_unicode?.Concept}
-  explanation={currentConcept.concept_json_unicode?.Explanation}
-  onNext={handleNextPhase}
-  current={currentIdx + 1}
-  total={totalConcepts}
+                concept={currentConcept.concept_json_unicode?.Concept}
+                explanation={currentConcept.concept_json_unicode?.Explanation}
+                onNext={handleNextPhase}
+                current={currentIdx + 1}
+                total={totalConcepts}
+              />
             )}
-           {phase === 1 && (
-  <ConversationPhase
-   hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
-  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,
-  text: hyf.HYF,
-  subject_id: currentConcept.subject_id,      // ✅ add
-  chapter_id: currentConcept.chapter_id,      // ✅ add
-  topic_id: currentConcept.topic_id, // ✅ add
-  vertical_id: currentConcept.vertical_id,    // ✅ add
-  mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
-    id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,
-    stem: mcq.stem,
-    options: mcq.options,
-    feedback: {
-      correct: mcq.feedback?.correct ?? "",
-      wrong: mcq.feedback?.wrong ?? "",
-    },
-    learning_gap: mcq.learning_gap,
-    correct_answer: mcq.correct_answer,
-  })),
-}))}
-
-    onComplete={handleNextPhase}
-    onBookmark={async (hyfUuid, newValue) => {
-  if (!user) return;
-  await supabase.from("student_signals").upsert(
-    {
-      student_id: user.id,
-      object_type: "conversation_hyf",
-      object_uuid: hyfUuid,
-      bookmark: newValue,
-    },
-    { onConflict: "student_id,object_type,object_uuid" }
-  );
-}}
-  />
-)}
+            {phase === 1 && (
+              <ConversationPhase
+                hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
+                  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,
+                  text: hyf.HYF,
+                  subject_id: currentConcept.subject_id,      // ✅ add
+                  chapter_id: currentConcept.chapter_id,      // ✅ add
+                  topic_id: currentConcept.topic_id, // ✅ add
+                  vertical_id: currentConcept.vertical_id,    // ✅ add
+                  mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
+                    id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,
+                    stem: mcq.stem,
+                    options: mcq.options,
+                    feedback: {
+                      correct: mcq.feedback?.correct ?? "",
+                      wrong: mcq.feedback?.wrong ?? "",
+                    },
+                    learning_gap: mcq.learning_gap,
+                    correct_answer: mcq.correct_answer,
+                  })),
+                }))}
+                onComplete={handleNextPhase}
+                onBookmark={async (hyfUuid, newValue) => {
+                  if (!user) return;
+                  await supabase.from("student_signals").upsert(
+                    {
+                      student_id: user.id,
+                      object_type: "conversation_hyf",
+                      object_uuid: hyfUuid,
+                      bookmark: newValue,
+                    },
+                    { onConflict: "student_id,object_type,object_uuid" }
+                  );
+                }}
+              />
+            )}
 
             {phase === 2 && (
               <View className="flex-1 bg-slate-900">
@@ -447,92 +445,84 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             )}
             {phase === 4 && (
               <MCQPhase
-  key={currentIdx}
-  mcqs={mcqs.map((mcq: any) => ({
-    ...mcq,
-    isBookmarked: mcq.isBookmarked ?? false, // ✅ preload bookmark state
-  }))}
-  mode="concept"
-  stopOnFirstCorrect
-  onComplete={handleCompleteConcept}
+                key={currentIdx}
+                mcqs={mcqs.map((mcq: any) => ({
+                  ...mcq,
+                  isBookmarked: mcq.isBookmarked ?? false, // ✅ preload bookmark state
+                }))}
+                mode="concept"
+                stopOnFirstCorrect
+                onComplete={handleCompleteConcept}
 
-  // ✅ Log MCQ attempt
- onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
-  if (!user) return;
-  try {
-    const { error } = await supabase.from("student_mcq_attempts").insert({
-      student_id: user.id,
-      subject_id: currentConcept.subject_id,
-      chapter_id: currentConcept.chapter_id,
-      topic_id: currentConcept.topic_id,
-      vertical_id: currentConcept.vertical_id,
-      mcq_key: mcq.mcq_key || "concept_mcq",
-      mcq_uuid: mcq.id || mcq.uuid,
-      selected_option: selectedOption,
-      correct_answer: mcq.correct_answer,
-      is_correct: isCorrect,
-      learning_gap: mcq.learning_gap || null,
-      hyf_uuid: null,
-      mcq_category: "concept",
-      feedback: mcq.feedback ? mcq.feedback : null,
-    });
+                // ✅ Log MCQ attempt
+                onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
+                  if (!user) return;
+                  try {
+                    const { error } = await supabase.from("student_mcq_attempts").insert({
+                      student_id: user.id,
+                      subject_id: currentConcept.subject_id,
+                      chapter_id: currentConcept.chapter_id,
+                      topic_id: currentConcept.topic_id,
+                      vertical_id: currentConcept.vertical_id,
+                      mcq_key: mcq.mcq_key || "concept_mcq",
+                      mcq_uuid: mcq.id || mcq.uuid,
+                      selected_option: selectedOption,
+                      correct_answer: mcq.correct_answer,
+                      is_correct: isCorrect,
+                      learning_gap: mcq.learning_gap || null,
+                      hyf_uuid: null,
+                      mcq_category: "concept",
+                      feedback: mcq.feedback ? mcq.feedback : null,
+                    });
 
-    if (error) {
-      console.error("❌ Failed to insert Concept MCQ attempt:", error);
-    } else {
-      console.log(`✅ Logged Concept MCQ attempt for ${mcq.id}`);
-    }
-  } catch (err) {
-    console.error("❌ Exception inserting Concept MCQ attempt:", err);
-  }
-}}
+                    if (error) {
+                      console.error("❌ Failed to insert Concept MCQ attempt:", error);
+                    } else {
+                      console.log(`✅ Logged Concept MCQ attempt for ${mcq.id}`);
+                    }
+                  } catch (err) {
+                    console.error("❌ Exception inserting Concept MCQ attempt:", err);
+                  }
+                }}
 
+                // ✅ Bookmark handler
+                onBookmarkMCQ={async (mcqId, newValue) => {
+                  if (!user) return;
 
+                  try {
+                    const { error } = await supabase.from("student_signals").upsert(
+                      {
+                        student_id: user.id,
+                        object_type: "conversation_mcq",
+                        object_uuid: mcqId,
+                        bookmark: newValue,
+                      },
+                      { onConflict: "student_id,object_type,object_uuid" }
+                    );
 
-
-
-
-  // ✅ Bookmark handler
-  onBookmarkMCQ={async (mcqId, newValue) => {
-    if (!user) return;
-
-    try {
-      const { error } = await supabase.from("student_signals").upsert(
-        {
-          student_id: user.id,
-          object_type: "conversation_mcq",
-          object_uuid: mcqId,
-          bookmark: newValue,
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      );
-
-      if (error) {
-        console.error("❌ Failed to update MCQ bookmark:", error);
-      } else {
-        console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
-        // also update local state so UI reflects immediately
-        setCurrentConcept((prev: any) =>
-          prev
-            ? {
-                ...prev,
-                mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-                  m.id === mcqId || m.uuid === mcqId
-                    ? { ...m, isBookmarked: newValue }
-                    : m
-                ),
-              }
-            : prev
-        );
-      }
-    } catch (err) {
-      console.error("❌ Exception updating MCQ bookmark:", err);
-    }
-  }}
-/>
-
-
-
+                    if (error) {
+                      console.error("❌ Failed to update MCQ bookmark:", error);
+                    } else {
+                      console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
+                      // also update local state so UI reflects immediately
+                      setCurrentConcept((prev: any) =>
+                        prev
+                          ? {
+                              ...prev,
+                              mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
+                                m.id === mcqId || m.uuid === mcqId
+                                  ? { ...m, isBookmarked: newValue }
+                                  : m
+                              ),
+                            }
+                          : prev
+                      );
+                    }
+                  } catch (err) {
+                    console.error("❌ Exception updating MCQ bookmark:", err);
+                  }
+                }}
+              />
             )}
           </>
         ) : (
