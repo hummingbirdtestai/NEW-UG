@@ -344,6 +344,9 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
   uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,   // ✅ real HYF uuid from DB
       text: hyf.HYF,
+      subject_id: currentConcept.subject_id,
+  chapter_id: currentConcept.chapter_id,
+  vertical_id: currentConcept.vertical_id,
       mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
         id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,     // ✅ real MCQ id from DB
         stem: mcq.stem,
