@@ -89,55 +89,68 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
   };
 
   // fetch one concept by index
-  const fetchConcept = async (
-    idx: number,
-    preloadNext = false,
-    isActive = true
-  ) => {
-    setLoadingConcept(true);
-    const { data, error } = await supabase
-      .from("concepts_vertical")
-      .select(
-        "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
-      )
-      .eq("chapter_id", chapterId)
-      .order("react_order", { ascending: true })
-      .range(idx, idx);
+const fetchConcept = async (
+  idx: number,
+  preloadNext = false,
+  isActive = true
+) => {
+  setLoadingConcept(true);
+  const { data, error } = await supabase
+    .from("concepts_vertical")
+    .select(
+      "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
+    )
+    .eq("chapter_id", chapterId)
+    .order("react_order", { ascending: true })
+    .range(idx, idx);
 
-    if (!isActive) return;
-    if (error || !data || !data[0]) {
-      console.error("❌ Error fetching concept:", error);
-      setLoadingConcept(false);
-      setFetchError(true);
-      return;
-    }
-    let concept = data[0];
+  if (!isActive) return;
+  if (error || !data || !data[0]) {
+    console.error("❌ Error fetching concept:", error);
+    setLoadingConcept(false);
+    setFetchError(true);
+    return;
+  }
+  let concept = data[0];
 
-    // ✅ Check if this concept is already bookmarked by this user
-    // ✅ Prepare MCQs with bookmark state
-    if (user && Array.isArray(concept.mcq_1_6_unicode)) {
-      for (let mcq of concept.mcq_1_6_unicode) {
-        if (mcq?.id) {
-          const { data: signal } = await supabase
-            .from("student_signals")
-            .select("bookmark")
-            .eq("student_id", user.id)
-            .eq("object_type", "hyf_mcq")
-            .eq("object_uuid", mcq.id)
-            .maybeSingle();
+  // ✅ Load concept bookmark state
+  if (user && concept.concept_json_unicode?.uuid) {
+    const { data: signal } = await supabase
+      .from("student_signals")
+      .select("bookmark")
+      .eq("student_id", user.id)
+      .eq("object_type", "concept")
+      .eq("object_uuid", concept.concept_json_unicode.uuid)
+      .maybeSingle();
 
-          mcq.isBookmarked = signal?.bookmark ?? false;
-        }
+    concept.isBookmarked = signal?.bookmark ?? false;
+  }
+
+  // ✅ Prepare MCQs with bookmark state
+  if (user && Array.isArray(concept.mcq_1_6_unicode)) {
+    for (let mcq of concept.mcq_1_6_unicode) {
+      if (mcq?.id) {
+        const { data: signal } = await supabase
+          .from("student_signals")
+          .select("bookmark")
+          .eq("student_id", user.id)
+          .eq("object_type", "conversation_mcq") // ✅ FIXED type
+          .eq("object_uuid", mcq.id)
+          .maybeSingle();
+
+        mcq.isBookmarked = signal?.bookmark ?? false;
       }
     }
+  }
 
-    setCurrentConcept(concept);
+  setCurrentConcept(concept);
 
-    setLoadingConcept(false);
-    setFetchError(false);
+  setLoadingConcept(false);
+  setFetchError(false);
 
-    if (preloadNext && idx + 1 < totalConcepts) preloadConcept(idx + 1);
-  };
+  if (preloadNext && idx + 1 < totalConcepts) preloadConcept(idx + 1);
+};
+
 
   // ✅ Toggle bookmark in student_signals
   const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
@@ -328,12 +341,16 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
           <>
             {phase === 0 && (
               <ConceptPhase
-                concept={currentConcept.concept_json_unicode?.Concept}
-                explanation={currentConcept.concept_json_unicode?.Explanation}
-                onNext={handleNextPhase}
-                current={currentIdx + 1}
-                total={totalConcepts}
-              />
+  concept={currentConcept.concept_json_unicode?.Concept}
+  explanation={currentConcept.concept_json_unicode?.Explanation}
+  onNext={handleNextPhase}
+  current={currentIdx + 1}
+  total={totalConcepts}
+  isBookmarked={currentConcept.isBookmarked} // ✅ pass bookmark state
+  onBookmark={(newValue) => handleBookmarkToggle(newValue, currentConcept)} // ✅ wire toggle
+/>
+
+
             )}
             {phase === 1 && (
               <ConversationPhase
