@@ -22,7 +22,7 @@ interface MCQ {
   options: MCQOption;
   feedback: MCQFeedback;
   learning_gap?: string;
-  correct_answer: keyof MCQOption;
+  correct_answer: keyof MCQOption | null;
 }
 
 interface MCQPhaseProps {
@@ -241,6 +241,11 @@ export default function MCQPhase({
   const handleAnswer = (selectedValue: string) => {
     const currentMCQ = mcqs[currentMCQIndex];
     const correctDbKey = currentMCQ.correct_answer;
+if (!correctDbKey) {
+  console.warn("⚠️ Missing correct_answer for MCQ:", currentMCQ.id);
+  return;
+}
+
 
     const correctUiLabel =
       shuffledOptionsList[currentMCQIndex].find(
