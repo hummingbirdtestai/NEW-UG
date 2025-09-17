@@ -324,28 +324,16 @@ export default function MCQPhase({
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
 
             {idx === currentMCQIndex && (
-              <>
-                {!ans.isCorrect ? (
-                  <Pressable
-                    onPress={handleNext}
-                    className="bg-red-600 rounded-2xl px-6 py-4 items-center mt-2"
-                  >
-                    <Text className="text-white font-bold">Next Question</Text>
-                  </Pressable>
-                ) : (
-                  mode === "concept" && (
-                    <Pressable
-                      onPress={handleNext}
-                      className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
-                    >
-                      <Text className="text-white font-bold">Next Concept</Text>
-                    </Pressable>
-                  )
-                )}
-              </>
-            )}
-          </View>
-        ))}
+  <Pressable
+    onPress={handleNext}
+    className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+  >
+    <Text className="text-white font-bold">
+      {mode === "concept" ? "Next Concept" : "Next Question"}
+    </Text>
+  </Pressable>
+)}
+
 
         {!isComplete &&
           currentMCQIndex < mcqs.length &&
