@@ -178,8 +178,8 @@ const preloadConcept = async (idx: number) => {
   const { data, error } = await supabase
     .from("concepts_vertical")
     .select(
-      "vertical_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
-    )
+  "vertical_id, subject_id, chapter_id, topic_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order")
+
     .eq("chapter_id", chapterId)
     .order("react_order", { ascending: true })
     .range(idx, idx);
