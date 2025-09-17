@@ -429,19 +429,23 @@ const handleGotIt = () => {
   onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
     if (!user) return;
     try {
-     const { error } = await supabase.from("student_mcq_attempts").insert({
+     const { error } =await supabase.from("student_mcq_attempts").insert({
   student_id: user.id,
-  vertical_id: currentHYF.vertical_id || null,   // ✅ only vertical_id needed
-  mcq_key: mcq.mcq_key || "conversation_mcq",
+  subject_id: currentConcept.subject_id,
+  chapter_id: currentConcept.chapter_id,
+  topic_id: currentConcept.topic_id,
+  vertical_id: currentConcept.vertical_id,
+  mcq_key: mcq.mcq_key || "concept_mcq",
   mcq_uuid: mcq.id || mcq.uuid,
   selected_option: selectedOption,
   correct_answer: mcq.correct_answer,
   is_correct: isCorrect,
   learning_gap: mcq.learning_gap || null,
-  hyf_uuid: currentHYF.uuid,
-  mcq_category: "conversation",
+  hyf_uuid: null,
+  mcq_category: "mcq_section",
   feedback: mcq.feedback ? mcq.feedback : null,
 });
+
 
 
       if (error) {
