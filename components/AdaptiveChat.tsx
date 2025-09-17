@@ -153,7 +153,7 @@ const fetchConcept = async (
 
 
   // ✅ Toggle bookmark in student_signals
-  const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
+    const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     if (!user) return;
 
     const objectUuid = concept.concept_json_unicode?.uuid;
@@ -162,26 +162,31 @@ const fetchConcept = async (
       return;
     }
 
-    const { data, error } = await supabase
-      .from("student_signals")
-      .upsert(
-        {
+    try {
+      const { data, error } = await supabase
+        .from("student_signals")
+        .insert({
           student_id: user.id,
           object_type: "concept",
           object_uuid: objectUuid,
-          bookmark: newValue, // ✅ always send true/false
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      )
-      .select();
+          bookmark: newValue,
+          updated_at: new Date().toISOString(),
+        })
+        .onConflict("student_id,object_type,object_uuid")
+        .merge()
+        .select();
 
-    if (error) {
-      console.error("❌ Error updating bookmark:", error);
-    } else {
-      console.log("✅ Bookmark upsert result:", data);
-      setCurrentConcept((prev: any) =>
-        prev ? { ...prev, isBookmarked: newValue } : prev
-      );
+      if (error) {
+        console.error("❌ Error updating bookmark:", error);
+      } else {
+        console.log("✅ Bookmark updated:", data);
+        // Update local state so UI reflects immediately
+        setCurrentConcept((prev: any) =>
+          prev ? { ...prev, isBookmarked: newValue } : prev
+        );
+      }
+    } catch (err) {
+      console.error("❌ Exception updating bookmark:", err);
     }
   };
 
@@ -503,42 +508,46 @@ const fetchConcept = async (
                 }}
 
                 // ✅ Bookmark handler
-                onBookmarkMCQ={async (mcqId, newValue) => {
-                  if (!user) return;
+                // ✅ Bookmark handler
+onBookmarkMCQ={async (mcqId, newValue) => {
+  if (!user) return;
 
-                  try {
-                    const { error } = await supabase.from("student_signals").upsert(
-                      {
-                        student_id: user.id,
-                        object_type: "conversation_mcq",
-                        object_uuid: mcqId,
-                        bookmark: newValue,
-                      },
-                      { onConflict: "student_id,object_type,object_uuid" }
-                    );
+  try {
+    const { error } = await supabase
+      .from("student_signals")
+      .insert({
+        student_id: user.id,
+        object_type: "conversation_mcq",
+        object_uuid: mcqId,
+        bookmark: newValue,
+        updated_at: new Date().toISOString(),
+      })
+      .onConflict("student_id,object_type,object_uuid")
+      .merge();
 
-                    if (error) {
-                      console.error("❌ Failed to update MCQ bookmark:", error);
-                    } else {
-                      console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
-                      // also update local state so UI reflects immediately
-                      setCurrentConcept((prev: any) =>
-                        prev
-                          ? {
-                              ...prev,
-                              mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-                                m.id === mcqId || m.uuid === mcqId
-                                  ? { ...m, isBookmarked: newValue }
-                                  : m
-                              ),
-                            }
-                          : prev
-                      );
-                    }
-                  } catch (err) {
-                    console.error("❌ Exception updating MCQ bookmark:", err);
-                  }
-                }}
+    if (error) {
+      console.error("❌ Failed to update MCQ bookmark:", error);
+    } else {
+      console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
+      // also update local state so UI reflects immediately
+      setCurrentConcept((prev: any) =>
+        prev
+          ? {
+              ...prev,
+              mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
+                m.id === mcqId || m.uuid === mcqId
+                  ? { ...m, isBookmarked: newValue }
+                  : m
+              ),
+            }
+          : prev
+      );
+    }
+  } catch (err) {
+    console.error("❌ Exception updating MCQ bookmark:", err);
+  }
+}}
+
               />
             )}
           </>
