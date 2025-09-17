@@ -347,35 +347,29 @@ const handleAnswer = (selectedValue: string) => {
 
             {idx === currentMCQIndex && (
   <Pressable
-    onPress={() => {
-      if (idx < mcqs.length - 1) {
-        handleNext();       // go to next MCQ
-      } else {
-        setIsComplete(true);
-        onComplete?.();     // end phase
-      }
-    }}
-    className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
-  >
-   <Text className="text-white font-bold">
-  {mode === "concept" ? (
-    ans.isCorrect
-      ? "Next Concept"
-      : idx === mcqs.length - 1
-        ? "Next Concept"
-        : "Next Question"
-  ) : (
-    ans.isCorrect
-      ? (isLastHYF ? "Next Media" : "Next HYF")
-      : idx === mcqs.length - 1
-        ? (isLastHYF ? "Next Media" : "Next HYF")
-        : "Next Question"
-  )}
-</Text>
+  onPress={() => {
+    if (ans.isCorrect || idx === mcqs.length - 1) {
+      // 👉 Correct answer OR last question → finish this phase
+      setIsComplete(true);
+      onComplete?.();
+    } else {
+      // 👉 Wrong answer but not last → go to next MCQ
+      handleNext();
+    }
+  }}
+  className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+>
+  <Text className="text-white font-bold">
+    {mode === "concept"
+      ? (ans.isCorrect || idx === mcqs.length - 1
+          ? "Next Concept"
+          : "Next Question")
+      : (ans.isCorrect || idx === mcqs.length - 1
+          ? (isLastHYF ? "Next Media" : "Next HYF")
+          : "Next Question")}
+  </Text>
+</Pressable>
 
-
-
-  </Pressable>
 )}
 
 
