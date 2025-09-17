@@ -420,7 +420,8 @@ const handleGotIt = () => {
   <MCQPhase
   mcqs={currentHYF.mcqs}
   mode="conversation"
-  stopOnFirstCorrect={false}
+  stopOnFirstCorrect={true}
+  isLastHYF={currentHYFIndex === normalizedHyfs.length - 1} 
   onComplete={() => {
   setShowMCQs(false);
   if (currentHYFIndex < normalizedHyfs.length - 1) {
