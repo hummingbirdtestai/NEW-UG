@@ -242,7 +242,7 @@ export default function ConversationPhase({
         : null;
 
       return {
-        id: m.id ?? crypto.randomUUID(),
+        id: m.id || m.uuid || crypto.randomUUID(),
         stem: m.stem ?? m.question ?? "",
         options: m.options,
         feedback: m.feedback,
