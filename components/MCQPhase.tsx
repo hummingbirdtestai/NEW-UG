@@ -24,14 +24,15 @@ interface MCQ {
   learning_gap?: string;
   correct_answer: keyof MCQOption | null;
 }
-
 interface MCQPhaseProps {
   mcqs: MCQ[];
   onComplete?: () => void;
   mode?: "conversation" | "concept";
-  onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void; // 👈 NEW
+  onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void;
   stopOnFirstCorrect?: boolean;
+  onAttemptMCQ?: (mcq: MCQ, selectedOption: string, isCorrect: boolean) => void; // 👈 NEW
 }
+
 
 interface AnsweredMCQ {
   mcq: MCQ;
@@ -240,54 +241,55 @@ export default function MCQPhase({
     }
   }, [answeredMCQs, currentMCQIndex, isComplete]);
 
-  const handleAnswer = (selectedValue: string) => {
-    const currentMCQ = mcqs[currentMCQIndex];
-    const correctDbKey = currentMCQ.correct_answer;
-if (!correctDbKey) {
-  console.warn("⚠️ Missing correct_answer for MCQ:", currentMCQ.id);
-  return;
-}
-
-
-
-    const correctUiLabel =
-      shuffledOptionsList[currentMCQIndex].find(
-        (opt) => opt.dbKey === correctDbKey
-      )?.uiLabel || "?";
-
-    const selectedDbKey = shuffledOptionsList[currentMCQIndex].find(
-      (opt) => opt.value === selectedValue
-    )?.dbKey;
-
-    const isCorrect = selectedDbKey === correctDbKey;
-
-    const newAnswered: AnsweredMCQ = {
-      mcq: currentMCQ,
-      selectedValue,
-      isCorrect,
-      correctUiLabel,
-      showFeedback: true,
-    };
-
-    setAnsweredMCQs((prev) => {
-      const updated = [...prev];
-      updated[currentMCQIndex] = newAnswered;
-      return updated;
-    });
-
-    if (isCorrect) {
-  setShowConfetti(true);
-  setTimeout(() => setShowConfetti(false), 1500);
-
-  if (stopOnFirstCorrect) {
-    // 👇 immediately end this phase after first correct
-    setIsComplete(true);
-    onComplete?.();
+const handleAnswer = (selectedValue: string) => {
+  const currentMCQ = mcqs[currentMCQIndex];
+  const correctDbKey = currentMCQ.correct_answer;
+  if (!correctDbKey) {
+    console.warn("⚠️ Missing correct_answer for MCQ:", currentMCQ.id);
     return;
   }
-}
 
+  const correctUiLabel =
+    shuffledOptionsList[currentMCQIndex].find(
+      (opt) => opt.dbKey === correctDbKey
+    )?.uiLabel || "?";
+
+  const selectedDbKey = shuffledOptionsList[currentMCQIndex].find(
+    (opt) => opt.value === selectedValue
+  )?.dbKey;
+
+  const isCorrect = selectedDbKey === correctDbKey;
+
+  // ✅ trigger DB logging
+  if (onAttemptMCQ) {
+    onAttemptMCQ(currentMCQ, selectedDbKey!, isCorrect);
+  }
+
+  const newAnswered: AnsweredMCQ = {
+    mcq: currentMCQ,
+    selectedValue,
+    isCorrect,
+    correctUiLabel,
+    showFeedback: true,
   };
+
+  setAnsweredMCQs((prev) => {
+    const updated = [...prev];
+    updated[currentMCQIndex] = newAnswered;
+    return updated;
+  });
+
+  if (isCorrect) {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 1500);
+    if (stopOnFirstCorrect) {
+      setIsComplete(true);
+      onComplete?.();
+      return;
+    }
+  }
+};
+
 
   const handleNext = () => {
     if (currentMCQIndex < mcqs.length - 1) {
