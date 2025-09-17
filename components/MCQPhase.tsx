@@ -369,41 +369,6 @@ const handleAnswer = (selectedValue: string) => {
               onBookmarkMCQ={onBookmarkMCQ}
             />
           )}
-
-        {isComplete && (
-  <View>
-    {mode === "conversation" && (
-      <View className="items-center justify-center mt-12">
-        <Pressable
-          onPress={onComplete}
-          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
-        >
-          <Sparkles size={20} color="#fff" />
-          <Text className="text-white font-bold text-lg ml-2">
-            {/* 👇 if last HYF → Next Media, else Next HYF */}
-            {currentMCQIndex === mcqs.length - 1 ? "Next Media" : "Next HYF"}
-          </Text>
-          <ChevronRight size={20} color="#fff" />
-        </Pressable>
-      </View>
-    )}
-
-    {mode === "concept" && (
-      <View className="items-center justify-center mt-12">
-        <Pressable
-          onPress={onComplete}
-          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl px-8 py-4 flex-row items-center"
-        >
-          <Sparkles size={20} color="#fff" />
-          <Text className="text-white font-bold text-lg ml-2">
-            Next Concept
-          </Text>
-          <ChevronRight size={20} color="#fff" />
-        </Pressable>
-      </View>
-    )}
-  </View>
-)}
       </ScrollView>
     </View>
   );
