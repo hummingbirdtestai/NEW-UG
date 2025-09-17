@@ -411,6 +411,7 @@ const handleGotIt = () => {
   <MCQPhase
     mcqs={currentHYF.mcqs}
     mode="conversation"
+    stopOnFirstCorrect   
     onComplete={() => {
       setShowMCQs(false);
       handleNextHYF();
@@ -426,21 +427,16 @@ const handleGotIt = () => {
     { onConflict: "student_id,object_type,object_uuid" }
   );
 
-  if (error) {
-    console.error("❌ Failed to bookmark MCQ:", error);
-  } else {
-    console.log(`✅ Bookmark set to ${newValue} for MCQ ${mcqId}`);
-
-    // update local state so UI reacts immediately
-    setShowMCQs((prev) => {
-      const updated = { ...currentHYF };
-      updated.mcqs = updated.mcqs.map((m) =>
+  if (!error) {
+    setCurrentHYFIndex((prevIdx) => {
+      normalizedHyfs[prevIdx].mcqs = normalizedHyfs[prevIdx].mcqs.map((m) =>
         m.id === mcqId ? { ...m, isBookmarked: newValue } : m
       );
-      return prev; // state doesn't hold mcqs directly, but ensures UI re-render
+      return prevIdx;
     });
   }
 }}
+
 
   />
 )}
