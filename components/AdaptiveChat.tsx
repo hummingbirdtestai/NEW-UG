@@ -341,8 +341,8 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             )}
            {phase === 1 && (
   <ConversationPhase
-    hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any) => ({
-      uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,   // ✅ real HYF uuid from DB
+    hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
+  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,   // ✅ real HYF uuid from DB
       text: hyf.HYF,
       mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
         id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,     // ✅ real MCQ id from DB
