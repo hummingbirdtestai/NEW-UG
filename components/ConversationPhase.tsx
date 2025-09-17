@@ -409,36 +409,74 @@ const handleGotIt = () => {
             {/* Current MCQ */}
             {showMCQs && currentHYF?.mcqs?.length > 0 && (
   <MCQPhase
-    mcqs={currentHYF.mcqs}
-    mode="conversation"
-    stopOnFirstCorrect   
-    onComplete={() => {
-      setShowMCQs(false);
-      handleNextHYF();
-    }}
-    onBookmarkMCQ={async (mcqId, newValue) => {
-  const { error } = await supabase.from("student_signals").upsert(
-    {
-      student_id: user.id,
-      object_type: "conversation_mcq",
-      object_uuid: mcqId,
-      bookmark: newValue,
-    },
-    { onConflict: "student_id,object_type,object_uuid" }
-  );
+  mcqs={currentHYF.mcqs}
+  mode="conversation"
+  stopOnFirstCorrect
+  onComplete={() => {
+    setShowMCQs(false);
+    handleNextHYF();
+  }}
+  // ✅ Log MCQ attempt
+  onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_mcq_attempts").insert({
+        student_id: user.id,
+        subject_id: currentHYF.subject_id || null,
+        chapter_id: currentHYF.chapter_id || null,
+        topic_id: currentHYF.topic_id || null,
+        vertical_id: currentHYF.vertical_id || null,
+        mcq_key: mcq.mcq_key || "conversation_mcq",
+        mcq_uuid: mcq.id || mcq.uuid,
+        selected_option: selectedOption,
+        correct_answer: mcq.correct_answer,
+        is_correct: isCorrect,
+        learning_gap: mcq.learning_gap || null,
+        hyf_uuid: currentHYF.uuid,
+        mcq_category: "conversation",
+        feedback: mcq.feedback ? mcq.feedback : null,
+      });
 
-  if (!error) {
-    setCurrentHYFIndex((prevIdx) => {
-      normalizedHyfs[prevIdx].mcqs = normalizedHyfs[prevIdx].mcqs.map((m) =>
-        m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+      if (error) {
+        console.error("❌ Failed to insert HYF MCQ attempt:", error);
+      } else {
+        console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
+      }
+    } catch (err) {
+      console.error("❌ Exception inserting HYF MCQ attempt:", err);
+    }
+  }}
+  // ✅ Bookmark handler
+  onBookmarkMCQ={async (mcqId, newValue) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "conversation_mcq",
+          object_uuid: mcqId,
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
       );
-      return prevIdx;
-    });
-  }
-}}
 
+      if (error) {
+        console.error("❌ Failed to update MCQ bookmark:", error);
+      } else {
+        console.log(`✅ Bookmark for HYF MCQ ${mcqId} set to ${newValue}`);
+        setCurrentHYFIndex((prevIdx) => {
+          normalizedHyfs[prevIdx].mcqs = normalizedHyfs[prevIdx].mcqs.map((m) =>
+            m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+          );
+          return prevIdx;
+        });
+      }
+    } catch (err) {
+      console.error("❌ Exception updating HYF MCQ bookmark:", err);
+    }
+  }}
+/>
 
-  />
 )}
 
 
