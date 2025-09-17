@@ -344,16 +344,28 @@ const handleAnswer = (selectedValue: string) => {
 
             {idx === currentMCQIndex && (
   <Pressable
-    onPress={handleNext}
+    onPress={() => {
+      if (idx < mcqs.length - 1) {
+        handleNext();       // go to next MCQ
+      } else {
+        setIsComplete(true);
+        onComplete?.();     // end phase
+      }
+    }}
     className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
   >
     <Text className="text-white font-bold">
       {mode === "concept"
-        ? (ans.isCorrect || idx === mcqs.length - 1 ? "Next Concept" : "Next Question")
-        : (ans.isCorrect || idx === mcqs.length - 1 ? "Next HYF" : "Next Question")}
+        ? (ans.isCorrect || idx === mcqs.length - 1
+            ? "Next Concept"
+            : "Next Question")
+        : (ans.isCorrect || idx === mcqs.length - 1
+            ? "Next HYF"
+            : "Next Question")}
     </Text>
   </Pressable>
 )}
+
 
 
           </View>
