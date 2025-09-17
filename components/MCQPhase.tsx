@@ -287,10 +287,9 @@ const handleAnswer = (selectedValue: string) => {
   setShowConfetti(true);
   setTimeout(() => setShowConfetti(false), 1500);
   if (stopOnFirstCorrect) {
-    setIsComplete(true);
-    onComplete?.();
-    return;
-  }
+   setIsComplete(true); // ✅ just mark complete
+   return;
+ }
 }
 
 };
