@@ -6,7 +6,6 @@ import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import MCQPhase from "@/components/MCQPhase";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/contexts/AuthContext";
-import { toggleBookmark } from "@/lib/bookmarkUtils";
 
 
 interface MCQOption {
@@ -418,15 +417,25 @@ const handleGotIt = () => {
       handleNextHYF();
     }}
     onBookmarkMCQ={async (mcqId, newValue) => {
-      if (!user) return;
-      await toggleBookmark("conversation_mcq", mcqId, newValue, user.id);
-      setCurrentHYFIndex((prevIdx) => {
-        normalizedHyfs[prevIdx].mcqs = normalizedHyfs[prevIdx].mcqs.map((m) =>
-          m.id === mcqId ? { ...m, isBookmarked: newValue } : m
-        );
-        return prevIdx;
-      });
-    }}
+  const { error } = await supabase.from("student_signals").upsert(
+    {
+      student_id: user.id,
+      object_type: "conversation_mcq",
+      object_uuid: mcqId,
+      bookmark: newValue,
+    },
+    { onConflict: "student_id,object_type,object_uuid" }
+  );
+
+  if (!error) {
+    setCurrentHYFIndex((prevIdx) => {
+      normalizedHyfs[prevIdx].mcqs = normalizedHyfs[prevIdx].mcqs.map((m) =>
+        m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+      );
+      return prevIdx;
+    });
+  }
+}}
 
 
   />

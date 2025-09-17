@@ -14,7 +14,6 @@ import { ChevronRight } from "lucide-react-native";
 import { supabase } from "@/lib/supabaseClient";
 import ConfettiCannon from "react-native-confetti-cannon";
 import { useAuth } from "../contexts/AuthContext";
-import { toggleBookmark } from "@/lib/bookmarkUtils";
 
 import ConceptPhase from "@/components/ConceptPhase";
 import ConversationPhase from "@/components/ConversationPhase";
@@ -146,10 +145,32 @@ if (user && Array.isArray(concept.mcq_1_6_unicode)) {
     if (!user) return;
 
     const objectUuid = concept.concept_json_unicode?.uuid || concept.vertical_id;
-    await toggleBookmark("concept", objectUuid, newValue, user.id);
-    setCurrentConcept((prev: any) =>
-      prev ? { ...prev, isBookmarked: newValue } : prev
-    );
+
+    if (!objectUuid) {
+      console.error("❌ No concept UUID found");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("student_signals")
+      .upsert(
+        {
+          student_id: user.id,
+          object_type: "concept",
+          object_uuid: objectUuid,
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+
+    if (error) {
+      console.error("❌ Error updating bookmark:", error);
+    } else {
+      console.log(`✅ Bookmark set to ${newValue} for concept ${objectUuid}`);
+      setCurrentConcept((prev: any) =>
+        prev ? { ...prev, isBookmarked: newValue } : prev
+      );
+    }
   };
 
 // preload next concept
@@ -337,9 +358,17 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     }))}
     onComplete={handleNextPhase}
     onBookmark={async (hyfUuid, newValue) => {
-                  if (!user) return;
-                  await toggleBookmark("conversation_hyf", hyfUuid, newValue, user.id);
-                }}
+  if (!user) return;
+  await supabase.from("student_signals").upsert(
+    {
+      student_id: user.id,
+      object_type: "conversation_hyf",
+      object_uuid: hyfUuid,
+      bookmark: newValue,
+    },
+    { onConflict: "student_id,object_type,object_uuid" }
+  );
+}}
   />
 )}
 
@@ -426,19 +455,40 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
   onComplete={handleCompleteConcept}
   onBookmarkMCQ={async (mcqId, newValue) => {
     if (!user) return;
-    await toggleBookmark("conversation_mcq", mcqId, newValue, user.id);
-    setCurrentConcept((prev: any) =>
-      prev
-        ? {
-            ...prev,
-            mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-              (m.id === mcqId || m.uuid === mcqId)
-                ? { ...m, isBookmarked: newValue }
-                : m
-            ),
-          }
-        : prev
-    );
+
+    try {
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "conversation_mcq",   // ✅ type for MCQ
+          object_uuid: mcqId,       // ✅ MCQ id
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+
+      if (error) {
+        console.error("❌ Failed to update MCQ bookmark:", error);
+      } else {
+        console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
+        // also update local state so UI reflects immediately
+        setCurrentConcept((prev: any) =>
+          prev
+            ? {
+                ...prev,
+                mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
+                  (m.id === mcqId || m.uuid === mcqId)
+  ? { ...m, isBookmarked: newValue }
+  : m
+
+                ),
+              }
+            : prev
+        );
+      }
+    } catch (err) {
+      console.error("❌ Exception updating MCQ bookmark:", err);
+    }
   }}
 />
 
