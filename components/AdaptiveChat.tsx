@@ -142,36 +142,37 @@ if (user && Array.isArray(concept.mcq_1_6_unicode)) {
 
   // ✅ Toggle bookmark in student_signals
   const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
-    if (!user) return;
+  if (!user) return;
 
-    const objectUuid = concept.concept_json_unicode?.uuid || concept.vertical_id;
+  // ✅ Only use uuid (don’t fallback to vertical_id)
+  const objectUuid = concept.concept_json_unicode?.uuid;
+  if (!objectUuid) {
+    console.error("❌ Concept missing uuid — cannot bookmark");
+    return;
+  }
 
-    if (!objectUuid) {
-      console.error("❌ No concept UUID found");
-      return;
-    }
+  const { data, error } = await supabase
+    .from("student_signals")
+    .upsert(
+      {
+        student_id: user.id,
+        object_type: "concept",
+        object_uuid: objectUuid,
+        bookmark: newValue,
+      },
+      { onConflict: "student_id,object_type,object_uuid" }
+    )
+    .select();
 
-    const { error } = await supabase
-      .from("student_signals")
-      .upsert(
-        {
-          student_id: user.id,
-          object_type: "concept",
-          object_uuid: objectUuid,
-          bookmark: newValue,
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      );
-
-    if (error) {
-      console.error("❌ Error updating bookmark:", error);
-    } else {
-      console.log(`✅ Bookmark set to ${newValue} for concept ${objectUuid}`);
-      setCurrentConcept((prev: any) =>
-        prev ? { ...prev, isBookmarked: newValue } : prev
-      );
-    }
-  };
+  if (error) {
+    console.error("❌ Error updating bookmark:", error);
+  } else {
+    console.log("✅ Bookmark upsert result:", data);
+    setCurrentConcept((prev: any) =>
+      prev ? { ...prev, isBookmarked: newValue } : prev
+    );
+  }
+};
 
 // preload next concept
 const preloadConcept = async (idx: number) => {
