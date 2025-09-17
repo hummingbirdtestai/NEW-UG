@@ -433,7 +433,7 @@ const handleGotIt = () => {
       student_id: user.id,
       subject_id: currentHYF.subject_id,
       chapter_id: currentHYF.chapter_id,
-      topic_id: currentHYF.topic_id || currentConcept.topic_id,
+      topic_id: currentHYF.topic_id,
       vertical_id: currentHYF.vertical_id,
       mcq_key: mcq.mcq_key || "conversation_mcq",
       mcq_uuid: mcq.id || mcq.uuid,
