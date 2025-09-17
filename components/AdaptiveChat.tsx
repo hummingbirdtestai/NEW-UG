@@ -461,7 +461,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
       const { error } = await supabase.from("student_mcq_attempts").insert({
         student_id: user.id,
         subject_id: currentConcept.concept_json_unicode?.subject_id || null,
-        chapter_id: chapterId,
+chapter_id: chapterId,
         topic_id: currentConcept.concept_json_unicode?.topic_id || null,
         vertical_id: currentConcept.vertical_id,
         mcq_key: mcq.mcq_key || "concept_mcq",
