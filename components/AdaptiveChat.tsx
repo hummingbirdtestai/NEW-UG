@@ -346,7 +346,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
   text: hyf.HYF,
   subject_id: currentConcept.subject_id,      // ✅ add
   chapter_id: currentConcept.chapter_id,      // ✅ add
-  topic_id: currentHYF.topic_id || currentConcept.topic_id, // ✅ add
+  topic_id: currentConcept.topic_id, // ✅ add
   vertical_id: currentConcept.vertical_id,    // ✅ add
   mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
     id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,
