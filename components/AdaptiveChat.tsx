@@ -459,7 +459,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
       const { error } = await supabase.from("student_signals").upsert(
         {
           student_id: user.id,
-          object_type: "hyf_mcq",   // ✅ type for MCQ
+          object_type: "conversation_mcq",   // ✅ type for MCQ
           object_uuid: mcqId,       // ✅ MCQ id
           bookmark: newValue,
         },
