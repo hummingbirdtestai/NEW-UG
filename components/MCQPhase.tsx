@@ -355,14 +355,24 @@ const handleAnswer = (selectedValue: string) => {
     className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
   >
     <Text className="text-white font-bold">
-      {mode === "concept"
-        ? (ans.isCorrect || idx === mcqs.length - 1
-            ? "Next Concept"
-            : "Next Question")
-        : (ans.isCorrect || idx === mcqs.length - 1
-            ? "Next HYF"
-            : "Next Question")}
-    </Text>
+  {mode === "concept"
+    ? (
+        ans.isCorrect
+          ? "Next Concept"                       // ✅ correct (stop flow)
+          : (idx === mcqs.length - 1
+              ? "Next Concept"                   // ✅ wrong + last
+              : "Next Question")                 // ✅ wrong + not last
+      )
+    : (
+        ans.isCorrect
+          ? "Next HYF"                           // ✅ correct (stop flow)
+          : (idx === mcqs.length - 1
+              ? "Next HYF"                       // ✅ wrong + last
+              : "Next Question")                 // ✅ wrong + not last
+      )
+  }
+</Text>
+
   </Pressable>
 )}
 
