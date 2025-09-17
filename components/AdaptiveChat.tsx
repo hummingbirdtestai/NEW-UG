@@ -362,7 +362,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
   await supabase.from("student_signals").upsert(
     {
       student_id: user.id,
-      object_type: "hyf",
+      object_type: "conversation_hyf",
       object_uuid: hyfUuid,
       bookmark: newValue,
     },
