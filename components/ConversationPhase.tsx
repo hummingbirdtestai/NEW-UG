@@ -27,10 +27,15 @@ interface MCQ {
   correct_answer: keyof MCQOption | null;  // ✅ allow null
 }
 interface HYF {
-  uuid: string;   // 👈 add this
+  uuid: string;
   text: string;
   mcqs: MCQ[];
+  subject_id?: string | number;
+  chapter_id?: string | number;
+  topic_id?: string | number;
+  vertical_id?: string | number;
 }
+
 
 
 interface ConversationPhaseProps {
