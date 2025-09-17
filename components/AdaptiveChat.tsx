@@ -494,15 +494,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
 
 
 
-      if (error) {
-        console.error("❌ Failed to insert MCQ attempt:", error);
-      } else {
-        console.log(`✅ Logged Concept MCQ attempt for ${mcq.id}`);
-      }
-    } catch (err) {
-      console.error("❌ Exception inserting MCQ attempt:", err);
-    }
-  }}
 
   // ✅ Bookmark handler
   onBookmarkMCQ={async (mcqId, newValue) => {
