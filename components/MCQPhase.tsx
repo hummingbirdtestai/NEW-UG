@@ -323,7 +323,7 @@ export default function MCQPhase({
               onAnswer={handleAnswer}
               answeredMCQ={ans}
               onBookmarkMCQ={onBookmarkMCQ}
-              isBookmarked={mcq.isBookmarked}
+              isBookmarked={ans.mcq.isBookmarked ?? false}
             />
             {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
 
