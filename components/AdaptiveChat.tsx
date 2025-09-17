@@ -379,18 +379,29 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
                   })),
                 }))}
                 onComplete={handleNextPhase}
-                onBookmark={async (hyfUuid, newValue) => {
-                  if (!user) return;
-                  await supabase.from("student_signals").upsert(
-                    {
-                      student_id: user.id,
-                      object_type: "conversation_hyf",
-                      object_uuid: hyfUuid,
-                      bookmark: newValue,
-                    },
-                    { onConflict: "student_id,object_type,object_uuid" }
-                  );
-                }}
+  onBookmark={async (hyfUuid, newValue) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "conversation_hyf",  // ✅ type for HYF
+          object_uuid: hyfUuid,
+          bookmark: newValue,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+
+      if (error) {
+        console.error("❌ Failed to update HYF bookmark:", error);
+      } else {
+        console.log(`✅ Bookmark for HYF ${hyfUuid} set to ${newValue}`);
+      }
+    } catch (err) {
+      console.error("❌ Exception updating HYF bookmark:", err);
+    }
+  }}
               />
             )}
 
