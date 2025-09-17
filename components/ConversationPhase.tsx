@@ -231,7 +231,7 @@ export default function ConversationPhase({
   bookmarkedHYFs = new Set()
 }: ConversationPhaseProps) {
   // Normalize HYFs data
-  const normalizedHyfs = hyfs.map((h: any) => ({
+  const normalizedHyfs = hyfs.map((h: any, hyfIdx: number) => ({
     uuid: h.uuid || h.id || `hyf-${hyfIdx}`, // normalize HYF id
    text: h.text,
   mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any, mcqIdx: number) => {
