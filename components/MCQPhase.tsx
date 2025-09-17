@@ -356,24 +356,21 @@ const handleAnswer = (selectedValue: string) => {
     className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
   >
     <Text className="text-white font-bold">
-  {mode === "concept"
-    ? (
-        ans.isCorrect
-          ? "Next Concept"                       // ✅ correct (stop flow)
-          : (idx === mcqs.length - 1
-              ? "Next Concept"                   // ✅ wrong + last
-              : "Next Question")                 // ✅ wrong + not last
-      )
-    : (
-  ans.isCorrect
-    ? (isLastHYF ? "Next Media" : "Next HYF")                // ✅ correct
-    : (idx === mcqs.length - 1
-        ? (isLastHYF ? "Next Media" : "Next HYF")            // ✅ wrong + last
-        : "Next Question")                                   // ✅ wrong + not last
-)
-
-  }
+  {mode === "concept" ? (
+    ans.isCorrect
+      ? "Next Concept" // correct → Next Concept
+      : idx === mcqs.length - 1
+        ? "Next Concept" // wrong + last
+        : "Next Question" // wrong + not last
+  ) : (
+    ans.isCorrect
+      ? (isLastHYF ? "Next Media" : "Next HYF") // ✅ correct
+      : idx === mcqs.length - 1
+        ? (isLastHYF ? "Next Media" : "Next HYF") // ✅ wrong + last
+        : "Next Question" // ✅ wrong + not last
+  )}
 </Text>
+
 
   </Pressable>
 )}
