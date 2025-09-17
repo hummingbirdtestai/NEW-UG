@@ -451,8 +451,41 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     isBookmarked: mcq.isBookmarked ?? false, // ✅ preload bookmark state
   }))}
   mode="concept"
-   stopOnFirstCorrect             
+  stopOnFirstCorrect
   onComplete={handleCompleteConcept}
+
+  // ✅ Log MCQ attempt
+  onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_mcq_attempts").insert({
+        student_id: user.id,
+        subject_id: currentConcept.concept_json_unicode?.subject_id || null,
+        chapter_id: chapterId,
+        topic_id: currentConcept.concept_json_unicode?.topic_id || null,
+        vertical_id: currentConcept.vertical_id,
+        mcq_key: mcq.mcq_key || "concept_mcq",
+        mcq_uuid: mcq.id || mcq.uuid,
+        selected_option: selectedOption,
+        correct_answer: mcq.correct_answer,
+        is_correct: isCorrect,
+        learning_gap: mcq.learning_gap || null,
+        hyf_uuid: null,
+        mcq_category: "mcq_section",
+        feedback: mcq.feedback ? mcq.feedback : null,
+      });
+
+      if (error) {
+        console.error("❌ Failed to insert MCQ attempt:", error);
+      } else {
+        console.log(`✅ Logged Concept MCQ attempt for ${mcq.id}`);
+      }
+    } catch (err) {
+      console.error("❌ Exception inserting MCQ attempt:", err);
+    }
+  }}
+
+  // ✅ Bookmark handler
   onBookmarkMCQ={async (mcqId, newValue) => {
     if (!user) return;
 
@@ -460,8 +493,8 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
       const { error } = await supabase.from("student_signals").upsert(
         {
           student_id: user.id,
-          object_type: "conversation_mcq",   // ✅ type for MCQ
-          object_uuid: mcqId,       // ✅ MCQ id
+          object_type: "conversation_mcq",
+          object_uuid: mcqId,
           bookmark: newValue,
         },
         { onConflict: "student_id,object_type,object_uuid" }
@@ -477,10 +510,9 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             ? {
                 ...prev,
                 mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-                  (m.id === mcqId || m.uuid === mcqId)
-  ? { ...m, isBookmarked: newValue }
-  : m
-
+                  m.id === mcqId || m.uuid === mcqId
+                    ? { ...m, isBookmarked: newValue }
+                    : m
                 ),
               }
             : prev
@@ -491,6 +523,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
     }
   }}
 />
+
 
 
             )}
