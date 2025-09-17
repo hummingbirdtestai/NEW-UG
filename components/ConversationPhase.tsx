@@ -429,22 +429,20 @@ const handleGotIt = () => {
   onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
     if (!user) return;
     try {
-      const { error } = await supabase.from("student_mcq_attempts").insert({
-        student_id: user.id,
-        subject_id: currentHYF.subject_id || null,
-        chapter_id: currentHYF.chapter_id || null,
-        topic_id: currentHYF.topic_id || null,
-        vertical_id: currentHYF.vertical_id || null,
-        mcq_key: mcq.mcq_key || "conversation_mcq",
-        mcq_uuid: mcq.id || mcq.uuid,
-        selected_option: selectedOption,
-        correct_answer: mcq.correct_answer,
-        is_correct: isCorrect,
-        learning_gap: mcq.learning_gap || null,
-        hyf_uuid: currentHYF.uuid,
-        mcq_category: "conversation",
-        feedback: mcq.feedback ? mcq.feedback : null,
-      });
+     const { error } = await supabase.from("student_mcq_attempts").insert({
+  student_id: user.id,
+  vertical_id: currentHYF.vertical_id || null,   // ✅ only vertical_id needed
+  mcq_key: mcq.mcq_key || "conversation_mcq",
+  mcq_uuid: mcq.id || mcq.uuid,
+  selected_option: selectedOption,
+  correct_answer: mcq.correct_answer,
+  is_correct: isCorrect,
+  learning_gap: mcq.learning_gap || null,
+  hyf_uuid: currentHYF.uuid,
+  mcq_category: "conversation",
+  feedback: mcq.feedback ? mcq.feedback : null,
+});
+
 
       if (error) {
         console.error("❌ Failed to insert HYF MCQ attempt:", error);
