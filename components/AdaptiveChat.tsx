@@ -522,41 +522,25 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
                 // ✅ Bookmark handler
 onBookmarkMCQ={async (mcqId, newValue) => {
   if (!user) return;
-
   try {
-    const { data, error } = await supabase
-      .from("student_signals")
-      .upsert(
-        {
-          student_id: user.id,
-          object_type: "conversation_mcq",
-          object_uuid: mcqId,
-          bookmark: newValue,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      )
-      .select();
+    const { error } = await supabase.from("student_signals").upsert(
+      {
+        student_id: user.id,
+        object_type: "conversation_mcq", // ✅ type for HYF MCQs
+        object_uuid: mcqId,
+        bookmark: newValue,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "student_id,object_type,object_uuid" }
+    );
 
     if (error) {
-      console.error("❌ Failed to update MCQ bookmark:", error);
+      console.error("❌ Failed to update HYF MCQ bookmark:", error);
     } else {
-      console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
-      setCurrentConcept((prev: any) =>
-        prev
-          ? {
-              ...prev,
-              mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-                m.id === mcqId || m.uuid === mcqId
-                  ? { ...m, isBookmarked: newValue }
-                  : m
-              ),
-            }
-          : prev
-      );
+      console.log(`✅ Bookmark for HYF MCQ ${mcqId} set to ${newValue}`);
     }
   } catch (err) {
-    console.error("❌ Exception updating MCQ bookmark:", err);
+    console.error("❌ Exception updating HYF MCQ bookmark:", err);
   }
 }}
               />
