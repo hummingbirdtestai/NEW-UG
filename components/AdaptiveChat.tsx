@@ -141,10 +141,9 @@ if (user && Array.isArray(concept.mcq_1_6_unicode)) {
   };
 
   // ✅ Toggle bookmark in student_signals
-  const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
+ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
   if (!user) return;
 
-  // ✅ Only use uuid (don’t fallback to vertical_id)
   const objectUuid = concept.concept_json_unicode?.uuid;
   if (!objectUuid) {
     console.error("❌ Concept missing uuid — cannot bookmark");
@@ -158,7 +157,7 @@ if (user && Array.isArray(concept.mcq_1_6_unicode)) {
         student_id: user.id,
         object_type: "concept",
         object_uuid: objectUuid,
-        bookmark: newValue,
+        bookmark: newValue, // ✅ always send true/false
       },
       { onConflict: "student_id,object_type,object_uuid" }
     )
