@@ -4,6 +4,8 @@ import { MotiView, AnimatePresence } from 'moti';
 import { MessageCircle, User, GraduationCap, Lightbulb, BookOpen, Bookmark, BookmarkCheck, ChevronRight, ChevronDown, ChevronUp, CircleCheck as CheckCircle, Circle as XCircle, TriangleAlert as AlertTriangle } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 import MCQPhase from "@/components/MCQPhase";
+import { supabase } from "@/lib/supabaseClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 interface MCQOption {
