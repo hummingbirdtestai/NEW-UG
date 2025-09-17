@@ -83,7 +83,7 @@ function MCQCard({
   const handleBookmarkToggle = () => {
     const newValue = !localBookmark;
     setLocalBookmark(newValue);
-    onBookmarkMCQ?.(mcq.id, newValue);
+    onBookmarkMCQ?.(mcq.id || (mcq as any).uuid, newValue);
   };
 
   return (
