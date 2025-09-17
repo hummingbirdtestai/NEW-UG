@@ -277,11 +277,8 @@ const handleAnswer = (selectedValue: string) => {
     showFeedback: true,
   };
 
-  setAnsweredMCQs((prev) => {
-    const updated = [...prev];
-    updated[currentMCQIndex] = newAnswered;
-    return updated;
-  });
+  setAnsweredMCQs((prev) => [...prev, newAnswered]);
+
 
   if (isCorrect) {
   setShowConfetti(true);
