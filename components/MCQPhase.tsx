@@ -224,7 +224,8 @@ export default function MCQPhase({
   onComplete,
   mode = "concept",
   onBookmarkMCQ,
-  stopOnFirstCorrect = false,   // 👈 NEW
+  stopOnFirstCorrect = false,
+  onAttemptMCQ,   // 👈 add this here
 }: MCQPhaseProps) {
   const { width } = Dimensions.get("window");
   const [answeredMCQs, setAnsweredMCQs] = useState<AnsweredMCQ[]>([]);
