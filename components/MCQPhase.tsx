@@ -276,9 +276,17 @@ if (!correctDbKey) {
     });
 
     if (isCorrect) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 1500);
-    }
+  setShowConfetti(true);
+  setTimeout(() => setShowConfetti(false), 1500);
+
+  if (stopOnFirstCorrect) {
+    // 👇 immediately end this phase after first correct
+    setIsComplete(true);
+    onComplete?.();
+    return;
+  }
+}
+
   };
 
   const handleNext = () => {
