@@ -259,7 +259,8 @@ export default function ConversationPhase({
         options: m.options,
         feedback: m.feedback,
         learning_gap: m.learning_gap ?? m.Learning_Gap ?? m.learningGap ?? "",
-        correct_answer: finalKey,   // ✅ null if invalid/missing
+        correct_answer: finalKey, 
+        mcq_key: m.mcq_key || null, // ✅ null if invalid/missing
       };
     }),
   }));
