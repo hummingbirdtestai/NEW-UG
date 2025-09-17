@@ -345,7 +345,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
       uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,   // ✅ real HYF uuid from DB
       text: hyf.HYF,
       mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
-+     id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,     // ✅ real MCQ id from DB
+     id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,     // ✅ real MCQ id from DB
         stem: mcq.stem,
         options: mcq.options,
         feedback: {
