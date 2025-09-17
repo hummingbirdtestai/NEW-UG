@@ -376,14 +376,15 @@ const handleAnswer = (selectedValue: string) => {
 
         {!isComplete &&
           currentMCQIndex < mcqs.length &&
-          !answeredMCQs[currentMCQIndex] && (
-            <MCQCard
-              mcq={mcqs[currentMCQIndex]}
-              shuffledOptions={shuffledOptionsList[currentMCQIndex]}
-              onAnswer={handleAnswer}
-              onBookmarkMCQ={onBookmarkMCQ}
-            />
-          )}
+          currentMCQIndex < mcqs.length && (
+  <MCQCard
+    mcq={mcqs[currentMCQIndex]}
+    shuffledOptions={shuffledOptionsList[currentMCQIndex]}
+    onAnswer={handleAnswer}
+    onBookmarkMCQ={onBookmarkMCQ}
+  />
+)
+}
       </ScrollView>
     </View>
   );
