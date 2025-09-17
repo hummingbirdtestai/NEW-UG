@@ -364,12 +364,13 @@ const handleAnswer = (selectedValue: string) => {
               : "Next Question")                 // ✅ wrong + not last
       )
     : (
-        ans.isCorrect
-          ? "Next HYF"                           // ✅ correct (stop flow)
-          : (idx === mcqs.length - 1
-              ? "Next HYF"                       // ✅ wrong + last
-              : "Next Question")                 // ✅ wrong + not last
-      )
+  ans.isCorrect
+    ? (isLastHYF ? "Next Media" : "Next HYF")                // ✅ correct
+    : (idx === mcqs.length - 1
+        ? (isLastHYF ? "Next Media" : "Next HYF")            // ✅ wrong + last
+        : "Next Question")                                   // ✅ wrong + not last
+)
+
   }
 </Text>
 
