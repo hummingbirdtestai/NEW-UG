@@ -281,14 +281,15 @@ const handleAnswer = (selectedValue: string) => {
   });
 
   if (isCorrect) {
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 1500);
-    if (stopOnFirstCorrect) {
-      setIsComplete(true);
-      onComplete?.();
-      return;
-    }
+  setShowConfetti(true);
+  setTimeout(() => setShowConfetti(false), 1500);
+  if (stopOnFirstCorrect) {
+    setIsComplete(true);
+    onComplete?.();
+    return;
   }
+}
+
 };
 
 
