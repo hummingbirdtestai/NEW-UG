@@ -322,7 +322,7 @@ if (!correctDbKey) {
             <MCQCard
               mcq={ans.mcq}
               shuffledOptions={shuffledOptionsList[idx]}
-              onAnswer={}
+              onAnswer={() => {}}
               answeredMCQ={ans}
               onBookmarkMCQ={onBookmarkMCQ}
               isBookmarked={ans.mcq.isBookmarked ?? false}
