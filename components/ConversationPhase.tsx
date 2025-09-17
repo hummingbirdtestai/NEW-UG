@@ -443,7 +443,7 @@ const handleGotIt = () => {
       chapter_id: currentHYF.chapter_id,
       topic_id: currentHYF.topic_id,
       vertical_id: currentHYF.vertical_id,
-      mcq_key: mcq.mcq_key,
+      mcq_key: mcq.mcq_key || `conversation_mcq_${mcq.id || "unknown"}`,
       mcq_uuid: mcq.id || mcq.uuid,
       selected_option: selectedOption,
       correct_answer: mcq.correct_answer,
