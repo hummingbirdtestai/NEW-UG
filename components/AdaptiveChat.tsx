@@ -341,24 +341,26 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             )}
            {phase === 1 && (
   <ConversationPhase
-    hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
-  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,   // ✅ real HYF uuid from DB
-      text: hyf.HYF,
-      subject_id: currentConcept.subject_id,
-  chapter_id: currentConcept.chapter_id,
-  vertical_id: currentConcept.vertical_id,
-      mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
-        id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,     // ✅ real MCQ id from DB
-        stem: mcq.stem,
-        options: mcq.options,
-        feedback: {
-          correct: mcq.feedback?.correct ?? "",
-          wrong: mcq.feedback?.wrong ?? "",
-        },
-        learning_gap: mcq.learning_gap,
-        correct_answer: mcq.correct_answer,
-      })),
-    }))}
+   hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
+  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,
+  text: hyf.HYF,
+  subject_id: currentConcept.subject_id,      // ✅ add
+  chapter_id: currentConcept.chapter_id,      // ✅ add
+  topic_id: currentConcept.concept_json_unicode?.topic_id || null, // ✅ add
+  vertical_id: currentConcept.vertical_id,    // ✅ add
+  mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
+    id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,
+    stem: mcq.stem,
+    options: mcq.options,
+    feedback: {
+      correct: mcq.feedback?.correct ?? "",
+      wrong: mcq.feedback?.wrong ?? "",
+    },
+    learning_gap: mcq.learning_gap,
+    correct_answer: mcq.correct_answer,
+  })),
+}))}
+
     onComplete={handleNextPhase}
     onBookmark={async (hyfUuid, newValue) => {
   if (!user) return;
