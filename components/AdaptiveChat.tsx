@@ -493,6 +493,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
 
 
 
+
       if (error) {
         console.error("❌ Failed to insert MCQ attempt:", error);
       } else {
