@@ -422,9 +422,15 @@ const handleGotIt = () => {
   mode="conversation"
   stopOnFirstCorrect={false}
   onComplete={() => {
-    setShowMCQs(false);
-    handleNextHYF();
-  }}
+  setShowMCQs(false);
+  if (currentHYFIndex < normalizedHyfs.length - 1) {
+    handleNextHYF();   // go to next HYF
+  } else {
+    setIsComplete(true);
+    onComplete?.();    // 🔑 triggers parent (AdaptiveChat) → goes to Media
+  }
+}}
+
   // ✅ Log MCQ attempt
   onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
   if (!user) return;
