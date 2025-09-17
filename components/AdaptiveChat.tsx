@@ -476,7 +476,8 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
             ? {
                 ...prev,
                 mcq_1_6_unicode: prev.mcq_1_6_unicode.map((m: any) =>
-                  m.id === mcqId ? { ...m, isBookmarked: newValue } : m
+                  mcq.id === mcqId || mcq.uuid === mcqId
+ ? { ...m, isBookmarked: newValue } : m
                 ),
               }
             : prev
