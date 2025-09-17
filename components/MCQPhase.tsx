@@ -358,21 +358,22 @@ const handleAnswer = (selectedValue: string) => {
     }}
     className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
   >
-    <Text className="text-white font-bold">
+   <Text className="text-white font-bold">
   {mode === "concept" ? (
     ans.isCorrect
-      ? "Next Concept" // correct → Next Concept
+      ? "Next Concept"
       : idx === mcqs.length - 1
-        ? "Next Concept" // wrong + last
-        : "Next Question" // wrong + not last
+        ? "Next Concept"
+        : "Next Question"
   ) : (
     ans.isCorrect
-      ? (isLastHYF ? "Next Media" : "Next HYF") // ✅ correct
+      ? (isLastHYF ? "Next Media" : "Next HYF")
       : idx === mcqs.length - 1
-        ? (isLastHYF ? "Next Media" : "Next HYF") // ✅ wrong + last
-        : "Next Question" // ✅ wrong + not last
+        ? (isLastHYF ? "Next Media" : "Next HYF")
+        : "Next Question"
   )}
 </Text>
+
 
 
   </Pressable>
