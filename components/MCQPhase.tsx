@@ -334,6 +334,8 @@ export default function MCQPhase({
   </Pressable>
 )}
 
+          </View>
+        ))}
 
         {!isComplete &&
           currentMCQIndex < mcqs.length &&
