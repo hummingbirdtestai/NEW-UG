@@ -242,6 +242,10 @@ export default function ConversationPhase({
   const normalizedHyfs = hyfs.map((h: any, hyfIdx: number) => ({
     uuid: h.uuid || h.id || `hyf-${hyfIdx}`, // normalize HYF id
    text: h.text,
+    subject_id: h.subject_id,
+  chapter_id: h.chapter_id,
+  topic_id: h.topic_id,
+  vertical_id: h.vertical_id,
   mcqs: (h.mcqs ?? h.MCQs ?? []).map((m: any, mcqIdx: number) => {
       const rawKey = m.correct_answer?.toString().trim().toUpperCase();
       const validKeys: (keyof MCQOption)[] = ["A", "B", "C", "D"];
