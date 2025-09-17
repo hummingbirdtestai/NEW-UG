@@ -98,8 +98,7 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
     const { data, error } = await supabase
       .from("concepts_vertical")
       .select(
-  "vertical_id, subject_id, chapter_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode, flash_cards_unicode, react_order"
-)
+  "vertical_id, subject_id, chapter_id, concept_json_unicode, correct_jsons, mcq_1_6_unicode, media_library_unicode,flash_cards_unicode,react_order")
 
       .eq("chapter_id", chapterId)
       .order("react_order", { ascending: true })
