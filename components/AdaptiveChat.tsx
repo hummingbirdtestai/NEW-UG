@@ -468,7 +468,7 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
         subject_id: currentConcept.subject_id,
 chapter_id: currentConcept.chapter_id,
 
-        topic_id: currentConcept.concept_json_unicode?.topic_id || null,
+        topic_id: currentConcept.topic_id,   // comes from table
         vertical_id: currentConcept.vertical_id,
         mcq_key: mcq.mcq_key || "concept_mcq",
         mcq_uuid: mcq.id || mcq.uuid,
