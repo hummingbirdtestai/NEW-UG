@@ -346,8 +346,8 @@ const fetchConcept = async (
   onNext={handleNextPhase}
   current={currentIdx + 1}
   total={totalConcepts}
-  isBookmarked={currentConcept.isBookmarked} // ✅ pass bookmark state
-  onBookmark={(newValue) => handleBookmarkToggle(newValue, currentConcept)} // ✅ wire toggle
+  isBookmarked={currentConcept.isBookmarked}
+  onBookmark={(newValue) => handleBookmarkToggle(newValue, currentConcept)}
 />
 
 
