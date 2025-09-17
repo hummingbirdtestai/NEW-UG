@@ -376,6 +376,7 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
                     },
                     learning_gap: mcq.learning_gap,
                     correct_answer: mcq.correct_answer,
+                    mcq_key: mcq.mcq_key || null,
                   })),
                 }))}
                 onComplete={handleNextPhase}
