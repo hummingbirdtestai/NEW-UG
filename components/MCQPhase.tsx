@@ -30,6 +30,7 @@ interface MCQPhaseProps {
   onComplete?: () => void;
   mode?: "conversation" | "concept";
   onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void; // 👈 NEW
+  stopOnFirstCorrect?: boolean;
 }
 
 interface AnsweredMCQ {
