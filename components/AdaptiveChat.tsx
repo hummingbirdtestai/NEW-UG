@@ -513,23 +513,24 @@ onBookmarkMCQ={async (mcqId, newValue) => {
   if (!user) return;
 
   try {
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("student_signals")
-      .upsert({
-        student_id: user.id,
-        object_type: "conversation_mcq",
-        object_uuid: mcqId,
-        bookmark: newValue,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: "student_id,object_type,object_uuid"
-      });
+      .upsert(
+        {
+          student_id: user.id,
+          object_type: "conversation_mcq",
+          object_uuid: mcqId,
+          bookmark: newValue,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      )
+      .select();
 
     if (error) {
       console.error("❌ Failed to update MCQ bookmark:", error);
     } else {
       console.log(`✅ Bookmark for MCQ ${mcqId} set to ${newValue}`);
-      // also update local state so UI reflects immediately
       setCurrentConcept((prev: any) =>
         prev
           ? {
@@ -547,7 +548,6 @@ onBookmarkMCQ={async (mcqId, newValue) => {
     console.error("❌ Exception updating MCQ bookmark:", err);
   }
 }}
-
               />
             )}
           </>
