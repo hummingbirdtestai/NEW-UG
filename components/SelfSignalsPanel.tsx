@@ -4,6 +4,7 @@ import { MotiView } from 'moti';
 import { Target, Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, CreditCard as Edit3, Check } from 'lucide-react-native';
 import { supabase } from '@/lib/supabaseClient';
 import { useAuth } from '@/contexts/AuthContext';
+import { toggleBookmark } from '@/lib/bookmarkUtils';
 
 interface StudentSignal {
   bookmark: boolean;
@@ -108,7 +109,11 @@ export default function SelfSignalsPanel({ objectType, objectUuid, topicName }: 
   };
 
   const handleBookmarkToggle = () => {
-    updateStudentSignal({ bookmark: !signals.bookmark });
+    const newValue = !signals.bookmark;
+    toggleBookmark(objectType, objectUuid, newValue, user.id);
+    setSignals(prev => ({ ...prev, bookmark: newValue }));
+    setSaveStatus('saved');
+    setTimeout(() => setSaveStatus('idle'), 2000);
   };
 
   const handleDifficultySelect = (difficulty: StudentSignal['difficulty']) => {
