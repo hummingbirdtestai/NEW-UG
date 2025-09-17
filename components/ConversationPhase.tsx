@@ -406,15 +406,33 @@ const handleGotIt = () => {
             {/* Current MCQ */}
             {showMCQs && currentHYF?.mcqs?.length > 0 && (
   <MCQPhase
-  mcqs={currentHYF.mcqs}
-  mode="conversation"   // 👈 add this
-  onComplete={() => {
-    setShowMCQs(false);
-    handleNextHYF();
-  }}
-/>
+    mcqs={currentHYF.mcqs}
+    mode="conversation"
+    onComplete={() => {
+      setShowMCQs(false);
+      handleNextHYF();
+    }}
+    onBookmarkMCQ={async (mcqId, newValue) => {
+      // Save bookmark to DB
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "conversation_mcq",   // ✅ correct type for HYF MCQs
+          object_uuid: mcqId,
+          bookmark: newValue,
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
 
+      if (error) {
+        console.error("❌ Failed to bookmark MCQ:", error);
+      } else {
+        console.log(`✅ Bookmark set to ${newValue} for MCQ ${mcqId}`);
+      }
+    }}
+  />
 )}
+
 
           </>
         ) : (
