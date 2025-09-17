@@ -515,15 +515,15 @@ onBookmarkMCQ={async (mcqId, newValue) => {
   try {
     const { error } = await supabase
       .from("student_signals")
-      .insert({
+      .upsert({
         student_id: user.id,
         object_type: "conversation_mcq",
         object_uuid: mcqId,
         bookmark: newValue,
         updated_at: new Date().toISOString(),
-      })
-      .onConflict("student_id,object_type,object_uuid")
-      .merge();
+      }, {
+        onConflict: "student_id,object_type,object_uuid"
+      });
 
     if (error) {
       console.error("❌ Failed to update MCQ bookmark:", error);
