@@ -185,19 +185,21 @@ const preloadConcept = async (idx: number) => {
     .range(idx, idx);
 
   if (!error && data && data[0]) {
-    let concept = data[0];
+   let concept = data[0];
 
-    if (user && concept.concept_json_unicode?.uuid) {
-      const { data: signal } = await supabase
-        .from("student_signals")
-        .select("bookmark")
-        .eq("student_id", user.id)
-        .eq("object_type", "concept")
-        .eq("object_uuid", concept.concept_json_unicode.uuid)
-        .maybeSingle();
+// ✅ Load concept bookmark state
+if (user && concept.concept_json_unicode?.uuid) {
+  const { data: signal } = await supabase
+    .from("student_signals")
+    .select("bookmark")
+    .eq("student_id", user.id)
+    .eq("object_type", "concept")
+    .eq("object_uuid", concept.concept_json_unicode.uuid)
+    .maybeSingle();
 
-      concept.isBookmarked = signal?.bookmark ?? false;
-    }
+  concept.isBookmarked = signal?.bookmark ?? false;
+}
+
 
     setNextConcept(concept);
   }
@@ -333,11 +335,6 @@ const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
   onNext={handleNextPhase}
   current={currentIdx + 1}
   total={totalConcepts}
-  isBookmarked={currentConcept.isBookmarked}
-  onBookmark={(newValue) =>
-    handleBookmarkToggle(newValue, currentConcept)
-  }
-/>
             )}
            {phase === 1 && (
   <ConversationPhase
