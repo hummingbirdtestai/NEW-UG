@@ -526,7 +526,7 @@ onBookmarkMCQ={async (mcqId, newValue) => {
     const { error } = await supabase.from("student_signals").upsert(
       {
         student_id: user.id,
-        object_type: "conversation_mcq", // ✅ type for HYF MCQs
+        object_type: "concept_mcq", // ✅ distinguish type
         object_uuid: mcqId,
         bookmark: newValue,
         updated_at: new Date().toISOString(),
@@ -535,14 +535,15 @@ onBookmarkMCQ={async (mcqId, newValue) => {
     );
 
     if (error) {
-      console.error("❌ Failed to update HYF MCQ bookmark:", error);
+      console.error("❌ Failed to update Concept MCQ bookmark:", error);
     } else {
-      console.log(`✅ Bookmark for HYF MCQ ${mcqId} set to ${newValue}`);
+      console.log(`✅ Bookmark for Concept MCQ ${mcqId} set to ${newValue}`);
     }
   } catch (err) {
-    console.error("❌ Exception updating HYF MCQ bookmark:", err);
+    console.error("❌ Exception updating Concept MCQ bookmark:", err);
   }
 }}
+
               />
             )}
           </>
