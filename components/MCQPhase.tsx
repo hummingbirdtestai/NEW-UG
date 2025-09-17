@@ -270,10 +270,6 @@ export default function MCQPhase({
     if (isCorrect) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 1500);
-
-      if (mode === "conversation" || mode === "concept") {
-        setIsComplete(true);
-      }
     }
   };
 
@@ -316,7 +312,7 @@ export default function MCQPhase({
 
       <ScrollView ref={scrollViewRef} className="flex-1 p-4">
         {answeredMCQs.map((ans, idx) => (
-          <View key={ans.mcq.id || idx}>
+          <View key={`${ans.mcq.id}-${idx}`}>
             <MCQCard
               mcq={ans.mcq}
               shuffledOptions={shuffledOptionsList[idx]}
