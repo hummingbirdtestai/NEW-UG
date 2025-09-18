@@ -308,24 +308,6 @@ const handleNextPhase = async () => {
     } else {
       setIsCompleted(true);
     }
-  }
-
-
-  const handleCompleteConcept = () => {
-    if (currentIdx + 1 < totalConcepts) {
-      const nextIdx = currentIdx + 1;
-      setCurrentIdx(nextIdx);
-      setPhase(0);
-      if (nextConcept) {
-        setCurrentConcept(nextConcept);
-        setNextConcept(null);
-        if (nextIdx + 1 < totalConcepts) preloadConcept(nextIdx + 1);
-      } else {
-        fetchConcept(nextIdx, true);
-      }
-    } else {
-      setIsCompleted(true);
-    }
   };
 
   // session/loading checks
