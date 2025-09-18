@@ -607,7 +607,7 @@ await supabase.from("student_learning_pointer").update({
 } catch (err) {
   console.error("❌ Failed to update pointer for MCQ:", err);
 }
-
+setPhaseStartTime(new Date());
                 }}
 
                 // ✅ Bookmark handler
