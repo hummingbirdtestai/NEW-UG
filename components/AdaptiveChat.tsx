@@ -243,7 +243,7 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     }
   };
 
-  const handleNextPhase = async () => {
+const handleNextPhase = async () => {
     if (!user || !currentConcept || !phaseStartTime) {
       setPhase((prev) => prev + 1);
       return;
@@ -308,7 +308,7 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     } else {
       setIsCompleted(true);
     }
-  };
+  }
 
 
   const handleCompleteConcept = () => {
