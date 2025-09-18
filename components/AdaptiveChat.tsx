@@ -260,30 +260,27 @@ const handleNextPhase = async () => {
     let updateFields: any = {};
 
     if (phase === 0) {
-      updateFields = {
-        concept_time_seconds: timeSpent,
-        concept_completed_at: new Date().toISOString(),
-        element_type: "conversation",
-      };
-    } else if (phase === 1) {
-      updateFields = {
-        conversation_time_seconds: timeSpent,
-        conversation_completed_at: new Date().toISOString(),
-        element_type: "media_library",
-      };
-    } else if (phase === 2) {
-      updateFields = {
-        media_library_time_seconds: timeSpent,
-        media_library_completed_at: new Date().toISOString(),
-        element_type: "flashcards",
-      };
-    } else if (phase === 3) {
-      updateFields = {
-        flashcards_time_seconds: timeSpent,
-        flashcards_completed_at: new Date().toISOString(),
-        element_type: "mcq",
-      };
-    }
+  updateFields = {
+    concept_time_seconds: timeSpent,
+    concept_completed_at: new Date().toISOString(),
+  };
+} else if (phase === 1) {
+  updateFields = {
+    conversation_time_seconds: timeSpent,
+    conversation_completed_at: new Date().toISOString(),
+  };
+} else if (phase === 2) {
+  updateFields = {
+    media_library_time_seconds: timeSpent,
+    media_library_completed_at: new Date().toISOString(),
+  };
+} else if (phase === 3) {
+  updateFields = {
+    flashcards_time_seconds: timeSpent,
+    flashcards_completed_at: new Date().toISOString(),
+  };
+}
+
 
     try {
       await supabase
