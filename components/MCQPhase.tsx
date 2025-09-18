@@ -336,48 +336,42 @@ const handleAnswer = (selectedValue: string) => {
 
       <ScrollView ref={scrollViewRef} className="flex-1 p-4">
         {answeredMCQs.map((ans, idx) => (
-          <View key={`${ans.mcq.id}-${idx}`}>
-            <MCQCard
-              mcq={ans.mcq}
-              shuffledOptions={shuffledOptionsList[idx]}
-              onAnswer={() => {}}
-              answeredMCQ={ans}
-              onBookmarkMCQ={onBookmarkMCQ}
-              isBookmarked={ans.mcq.isBookmarked ?? false}
-            />
-            {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
+  <View key={`${ans.mcq.id}-${idx}`}>
+    <MCQCard
+      mcq={ans.mcq}
+      shuffledOptions={shuffledOptionsList[idx]}
+      onAnswer={() => {}}
+      answeredMCQ={ans}
+      onBookmarkMCQ={onBookmarkMCQ}
+      isBookmarked={ans.mcq.isBookmarked ?? false}
+    />
+    {ans.showFeedback && <FeedbackCard mcq={ans.mcq} answered={ans} />}
 
-            {idx === currentMCQIndex && (
-  <Pressable
-  onPress={() => {
-    if (ans.isCorrect || idx === mcqs.length - 1) {
-      // 👉 Correct answer OR last question → finish this phase
-      setIsComplete(true);
-      onComplete?.();
-    } else {
-      // 👉 Wrong answer but not last → go to next MCQ
-      handleNext();
-    }
-  }}
-  className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
->
-  <Text className="text-white font-bold">
-    {mode === "concept"
-      ? (ans.isCorrect || idx === mcqs.length - 1
-          ? "Next Concept"
-          : "Next Question")
-      : (ans.isCorrect || idx === mcqs.length - 1
-          ? (isLastHYF ? "Next Media" : "Next HYF")
-          : "Next Question")}
-  </Text>
-</Pressable>
-
-)}
-
-
-
-          </View>
-        ))}
+    {idx === currentMCQIndex && (
+      <Pressable
+        onPress={() => {
+          if (ans.isCorrect || idx === mcqs.length - 1) {
+            setIsComplete(true);
+            onComplete?.();
+          } else {
+            handleNext();   // 👉 move index, only then show next MCQ
+          }
+        }}
+        className="bg-emerald-600 rounded-2xl px-6 py-4 items-center mt-2"
+      >
+        <Text className="text-white font-bold">
+          {mode === "concept"
+            ? (ans.isCorrect || idx === mcqs.length - 1
+                ? "Next Concept"
+                : "Next Question")
+            : (ans.isCorrect || idx === mcqs.length - 1
+                ? (isLastHYF ? "Next Media" : "Next HYF")
+                : "Next Question")}
+        </Text>
+      </Pressable>
+    )}
+  </View>
+))}
 
         {!isComplete &&
           currentMCQIndex < mcqs.length &&
