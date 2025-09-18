@@ -240,12 +240,52 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     }
   };
 
-  const handleNextPhase = () => {
-    if (phase === 0) setPhase(1);
-    else if (phase === 1) setPhase(2);
-    else if (phase === 2) setPhase(3);
-    else if (phase === 3) setPhase(4);
-  };
+const handleNextPhase = async () => {
+  if (!user || !currentConcept || !phaseStartTime) {
+    setPhase((prev) => prev + 1);
+    return;
+  }
+
+  const timeSpent = Math.floor((Date.now() - phaseStartTime.getTime()) / 1000);
+  let updateFields: any = {};
+
+  if (phase === 0) {
+    updateFields = {
+      concept_time_seconds: timeSpent,
+      concept_completed_at: new Date().toISOString(),
+    };
+  } else if (phase === 1) {
+    updateFields = {
+      conversation_time_seconds: timeSpent,
+      conversation_completed_at: new Date().toISOString(),
+    };
+  } else if (phase === 2) {
+    updateFields = {
+      media_library_time_seconds: timeSpent,
+      media_library_completed_at: new Date().toISOString(),
+    };
+  } else if (phase === 3) {
+    updateFields = {
+      flashcards_time_seconds: timeSpent,
+      flashcards_completed_at: new Date().toISOString(),
+    };
+  }
+
+  try {
+    await supabase
+      .from("student_learning_pointer")
+      .update(updateFields)
+      .eq("student_id", user.id)
+      .eq("vertical_id", currentConcept.vertical_id);
+    console.log("✅ Pointer updated for phase", phase);
+  } catch (err) {
+    console.error("❌ Failed to update pointer:", err);
+  }
+
+  setPhase((prev) => prev + 1);
+  setPhaseStartTime(new Date()); // reset timer for next phase
+};
+
 
   const handleCompleteConcept = () => {
     if (currentIdx + 1 < totalConcepts) {
