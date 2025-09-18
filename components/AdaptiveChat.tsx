@@ -148,16 +148,19 @@ const fetchConcept = async (
 
   if (user) {
   try {
-    await supabase.from("student_learning_pointer").insert({
-      student_id: user.id,
-      subject_id: concept.subject_id,
-      chapter_id: concept.chapter_id,
-      topic_id: concept.topic_id,
-      vertical_id: concept.vertical_id,
-      seq_number: concept.react_order,
-      element_type: "concept",
-      updated_at: new Date().toISOString(),
-    });
+   await supabase.from("student_learning_pointer").upsert(
+  {
+    student_id: user.id,
+    subject_id: concept.subject_id,
+    chapter_id: concept.chapter_id,
+    topic_id: concept.topic_id,
+    vertical_id: concept.vertical_id,
+    seq_number: concept.react_order,
+    element_type: "concept",
+    updated_at: new Date().toISOString(),
+  },
+  { onConflict: "student_id,vertical_id" }
+);
     setPhaseStartTime(new Date());
     console.log("✅ Pointer row created for concept", concept.vertical_id);
   } catch (err) {
