@@ -77,9 +77,14 @@ function MCQCard({
   onBookmarkMCQ?: (mcqId: string, isBookmarked: boolean) => void;
   isBookmarked?: boolean;
 }) {
-  const correctValue = mcq.options[mcq.correct_answer];
-  const correctUiLabel =
-    shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?";
+  const correctValue = mcq.correct_answer 
+  ? mcq.options[mcq.correct_answer] 
+  : undefined;
+
+const correctUiLabel =
+  correctValue !== undefined
+    ? shuffledOptions.find((opt) => opt.value === correctValue)?.uiLabel || "?"
+    : "?";
 
   const [localBookmark, setLocalBookmark] = useState(isBookmarked);
   useEffect(() => setLocalBookmark(isBookmarked), [isBookmarked]);
