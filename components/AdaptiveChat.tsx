@@ -32,6 +32,7 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
   const [nextConcept, setNextConcept] = useState<any | null>(null);
   const [phase, setPhase] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [phaseStartTime, setPhaseStartTime] = useState<Date | null>(null);
   const [loadingConcept, setLoadingConcept] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const { user, loading } = useAuth();
@@ -145,6 +146,24 @@ const fetchConcept = async (
 
   setCurrentConcept(concept);
 
+  if (user) {
+  try {
+    await supabase.from("student_learning_pointer").insert({
+      student_id: user.id,
+      subject_id: concept.subject_id,
+      chapter_id: concept.chapter_id,
+      topic_id: concept.topic_id,
+      vertical_id: concept.vertical_id,
+      seq_number: concept.react_order,
+      element_type: "concept",
+      updated_at: new Date().toISOString(),
+    });
+    setPhaseStartTime(new Date());
+    console.log("✅ Pointer row created for concept", concept.vertical_id);
+  } catch (err) {
+    console.error("❌ Failed to insert learning pointer:", err);
+  }
+}
   setLoadingConcept(false);
   setFetchError(false);
 
