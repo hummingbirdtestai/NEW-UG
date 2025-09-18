@@ -383,8 +383,7 @@ const handleAnswer = (selectedValue: string) => {
             onAnswer={handleAnswer}
             onBookmarkMCQ={onBookmarkMCQ}
           />
-        )
-}
+        )}
       </ScrollView>
     </View>
   );
