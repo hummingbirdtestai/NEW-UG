@@ -156,7 +156,6 @@ const fetchConcept = async (
     topic_id: concept.topic_id,
     vertical_id: concept.vertical_id,
     seq_number: concept.react_order,
-    element_type: "concept",
     updated_at: new Date().toISOString(),
   },
   { onConflict: "student_id,vertical_id" }
@@ -588,18 +587,21 @@ const handleNextPhase = async () => {
                   }
                   // ✅ Update pointer for MCQ completion
 try {
-  const mcqTime = phaseStartTime
+  const mcqKey = mcq.mcq_key; // e.g., "mcq_1"
+const mcqTime = phaseStartTime
   ? Math.floor((Date.now() - phaseStartTime.getTime()) / 1000)
   : 0;
 
 await supabase.from("student_learning_pointer").update({
-  mcq_key: mcq.mcq_key,
-  [`${mcq.mcq_key}_time_seconds`]: mcqTime,
-  [`${mcq.mcq_key}_completed_at`]: new Date().toISOString(),
+  [`${mcqKey}_time_seconds`]: mcqTime,
+  [`${mcqKey}_completed_at`]: new Date().toISOString(),
+  [`${mcqKey}_is_correct`]: isCorrect,
+  ...(isCorrect ? { mcq_section_completed: true } : {}),
   updated_at: new Date().toISOString(),
 })
 .eq("student_id", user.id)
 .eq("vertical_id", currentConcept.vertical_id);
+
   console.log(`✅ Pointer updated for ${mcq.mcq_key}`);
 } catch (err) {
   console.error("❌ Failed to update pointer for MCQ:", err);
