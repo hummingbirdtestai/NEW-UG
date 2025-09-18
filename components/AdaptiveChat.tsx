@@ -591,12 +591,18 @@ const handleNextPhase = async () => {
                   }
                   // ✅ Update pointer for MCQ completion
 try {
-  await supabase.from("student_learning_pointer").update({
-    [`${mcq.mcq_key}_time_seconds`]: 0, // TODO: replace with real timer if you track per-MCQ time
-    [`${mcq.mcq_key}_completed_at`]: new Date().toISOString(),
-  })
-  .eq("student_id", user.id)
-  .eq("vertical_id", currentConcept.vertical_id);
+  const mcqTime = phaseStartTime
+  ? Math.floor((Date.now() - phaseStartTime.getTime()) / 1000)
+  : 0;
+
+await supabase.from("student_learning_pointer").update({
+  mcq_key: mcq.mcq_key,
+  [`${mcq.mcq_key}_time_seconds`]: mcqTime,
+  [`${mcq.mcq_key}_completed_at`]: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+})
+.eq("student_id", user.id)
+.eq("vertical_id", currentConcept.vertical_id);
   console.log(`✅ Pointer updated for ${mcq.mcq_key}`);
 } catch (err) {
   console.error("❌ Failed to update pointer for MCQ:", err);
