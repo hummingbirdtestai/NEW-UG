@@ -244,10 +244,17 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
   };
 
 const handleNextPhase = async () => {
-    if (!user || !currentConcept || !phaseStartTime) {
-      setPhase((prev) => prev + 1);
-      return;
-    }
+    if (!user || !currentConcept) {
+    setPhase((prev) => prev + 1);
+    setPhaseStartTime(new Date());
+    return;
+  }
+
+  if (!phaseStartTime) {
+    setPhase((prev) => prev + 1);
+    setPhaseStartTime(new Date());
+    return;
+  }
 
     const timeSpent = Math.floor((Date.now() - phaseStartTime.getTime()) / 1000);
     let updateFields: any = {};
