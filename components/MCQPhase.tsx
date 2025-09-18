@@ -374,15 +374,15 @@ const handleAnswer = (selectedValue: string) => {
 ))}
 
         {!isComplete &&
-          currentMCQIndex < mcqs.length &&
-          currentMCQIndex < mcqs.length && (
-          <MCQCard
-            mcq={mcqs[currentMCQIndex]}
-            shuffledOptions={shuffledOptionsList[currentMCQIndex]}
-            onAnswer={handleAnswer}
-            onBookmarkMCQ={onBookmarkMCQ}
-          />
-        )}
+  currentMCQIndex < mcqs.length &&
+  !answeredMCQs[currentMCQIndex] && (   // 👈 show only if not answered yet
+    <MCQCard
+      mcq={mcqs[currentMCQIndex]}
+      shuffledOptions={shuffledOptionsList[currentMCQIndex]}
+      onAnswer={handleAnswer}
+      onBookmarkMCQ={onBookmarkMCQ}
+    />
+  )}
       </ScrollView>
     </View>
   );
