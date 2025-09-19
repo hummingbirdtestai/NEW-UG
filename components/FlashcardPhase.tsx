@@ -180,17 +180,19 @@ function ToggleCard({ item, index, isBookmarked = false, onBookmarkToggle }: Tog
 </Pressable>
 
 
-  {/* ✅ Bookmark Button */}
-  <Pressable
-    onPress={handleBookmark}
-    className="w-12 h-12 rounded-2xl items-center justify-center ml-3 bg-slate-700/40"
-  >
-    {localBookmark ? (
-      <BookmarkCheck size={20} color="#fbbf24" fill="#fbbf24" />
-    ) : (
-      <Bookmark size={20} color="#94a3b8" />
-    )}
-  </Pressable>
+          <View className="flex-row">
+            {/* ✅ Bookmark Button */}
+            <Pressable
+              onPress={handleBookmark}
+              className="w-12 h-12 rounded-2xl items-center justify-center ml-3 bg-slate-700/40"
+            >
+              {localBookmark ? (
+                <BookmarkCheck size={20} color="#fbbf24" fill="#fbbf24" />
+              ) : (
+                <Bookmark size={20} color="#94a3b8" />
+              )}
+            </Pressable>
+          </View>
 
         </View>
 
