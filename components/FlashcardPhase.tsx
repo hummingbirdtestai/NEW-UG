@@ -17,13 +17,6 @@ interface FlashcardPhaseProps {
   onBookmarkFlash?: (id: string, newValue: boolean) => void; // ✅ add
 }
 
-interface FlashcardPhaseProps {
-  qaData: QAItem[];
-  onNext?: () => void;
-  current?: number;
-  total?: number;
-}
-
 interface ToggleCardProps {
   item: QAItem;
   index: number;
@@ -35,10 +28,14 @@ function ToggleCard({ item, index }: ToggleCardProps) {
   const [showAnswer, setShowAnswer] = useState(false);
   const { width } = Dimensions.get('window');
   const isMobile = width < 768;
+  const [localBookmark, setLocalBookmark] = useState(isBookmarked);
 
-  const handleToggle = () => {
-    setShowAnswer(!showAnswer);
+  const handleBookmark = () => {
+    const newValue = !localBookmark;
+    setLocalBookmark(newValue);
+    onBookmarkToggle?.(item.id || `qa-${index}`, newValue);
   };
+
 
   const markdownStyles = {
     body: {
@@ -552,7 +549,5 @@ export default function FlashcardPhase({
     </View>
   );
 }
-
-export default FlashcardPhase
 
 export default FlashcardPhase
