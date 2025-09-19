@@ -423,13 +423,15 @@ const handleNextPhase = async () => {
           <>
             {phase === 0 && (
               <ConceptPhase
-  concept={currentConcept.concept_json_unicode?.Concept}
-  explanation={currentConcept.concept_json_unicode?.Explanation}
+  concept={currentConcept?.concept_json_unicode?.Concept || ""}
+  explanation={currentConcept?.concept_json_unicode?.Explanation || ""}
   onNext={handleNextPhase}
   current={currentIdx + 1}
   total={totalConcepts}
-  isBookmarked={currentConcept.isBookmarked}
-  onBookmark={(newValue) => handleBookmarkToggle(newValue, currentConcept)}
+  isBookmarked={!!currentConcept?.isBookmarked}
+  onBookmark={(newValue) =>
+    handleBookmarkToggle(newValue, currentConcept || {})
+  }
 />
 
 
