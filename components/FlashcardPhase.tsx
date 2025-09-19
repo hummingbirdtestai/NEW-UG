@@ -291,6 +291,7 @@ export default function FlashcardPhase({
   onNext,
   current,
   total,
+  onBookmarkFlash,
 }: FlashcardPhaseProps) {
   const { width } = Dimensions.get('window');
   const isMobile = width < 768;
@@ -568,5 +569,3 @@ export default function FlashcardPhase({
     </View>
   );
 }
-
-export default FlashcardPhase
