@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, Dimensions } from 'react-native';
 import { MotiView, AnimatePresence } from 'moti';
-import { Eye, Lightbulb, ChevronRight, Sparkles } from 'lucide-react-native';
+import { Eye, Lightbulb, ChevronRight, Sparkles,Bookmark, BookmarkCheck } from 'lucide-react-native';
 import MarkdownWithLatex from "@/components/MarkdownWithLatex";
 
 interface QAItem {
