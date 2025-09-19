@@ -181,7 +181,7 @@ export default function Sidebar({
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [chapters, setChapters] = useState<Chapter[]>([]);
 
-  const { session, login, logout } = useAuth();
+  const {  session, user, login, logout} = useAuth();
 
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showOTPModal, setShowOTPModal] = useState(false);
