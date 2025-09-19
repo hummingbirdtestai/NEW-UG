@@ -290,7 +290,8 @@ export default function Sidebar({
     setIsSubjectsExpanded(false);
   };
 
- const { session, user, logout } = useAuth();  // 👈 make sure to destructure `user`
+ const { session, user, logout } = useAuth();  
+  // 👈 make sure to destructure `user`
 
 const handleChapterSelect = (ch: Chapter) => {
   if (!session) {
