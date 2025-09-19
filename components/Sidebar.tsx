@@ -298,11 +298,7 @@ const handleChapterSelect = (ch: Chapter) => {
     return;
   }
 
-  if (!user?.is_subscribed) {
-    alert("🔒 Please subscribe to access this chapter");
-    return;
-  }
-
+  // don’t block here → let AdaptiveChat handle subscription lock
   onChapterSelect?.(ch);
   setIsChaptersExpanded(false);
 };
