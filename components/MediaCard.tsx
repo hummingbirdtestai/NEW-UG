@@ -25,6 +25,8 @@ interface MediaCardProps {
   delay?: number;
   onBookmarkToggle?: (id: string) => void;
   isBookmarked?: boolean;
+  onBookmarkToggle?: (id: string, newValue: boolean) => void;
+
 }
 
 export default function MediaCard({
