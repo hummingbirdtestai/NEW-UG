@@ -151,31 +151,39 @@ function ToggleCard({ item, index, isBookmarked = false, onBookmarkToggle }: Tog
           </View>
 
           {/* Toggle Button */}
-          <Pressable
-            onPress={handleToggle}
-            className={`w-12 h-12 rounded-2xl items-center justify-center shadow-lg active:scale-90 ${
-              showAnswer 
-                ? 'bg-gradient-to-br from-purple-500 to-indigo-600' 
-                : 'bg-gradient-to-br from-teal-500 to-cyan-600'
-            }`}
-            style={{
-              shadowColor: showAnswer ? '#8b5cf6' : '#14b8a6',
-              shadowOffset: { width: 0, height: 6 },
-              shadowOpacity: 0.4,
-              shadowRadius: 12,
-              elevation: 8,
-            }}
-          >
-            <MotiView
-              animate={{
-                scale: showAnswer ? [1, 1.2, 1] : 1,
-                rotate: showAnswer ? '180deg' : '0deg',
-              }}
-              transition={{ type: 'spring', duration: 600 }}
-            >
-              <Eye size={20} color="#ffffff" />
-            </MotiView>
-          </Pressable>
+            {/* Toggle Button */}
+  <Pressable
+    onPress={handleToggle}
+    className={`w-12 h-12 rounded-2xl items-center justify-center shadow-lg active:scale-90 ${
+      showAnswer 
+        ? 'bg-gradient-to-br from-purple-500 to-indigo-600' 
+        : 'bg-gradient-to-br from-teal-500 to-cyan-600'
+    }`}
+    style={{
+      shadowColor: showAnswer ? '#8b5cf6' : '#14b8a6',
+      shadowOffset: { width: 0, height: 6 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 8,
+    }}
+  >
+    <MotiView ...>
+      <Eye size={20} color="#ffffff" />
+    </MotiView>
+  </Pressable>
+
+  {/* ✅ Bookmark Button */}
+  <Pressable
+    onPress={handleBookmark}
+    className="w-12 h-12 rounded-2xl items-center justify-center ml-3 bg-slate-700/40"
+  >
+    {localBookmark ? (
+      <BookmarkCheck size={20} color="#fbbf24" fill="#fbbf24" />
+    ) : (
+      <Bookmark size={20} color="#94a3b8" />
+    )}
+  </Pressable>
+
         </View>
 
         {/* Content Container */}
