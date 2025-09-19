@@ -295,6 +295,17 @@ const handleGotIt = () => {
   }
 };
 
+  // ✅ Auto-advance when all HYFs are complete
+useEffect(() => {
+  if (isComplete) {
+    const timer = setTimeout(() => {
+      onComplete?.();   // 🚀 bubble up to AdaptiveChat
+    }, 1500); // wait 1.5s so user sees "All HYFs Completed!"
+    return () => clearTimeout(timer);
+  }
+}, [isComplete]);
+
+
 
   return (
     <View className="flex-1 bg-slate-900">
