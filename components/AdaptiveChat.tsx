@@ -48,17 +48,21 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
   }, [phase, currentIdx]);
 
   // revalidate session when tab regains focus
-  useEffect(() => {
-    const onFocus = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data?.session && !user && chapterId) {
-        // retry fetch if session restored
-        fetchConcept(0, true);
-      }
-    };
+  // revalidate session when tab regains focus
+useEffect(() => {
+  const onFocus = async () => {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session && chapterId) {
+      console.log("🔄 Restoring session, refetching current concept:", currentIdx);
+      await fetchConcept(currentIdx, true); // ✅ reload currentIdx, not 0
+    }
+  };
+
+  if (typeof window !== "undefined") {
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [chapterId, user]);
+  }
+}, [chapterId, user, currentIdx]);
 
   // reset on chapter change
   useEffect(() => {
