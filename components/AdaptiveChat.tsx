@@ -534,19 +534,43 @@ const handleNextPhase = async () => {
 
                   ))}
                   {YouTubeSearches.map((item: any, idx: number) => (
-                    <MediaCard
-                      key={`yt-${idx}`}
-                      type="video"
-                      item={{
-                        id: `yt-${idx}`,
-                        description: item.Description,
-                        search_query: item.Search,
-                        keywords: item.Search.split(" ")
-                          .filter((w: string) => w.length > 3)
-                          .slice(0, 3),
-                      }}
-                    />
-                  ))}
+  <MediaCard
+    key={`yt-${idx}`}
+    type="video"
+    item={{
+      id: `yt-${idx}`,
+      description: item.Description,
+      search_query: item.Search,
+      keywords: item.Search.split(" ")
+        .filter((w: string) => w.length > 3)
+        .slice(0, 3),
+    }}
+    isBookmarked={false} // 🔑 later preload from Supabase
+    onBookmarkToggle={async (mediaId, newValue) => {
+      if (!user) return;
+      try {
+        const { error } = await supabase.from("student_signals").upsert(
+          {
+            student_id: user.id,
+            object_type: "media",   // ✅ same as for images
+            object_uuid: mediaId,
+            bookmark: newValue,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "student_id,object_type,object_uuid" }
+        );
+        if (error) {
+          console.error("❌ Failed to update Media bookmark:", error);
+        } else {
+          console.log(`✅ Bookmark for Media ${mediaId} set to ${newValue}`);
+        }
+      } catch (err) {
+        console.error("❌ Exception updating Media bookmark:", err);
+      }
+    }}
+  />
+))}
+
                 </ScrollView>
 
                 {/* Fixed Next Button */}
