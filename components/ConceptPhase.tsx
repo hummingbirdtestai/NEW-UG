@@ -41,9 +41,9 @@ export default function ConceptPhase({
   const isMobile = width < 768;
 
   const handleBookmarkToggle = () => {
-+    const newValue = !isBookmarked;
-+    onBookmark?.(newValue);
-+  };
+    const newValue = !isBookmarked;
+    onBookmark?.(newValue);
+  };
 
   const handleLearnMore = () => {
     // ✅ safer fallback if concept is empty/undefined
