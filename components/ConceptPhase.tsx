@@ -40,17 +40,10 @@ export default function ConceptPhase({
   const { width } = Dimensions.get("window");
   const isMobile = width < 768;
 
-  const [localBookmark, setLocalBookmark] = useState(isBookmarked);
-
-  useEffect(() => {
-    setLocalBookmark(isBookmarked);
-  }, [isBookmarked]);
-
   const handleBookmarkToggle = () => {
-    const newValue = !localBookmark;
-    setLocalBookmark(newValue);
-    onBookmark?.(newValue);
-  };
++    const newValue = !isBookmarked;
++    onBookmark?.(newValue);
++  };
 
   const handleLearnMore = () => {
     // ✅ safer fallback if concept is empty/undefined
@@ -202,12 +195,12 @@ export default function ConceptPhase({
             <Pressable
               onPress={handleBookmarkToggle}
               className={`w-12 h-12 rounded-2xl items-center justify-center shadow-lg active:scale-90 ${
-                localBookmark
+                isBookmarked
                   ? "bg-gradient-to-br from-amber-500 to-orange-600"
                   : "bg-slate-700/60 border border-slate-600/50"
               }`}
               style={{
-                shadowColor: localBookmark ? "#f59e0b" : "#64748b",
+                shadowColor: isBookmarked  ? "#f59e0b" : "#64748b",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,
@@ -216,12 +209,12 @@ export default function ConceptPhase({
             >
               <MotiView
                 animate={{
-                  scale: localBookmark ? [1, 1.3, 1] : 1,
-                  rotate: localBookmark ? [0, 15, -15, 0] : 0,
+                  scale: isBookmarked  ? [1, 1.3, 1] : 1,
+                  rotate: isBookmarked  ? [0, 15, -15, 0] : 0,
                 }}
                 transition={{ type: "spring", duration: 600 }}
               >
-                {localBookmark ? (
+                {isBookmarked  ? (
                   <BookmarkCheck size={20} color="#ffffff" />
                 ) : (
                   <Bookmark size={20} color="#94a3b8" />
