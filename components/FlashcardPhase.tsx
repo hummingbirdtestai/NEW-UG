@@ -24,7 +24,7 @@ interface ToggleCardProps {
   onBookmarkToggle?: (id: string, newValue: boolean) => void; // ✅
 }
 
-function ToggleCard({ item, index }: ToggleCardProps) {
+function ToggleCard({ item, index, isBookmarked = false, onBookmarkToggle }: ToggleCardProps) {
   const [showAnswer, setShowAnswer] = useState(false);
   const { width } = Dimensions.get('window');
   const isMobile = width < 768;
@@ -35,7 +35,6 @@ function ToggleCard({ item, index }: ToggleCardProps) {
     setLocalBookmark(newValue);
     onBookmarkToggle?.(item.id || `qa-${index}`, newValue);
   };
-
 
   const markdownStyles = {
     body: {
