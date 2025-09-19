@@ -330,12 +330,39 @@ const handleNextPhase = async () => {
     );
   if (user && !user.is_subscribed)
   return (
-    <View className="flex-1 items-center justify-center bg-slate-900">
-      <Text className="text-slate-200 text-lg font-bold">
-        🔒 Please subscribe to access
-      </Text>
+    <View className="flex-1 bg-slate-900">
+      {/* Header Section */}
+      <View className="p-8 border-b border-slate-700/30 bg-slate-800/50">
+        <Text className="text-sm text-teal-400 font-semibold uppercase tracking-wide">
+          Subscription Required
+        </Text>
+        <Text className="text-3xl font-bold text-slate-100 mt-1 mb-2">
+          🔒 Locked Content
+        </Text>
+        <Text className="text-slate-400 text-base">
+          Please subscribe to access this chapter and continue your learning journey.
+        </Text>
+      </View>
+
+      {/* Body Section */}
+      <View className="flex-1 items-center justify-center p-8">
+        <Text className="text-slate-300 text-lg mb-6 text-center">
+          Upgrade now to unlock all concepts, flashcards, and MCQs 🚀
+        </Text>
+
+        <Pressable
+          onPress={() => {
+            // 🔑 navigate to payment/subscription page
+            console.log("Go to subscription flow");
+          }}
+          className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-8 shadow-xl"
+        >
+          <Text className="text-white font-bold text-lg">Subscribe Now</Text>
+        </Pressable>
+      </View>
     </View>
   );
+
 
   if (loadingConcept && !currentConcept)
     return (
