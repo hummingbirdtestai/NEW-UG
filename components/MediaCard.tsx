@@ -52,12 +52,13 @@ export default function MediaCard({
 };
 
   const toggleBookmark = () => {
-    const newValue = !localBookmark;
-    setLocalBookmark(newValue);
-    if (onBookmarkToggle) {
-      onBookmarkToggle(item.id);
-    }
-  };
+  const newValue = !localBookmark;
+  setLocalBookmark(newValue);
+  if (onBookmarkToggle) {
+    onBookmarkToggle(item.id, newValue); // ✅ pass new value
+  }
+};
+
 
   return (
     <MotiView
