@@ -27,6 +27,8 @@ interface FlashcardPhaseProps {
 interface ToggleCardProps {
   item: QAItem;
   index: number;
+  isBookmarked?: boolean; // ✅
+  onBookmarkToggle?: (id: string, newValue: boolean) => void; // ✅
 }
 
 function ToggleCard({ item, index }: ToggleCardProps) {
