@@ -401,12 +401,14 @@ export default function FlashcardPhase({
         {/* Flashcards Grid */}
         <View className="space-y-6">
           {qaData.map((item, index) => (
-            <ToggleCard
-              key={item.id || `qa-${index}`}
-              item={item}
-              index={index}
-            />
-          ))}
+  <ToggleCard
+    key={item.id || `qa-${index}`}
+    item={item}
+    index={index}
+    onBookmarkToggle={onBookmarkFlash} // ✅ connect parent
+  />
+))}
+
         </View>
 
         {/* Instructions Card */}
