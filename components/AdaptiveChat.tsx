@@ -540,13 +540,37 @@ const handleNextPhase = async () => {
               </View>
             )}
             {phase === 3 && (
-              <FlashcardPhase
-                qaData={qaData}
-                onNext={handleNextPhase}
-                current={currentIdx + 1}
-                total={totalConcepts}
-              />
-            )}
+  <FlashcardPhase
+    qaData={qaData}
+    onNext={handleNextPhase}
+    current={currentIdx + 1}
+    total={totalConcepts}
+    // ✅ add:
+    onBookmarkFlash={async (flashUuid, newValue) => {
+      if (!user) return;
+      try {
+        const { error } = await supabase.from("student_signals").upsert(
+          {
+            student_id: user.id,
+            object_type: "flashcard",
+            object_uuid: flashUuid,
+            bookmark: newValue,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: "student_id,object_type,object_uuid" }
+        );
+        if (error) {
+          console.error("❌ Failed to update Flashcard bookmark:", error);
+        } else {
+          console.log(`✅ Bookmark for Flashcard ${flashUuid} set to ${newValue}`);
+        }
+      } catch (err) {
+        console.error("❌ Exception updating Flashcard bookmark:", err);
+      }
+    }}
+  />
+)}
+
             {phase === 4 && (
               <MCQPhase
                 key={currentIdx}
