@@ -9,6 +9,13 @@ interface QAItem {
   question: string;
   answer: string;
 }
+interface FlashcardPhaseProps {
+  qaData: QAItem[];
+  onNext?: () => void;
+  current?: number;
+  total?: number;
+  onBookmarkFlash?: (id: string, newValue: boolean) => void; // ✅ add
+}
 
 interface FlashcardPhaseProps {
   qaData: QAItem[];
