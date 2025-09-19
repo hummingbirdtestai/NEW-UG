@@ -291,7 +291,7 @@ export default function Sidebar({
   };
 
  const { session, user, logout } = useAuth();  
-  // 👈 make sure to destructure `user`
+
 
 const handleChapterSelect = (ch: Chapter) => {
   if (!session) {
