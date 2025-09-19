@@ -328,6 +328,15 @@ const handleNextPhase = async () => {
         </Text>
       </View>
     );
+  if (user && !user.is_subscribed)
+  return (
+    <View className="flex-1 items-center justify-center bg-slate-900">
+      <Text className="text-slate-200 text-lg font-bold">
+        🔒 Please subscribe to access
+      </Text>
+    </View>
+  );
+
   if (loadingConcept && !currentConcept)
     return (
       <View className="flex-1 items-center justify-center bg-slate-900">
