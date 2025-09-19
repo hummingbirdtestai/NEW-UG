@@ -290,7 +290,6 @@ export default function Sidebar({
     setIsSubjectsExpanded(false);
   };
 
- const { session, user, logout } = useAuth();  
 
 
 const handleChapterSelect = (ch: Chapter) => {
