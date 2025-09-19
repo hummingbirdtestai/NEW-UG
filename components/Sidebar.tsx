@@ -290,14 +290,23 @@ export default function Sidebar({
     setIsSubjectsExpanded(false);
   };
 
-  const handleChapterSelect = (ch: Chapter) => {
-    if (!session) {
-      setShowPhoneModal(true);
-      return;
-    }
-    onChapterSelect?.(ch);
-    setIsChaptersExpanded(false);
-  };
+ const { session, user, logout } = useAuth();  // 👈 make sure to destructure `user`
+
+const handleChapterSelect = (ch: Chapter) => {
+  if (!session) {
+    setShowPhoneModal(true);
+    return;
+  }
+
+  if (!user?.is_subscribed) {
+    alert("🔒 Please subscribe to access this chapter");
+    return;
+  }
+
+  onChapterSelect?.(ch);
+  setIsChaptersExpanded(false);
+};
+
 
   // --- OTP handlers (same as before) ---
   const handleSendOTP = async (phone: string) => {
