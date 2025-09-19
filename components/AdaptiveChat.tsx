@@ -497,17 +497,41 @@ const handleNextPhase = async () => {
                 >
                   {ImageSearches.map((item: any, idx: number) => (
                     <MediaCard
-                      key={`img-${idx}`}
-                      type="image"
-                      item={{
-                        id: `img-${idx}`,
-                        description: item.Description,
-                        search_query: item.Search,
-                        keywords: item.Search.split(" ")
-                          .filter((w: string) => w.length > 3) // drop small filler words
-                          .slice(0, 3), // just 3 tags
-                      }}
-                    />
+  key={`img-${idx}`}
+  type="image"
+  item={{
+    id: `img-${idx}`,
+    description: item.Description,
+    search_query: item.Search,
+    keywords: item.Search.split(" ")
+      .filter((w: string) => w.length > 3)
+      .slice(0, 3),
+  }}
+  isBookmarked={false} // TODO: preload from Supabase if needed
+  onBookmarkToggle={async (mediaId) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_signals").upsert(
+        {
+          student_id: user.id,
+          object_type: "media",   // ✅ distinguish media bookmarks
+          object_uuid: mediaId,
+          bookmark: true,         // 🔁 toggle logic could be improved
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "student_id,object_type,object_uuid" }
+      );
+      if (error) {
+        console.error("❌ Failed to update Media bookmark:", error);
+      } else {
+        console.log(`✅ Bookmark for Media ${mediaId} updated`);
+      }
+    } catch (err) {
+      console.error("❌ Exception updating Media bookmark:", err);
+    }
+  }}
+/>
+
                   ))}
                   {YouTubeSearches.map((item: any, idx: number) => (
                     <MediaCard
