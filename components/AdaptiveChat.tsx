@@ -182,8 +182,13 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
     return;
   }
 
+  // ✅ Optimistic UI update
+  setCurrentConcept((prev: any) =>
+    prev ? { ...prev, isBookmarked: newValue } : prev
+  );
+
   try {
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("student_signals")
       .upsert(
         {
@@ -194,21 +199,25 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
           updated_at: new Date().toISOString(),
         },
         { onConflict: "student_id,object_type,object_uuid" }
-      )
-      .select();
+      );
 
     if (error) {
       console.error("❌ Error updating bookmark:", error);
-    } else {
-      console.log("✅ Bookmark updated:", data);
+      // rollback if needed
       setCurrentConcept((prev: any) =>
-        prev ? { ...prev, isBookmarked: newValue } : prev
+        prev ? { ...prev, isBookmarked: !newValue } : prev
       );
+    } else {
+      console.log("✅ Bookmark updated:", objectUuid, newValue);
     }
   } catch (err) {
     console.error("❌ Exception updating bookmark:", err);
+    setCurrentConcept((prev: any) =>
+      prev ? { ...prev, isBookmarked: !newValue } : prev
+    );
   }
 };
+
 
 
   // preload next concept
