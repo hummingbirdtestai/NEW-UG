@@ -75,6 +75,7 @@ useEffect(() => {
         setCurrentConcept(null);
         setNextConcept(null);
         setFetchError(false);
+        setLoadingConcept(true); 
         await fetchTotalConcepts();
         if (isActive) await fetchConcept(0, true, isActive);
       };
