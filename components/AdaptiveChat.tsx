@@ -382,7 +382,7 @@ const handleNextPhase = async () => {
   if (!currentConcept && totalConcepts === 0)
     return (
       <View className="flex-1 items-center justify-center bg-slate-900">
-        <Text className="text-slate-400">No concepts found</Text>
+        <Text className="text-slate-400">Loading Concepts</Text>
       </View>
     );
 
