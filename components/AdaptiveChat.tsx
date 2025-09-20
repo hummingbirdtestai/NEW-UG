@@ -537,9 +537,9 @@ const handleNextPhase = async () => {
   key={`img-${idx}`}
   type="image"
   item={{
-    id: `img-${idx}`,
-    description: item.Description,
-    search_query: item.Search,
+    id: item.uuid, // ✅ real UUID, not img-0
+      description: item.Description,
+      search_query: item.Search,
     keywords: item.Search.split(" ")
       .filter((w: string) => w.length > 3)
       .slice(0, 3),
@@ -575,7 +575,7 @@ const handleNextPhase = async () => {
     key={`yt-${idx}`}
     type="video"
     item={{
-      id: `yt-${idx}`,
+      id: item.uuid, // ✅ real UUID
       description: item.Description,
       search_query: item.Search,
       keywords: item.Search.split(" ")
