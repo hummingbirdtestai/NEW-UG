@@ -484,40 +484,26 @@ const handleNextPhase = async () => {
             )}
             {phase === 1 && (
               <ConversationPhase
-                hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf: any, hyfIdx: number) => ({
-                  uuid: hyf.uuid || hyf.id || `hyf-${currentIdx}-${hyfIdx}`,
-                  text: hyf.HYF,
-                  subject_id: currentConcept.subject_id,      // ✅ add
-                  chapter_id: currentConcept.chapter_id,      // ✅ add
-                  topic_id: currentConcept.topic_id, // ✅ add
-                  vertical_id: currentConcept.vertical_id,    // ✅ add
-                  mcqs: (hyf.MCQs || []).map((mcq: any, mcqIdx: number) => ({
-                    id: mcq.id || mcq.uuid || `mcq-${currentIdx}-${hyfIdx}-${mcqIdx}`,
-                    stem: mcq.stem,
-                    options: mcq.options,
-                    feedback: {
-                      correct: mcq.feedback?.correct ?? "",
-                      wrong: mcq.feedback?.wrong ?? "",
-                    },
-                    learning_gap: mcq.learning_gap,
-                    correct_answer: mcq.correct_answer,
-                    mcq_key: mcq.mcq_key || null,
-                  })),
-                }))}
-                onComplete={handleNextPhase}
- onBookmark={async (hyfUuid, newValue) => {
-  if (!user) return;
-  await upsertSignal({
-    user,
-    type: "conversation_hyf",
-    uuid: hyfUuid,
-    bookmark: newValue,
-    content: { uuid: hyfUuid, text: "HYF" }, // you can pass full HYF object
-    concept: currentConcept,
-  });
-}}
+  parentConcept={currentConcept} // 👈 add this
+  hyfs={(currentConcept.correct_jsons?.HYFs || []).map((hyf, idx) => ({
+    uuid: hyf.uuid || `hyf-${idx}`,
+    text: hyf.HYF,
+    mcqs: hyf.MCQs || [],
+  }))}
+  onComplete={handleNextPhase}
+  onBookmark={async (hyfUuid, newValue) => {
+    if (!user) return;
+    await upsertSignal({
+      user,
+      type: "conversation_hyf",
+      uuid: hyfUuid,
+      bookmark: newValue,
+      content: { uuid: hyfUuid, text: "HYF" },
+      concept: currentConcept,  // 👈 full parent concept
+    });
+  }}
+/>
 
-              />
             )}
 
             {phase === 2 && (
