@@ -685,17 +685,19 @@ onBookmarkToggle={async (mediaId, newValue) => {
 }}
 
                 // ✅ Bookmark handler
-                onBookmarkMCQ={async (mcqId, newValue) => {
-                  if (!user) return;
-                  await upsertSignal({
-                    user,
-                    type: "concept_mcq",
-                    uuid: mcqId,
-                    bookmark: newValue,
-                    content: mcqs.find((m) => m.id === mcqId), // full MCQ object
-                    concept: currentConcept,
-                  });
-                }}
+               onBookmarkMCQ={async (mcqId, newValue) => {
+  if (!user) return;
+  const mcqObj = currentHYF.mcqs.find((m) => m.id === mcqId);
+  await upsertSignal({
+    user,
+    type: "conversation_mcq",
+    uuid: mcqId,
+    bookmark: newValue,
+    content: mcqObj,
+    concept: parentConcept,  // ✅ not currentHYF
+  });
+}}
+
               />
             )}
           </>
