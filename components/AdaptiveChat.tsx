@@ -656,10 +656,7 @@ onBookmarkToggle={async (mediaId, newValue) => {
     } else {
       console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
     }
-  } catch (err) {
-    console.error("❌ Exception inserting HYF MCQ attempt:", err);
-  }
-}
+
 
     // Update pointer for MCQ completion
     const mcqKey = mcq.mcq_key; // e.g., "mcq_1"
