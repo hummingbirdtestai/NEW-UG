@@ -681,7 +681,6 @@ onBookmarkToggle={async (mediaId, newValue) => {
   } catch (err) {
     console.error("❌ Exception in MCQ attempt handling:", err);
   }
-}}
 
                 // ✅ Bookmark handler
                 // ✅ Bookmark handler
