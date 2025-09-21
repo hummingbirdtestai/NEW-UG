@@ -39,11 +39,13 @@ interface HYF {
 
 interface ConversationPhaseProps {
   hyfs: HYF[];
-  parentConcept: any;   // 👈 add this
+  parentConcept: any;
   onComplete?: () => void;
   onBookmark?: (hyfUuid: string, isBookmarked: boolean) => void;
   bookmarkedHYFs?: Set<string>;
+  upsertSignal?: typeof upsertSignal; // 👈 add
 }
+
 
 
 interface HYFCardProps {
