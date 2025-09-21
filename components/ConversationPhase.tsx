@@ -488,8 +488,8 @@ onBookmarkMCQ={async (mcqId, newValue) => {
     type: "conversation_mcq",
     uuid: mcqId,
     bookmark: newValue,
-    content: mcqObj,        // store full MCQ object
-    concept: currentHYF,    // pass parent HYF with subject_id, chapter_id, topic_id, vertical_id
+    content: mcqObj,            // 👈 store full MCQ JSON
+    concept: parentConcept,     // 👈 use full concept, not just HYF
   });
 }}
 
