@@ -43,7 +43,7 @@ interface ConversationPhaseProps {
   onComplete?: () => void;
   onBookmark?: (hyfUuid: string, isBookmarked: boolean) => void;
   bookmarkedHYFs?: Set<string>;
-  upsertSignal?: typeof upsertSignal; // 👈 add
+  upsertSignal: Function; // 👈 add
 }
 
 
