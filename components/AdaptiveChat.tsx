@@ -637,17 +637,16 @@ onBookmarkToggle={async (mediaId, newValue) => {
     // Log MCQ attempt
     const { error: attemptError } = await supabase.from("student_mcq_attempts").insert({
       student_id: user.id,
-      subject_id: parentConcept.subject_id,   // ✅ use parentConcept
-      chapter_id: parentConcept.chapter_id,
-      topic_id: parentConcept.topic_id,
-      vertical_id: parentConcept.vertical_id,
+      subject_id: currentConcept.subject_id,   // ✅ use currentConcept
+      chapter_id: currentConcept.chapter_id,
+      topic_id: currentConcept.topic_id,
+      vertical_id: currentConcept.vertical_id,
       mcq_key: mcq.mcq_key || `conversation_mcq_${mcq.mcq_key || "unknown"}`,
       mcq_uuid: mcq.id || mcq.uuid,
       selected_option: selectedOption,
       correct_answer: mcq.correct_answer,
       is_correct: isCorrect,
       learning_gap: mcq.learning_gap || null,
-      hyf_uuid: currentHYF.uuid,
       mcq_category: "conversation",
       feedback: mcq.feedback ? mcq.feedback : null,
     });
@@ -683,7 +682,6 @@ onBookmarkToggle={async (mediaId, newValue) => {
     console.error("❌ Exception in MCQ attempt handling:", err);
   }
 }}
-                }}
 
                 // ✅ Bookmark handler
                 // ✅ Bookmark handler
