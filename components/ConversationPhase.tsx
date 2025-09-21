@@ -43,7 +43,14 @@ interface ConversationPhaseProps {
   onComplete?: () => void;
   onBookmark?: (hyfUuid: string, isBookmarked: boolean) => void;
   bookmarkedHYFs?: Set<string>;
-  upsertSignal: typeof upsertSignal; // 👈 add
+  upsertSignal: (args: {
+    user: any;
+    type: string;
+    uuid: string;
+    bookmark: boolean;
+    content?: any;
+    concept?: any;
+  }) => Promise<void>;
 }
 
 
@@ -486,14 +493,15 @@ useEffect(() => {
   onBookmarkMCQ={async (mcqId, newValue) => {
     if (!user) return;
     const mcqObj = currentHYF.mcqs.find((m) => m.id === mcqId);
-    await upsertSignal({
-      user,
-      type: "conversation_mcq",
-      uuid: mcqId,
-      bookmark: newValue,
-      content: mcqObj,
-      concept: parentConcept,  // 👈 pass full concept for IDs
-    });
+await upsertSignal({
+  user,
+  type: "conversation_mcq",
+  uuid: mcqId,
+  bookmark: newValue,
+  content: mcqObj,
+  concept: parentConcept,
+});
+
   }}
 />
 
