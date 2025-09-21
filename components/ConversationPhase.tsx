@@ -478,27 +478,17 @@ useEffect(() => {
   // ✅ Bookmark handler
 onBookmarkMCQ={async (mcqId, newValue) => {
   if (!user) return;
-  try {
-    const { error } = await supabase.from("student_signals").upsert(
-      {
-        student_id: user.id,
-        object_type: "conversation_mcq", // ✅ type for HYF MCQs
-        object_uuid: mcqId,
-        bookmark: newValue,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "student_id,object_type,object_uuid" }
-    );
-
-    if (error) {
-      console.error("❌ Failed to update HYF MCQ bookmark:", error);
-    } else {
-      console.log(`✅ Bookmark for HYF MCQ ${mcqId} set to ${newValue}`);
-    }
-  } catch (err) {
-    console.error("❌ Exception updating HYF MCQ bookmark:", err);
-  }
+  const mcqObj = currentHYF.mcqs.find((m) => m.id === mcqId);
+  await upsertSignal({
+    user,
+    type: "conversation_mcq",
+    uuid: mcqId,
+    bookmark: newValue,
+    content: mcqObj,        // store full MCQ object
+    concept: currentHYF,    // pass parent HYF with subject_id, chapter_id, topic_id, vertical_id
+  });
 }}
+
 
 />
 
