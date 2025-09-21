@@ -246,10 +246,11 @@ function HYFCard({ hyf, index, onGotIt, onBookmark, isBookmarked = false }: HYFC
 
 export default function ConversationPhase({
   hyfs = [],
-  parentConcept,   // ✅ add this
+  parentConcept,
   onComplete,
   onBookmark,
   bookmarkedHYFs = new Set(),
+  upsertSignal,   // 👈 add this
 }: ConversationPhaseProps) {
   // Normalize HYFs data
   const { user } = useAuth(); 
