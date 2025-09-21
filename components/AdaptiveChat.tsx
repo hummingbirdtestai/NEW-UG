@@ -637,25 +637,25 @@ onBookmarkToggle={async (mediaId, newValue) => {
   try {
     const { error } = await supabase.from("student_mcq_attempts").insert({
       student_id: user.id,
-      subject_id: parentConcept.subject_id,   // ✅ always use parent concept
-      chapter_id: parentConcept.chapter_id,
-      topic_id: parentConcept.topic_id,
-      vertical_id: parentConcept.vertical_id,
-      mcq_key: mcq.mcq_key || `conversation_mcq_${mcq.mcq_key || "unknown"}`,
+      subject_id: currentConcept.subject_id,   // ✅ use currentConcept
+      chapter_id: currentConcept.chapter_id,
+      topic_id: currentConcept.topic_id,
+      vertical_id: currentConcept.vertical_id,
+      mcq_key: mcq.mcq_key || `concept_mcq_${mcq.id || "unknown"}`, // ✅ safer key
       mcq_uuid: mcq.id || mcq.uuid,
       selected_option: selectedOption,
       correct_answer: mcq.correct_answer,
       is_correct: isCorrect,
       learning_gap: mcq.learning_gap || null,
-      hyf_uuid: currentHYF.uuid,              // ✅ still log HYF linkage
-      mcq_category: "conversation",
+      hyf_uuid: null,                          // ✅ no HYF here
+      mcq_category: "concept",
       feedback: mcq.feedback ? mcq.feedback : null,
     });
 
     if (error) {
-      console.error("❌ Failed to insert HYF MCQ attempt:", error);
+      console.error("❌ Failed to insert concept MCQ attempt:", error);
     } else {
-      console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
+      console.log(`✅ Logged concept MCQ attempt for ${mcq.id}`);
     }
 
 
