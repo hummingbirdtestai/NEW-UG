@@ -502,6 +502,7 @@ const handleNextPhase = async () => {
       concept: currentConcept,  // 👈 full parent concept
     });
   }}
+  upsertSignal={upsertSignal}
 />
 
             )}
