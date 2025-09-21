@@ -505,29 +505,18 @@ const handleNextPhase = async () => {
                   })),
                 }))}
                 onComplete={handleNextPhase}
-  onBookmark={async (hyfUuid, newValue) => {
-    if (!user) return;
-    try {
-      const { error } = await supabase.from("student_signals").upsert(
-        {
-          student_id: user.id,
-          object_type: "conversation_hyf",  // ✅ type for HYF
-          object_uuid: hyfUuid,
-          bookmark: newValue,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      );
+ onBookmark={async (hyfUuid, newValue) => {
+  if (!user) return;
+  await upsertSignal({
+    user,
+    type: "conversation_hyf",
+    uuid: hyfUuid,
+    bookmark: newValue,
+    content: { uuid: hyfUuid, text: "HYF" }, // you can pass full HYF object
+    concept: currentConcept,
+  });
+}}
 
-      if (error) {
-        console.error("❌ Failed to update HYF bookmark:", error);
-      } else {
-        console.log(`✅ Bookmark for HYF ${hyfUuid} set to ${newValue}`);
-      }
-    } catch (err) {
-      console.error("❌ Exception updating HYF bookmark:", err);
-    }
-  }}
               />
             )}
 
@@ -563,28 +552,18 @@ const handleNextPhase = async () => {
       .slice(0, 3),
   }}
   isBookmarked={false} // TODO: preload from Supabase if needed
-  onBookmarkToggle={async (mediaId) => {
-    if (!user) return;
-    try {
-      const { error } = await supabase.from("student_signals").upsert(
-        {
-          student_id: user.id,
-          object_type: "media",   // ✅ distinguish media bookmarks
-          object_uuid: mediaId,
-          bookmark: true,         // 🔁 toggle logic could be improved
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      );
-      if (error) {
-        console.error("❌ Failed to update Media bookmark:", error);
-      } else {
-        console.log(`✅ Bookmark for Media ${mediaId} updated`);
-      }
-    } catch (err) {
-      console.error("❌ Exception updating Media bookmark:", err);
-    }
-  }}
+onBookmarkToggle={async (mediaId, newValue) => {
+  if (!user) return;
+  await upsertSignal({
+    user,
+    type: "media",
+    uuid: mediaId,
+    bookmark: newValue,
+    content: item,   // full media object
+    concept: currentConcept,
+  });
+}}
+
 />
 
                   ))}
@@ -650,27 +629,17 @@ const handleNextPhase = async () => {
     total={totalConcepts}
     // ✅ add:
     onBookmarkFlash={async (flashUuid, newValue) => {
-      if (!user) return;
-      try {
-        const { error } = await supabase.from("student_signals").upsert(
-          {
-            student_id: user.id,
-            object_type: "flashcard",
-            object_uuid: flashUuid,
-            bookmark: newValue,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "student_id,object_type,object_uuid" }
-        );
-        if (error) {
-          console.error("❌ Failed to update Flashcard bookmark:", error);
-        } else {
-          console.log(`✅ Bookmark for Flashcard ${flashUuid} set to ${newValue}`);
-        }
-      } catch (err) {
-        console.error("❌ Exception updating Flashcard bookmark:", err);
-      }
-    }}
+  if (!user) return;
+  await upsertSignal({
+    user,
+    type: "flashcard",
+    uuid: flashUuid,
+    bookmark: newValue,
+    content: qaData.find((f) => f.id === flashUuid), // store Q/A
+    concept: currentConcept,
+  });
+}}
+
   />
 )}
 
@@ -742,28 +711,15 @@ setPhaseStartTime(new Date());
                 // ✅ Bookmark handler
 onBookmarkMCQ={async (mcqId, newValue) => {
   if (!user) return;
-  try {
-    const { error } = await supabase.from("student_signals").upsert(
-      {
-        student_id: user.id,
-        object_type: "concept_mcq", // ✅ distinguish type
-        object_uuid: mcqId,
-        bookmark: newValue,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "student_id,object_type,object_uuid" }
-    );
-
-    if (error) {
-      console.error("❌ Failed to update Concept MCQ bookmark:", error);
-    } else {
-      console.log(`✅ Bookmark for Concept MCQ ${mcqId} set to ${newValue}`);
-    }
-  } catch (err) {
-    console.error("❌ Exception updating Concept MCQ bookmark:", err);
-  }
+  await upsertSignal({
+    user,
+    type: "concept_mcq",
+    uuid: mcqId,
+    bookmark: newValue,
+    content: mcqs.find((m) => m.id === mcqId), // full MCQ object
+    concept: currentConcept,
+  });
 }}
-
               />
             )}
           </>
