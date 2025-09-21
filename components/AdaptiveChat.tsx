@@ -580,28 +580,18 @@ onBookmarkToggle={async (mediaId, newValue) => {
         .slice(0, 3),
     }}
     isBookmarked={false} // 🔑 later preload from Supabase
-    onBookmarkToggle={async (mediaId, newValue) => {
-      if (!user) return;
-      try {
-        const { error } = await supabase.from("student_signals").upsert(
-          {
-            student_id: user.id,
-            object_type: "media",   // ✅ same as for images
-            object_uuid: mediaId,
-            bookmark: newValue,
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "student_id,object_type,object_uuid" }
-        );
-        if (error) {
-          console.error("❌ Failed to update Media bookmark:", error);
-        } else {
-          console.log(`✅ Bookmark for Media ${mediaId} set to ${newValue}`);
-        }
-      } catch (err) {
-        console.error("❌ Exception updating Media bookmark:", err);
-      }
-    }}
+onBookmarkToggle={async (mediaId, newValue) => {
+  if (!user) return;
+  await upsertSignal({
+    user,
+    type: "media",
+    uuid: mediaId,
+    bookmark: newValue,
+    content: item,   // full video object
+    concept: currentConcept,
+  });
+}}
+
   />
 ))}
 
