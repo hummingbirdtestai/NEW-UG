@@ -436,65 +436,64 @@ useEffect(() => {
   <MCQPhase
   mcqs={currentHYF.mcqs}
   mode="conversation"
-  stopOnFirstCorrect={true}
-  isLastHYF={currentHYFIndex === normalizedHyfs.length - 1} 
+  stopOnFirstCorrect
+  isLastHYF={currentHYFIndex === normalizedHyfs.length - 1}
   onComplete={() => {
-  setShowMCQs(false);
-  if (currentHYFIndex < normalizedHyfs.length - 1) {
-    handleNextHYF();   // go to next HYF
-  } else {
-    setIsComplete(true);
-    onComplete?.();    // 🔑 triggers parent (AdaptiveChat) → goes to Media
-  }
-}}
+    setShowMCQs(false);
+    if (currentHYFIndex < normalizedHyfs.length - 1) {
+      handleNextHYF();
+    } else {
+      setIsComplete(true);
+      onComplete?.();
+    }
+  }}
 
   // ✅ Log MCQ attempt
   onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
-  if (!user) return;
-  try {
-    const { error } = await supabase.from("student_mcq_attempts").insert({
-      student_id: user.id,
-      subject_id: currentHYF.subject_id,
-      chapter_id: currentHYF.chapter_id,
-      topic_id: currentHYF.topic_id,
-      vertical_id: currentHYF.vertical_id,
-      mcq_key: mcq.mcq_key || `conversation_mcq_${mcq.mcq_key || "unknown"}`,
-      mcq_uuid: mcq.id || mcq.uuid,
-      selected_option: selectedOption,
-      correct_answer: mcq.correct_answer,
-      is_correct: isCorrect,
-      learning_gap: mcq.learning_gap || null,
-      hyf_uuid: currentHYF.uuid,
-      mcq_category: "conversation",
-      feedback: mcq.feedback ? mcq.feedback : null,
-    });
+    if (!user) return;
+    try {
+      const { error } = await supabase.from("student_mcq_attempts").insert({
+        student_id: user.id,
+        subject_id: parentConcept.subject_id,   // 👈 FIXED
+        chapter_id: parentConcept.chapter_id,   // 👈 FIXED
+        topic_id: parentConcept.topic_id,       // 👈 FIXED
+        vertical_id: parentConcept.vertical_id, // 👈 FIXED
+        mcq_key: mcq.mcq_key || `conversation_mcq_${mcq.mcq_key || "unknown"}`,
+        mcq_uuid: mcq.id || mcq.uuid,
+        selected_option: selectedOption,
+        correct_answer: mcq.correct_answer,
+        is_correct: isCorrect,
+        learning_gap: mcq.learning_gap || null,
+        hyf_uuid: currentHYF.uuid,              // ✅ keep HYF linkage
+        mcq_category: "conversation",
+        feedback: mcq.feedback ? mcq.feedback : null,
+      });
 
-    if (error) {
-      console.error("❌ Failed to insert HYF MCQ attempt:", error);
-    } else {
-      console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
+      if (error) {
+        console.error("❌ Failed to insert HYF MCQ attempt:", error);
+      } else {
+        console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
+      }
+    } catch (err) {
+      console.error("❌ Exception inserting HYF MCQ attempt:", err);
     }
-  } catch (err) {
-    console.error("❌ Exception inserting HYF MCQ attempt:", err);
-  }
-}}
+  }}
 
   // ✅ Bookmark handler
-onBookmarkMCQ={async (mcqId, newValue) => {
-  if (!user) return;
-  const mcqObj = currentHYF.mcqs.find((m) => m.id === mcqId);
-  await upsertSignal({
-    user,
-    type: "conversation_mcq",
-    uuid: mcqId,
-    bookmark: newValue,
-    content: mcqObj,            // 👈 store full MCQ JSON
-    concept: parentConcept,     // 👈 use full concept, not just HYF
-  });
-}}
-
-
+  onBookmarkMCQ={async (mcqId, newValue) => {
+    if (!user) return;
+    const mcqObj = currentHYF.mcqs.find((m) => m.id === mcqId);
+    await upsertSignal({
+      user,
+      type: "conversation_mcq",
+      uuid: mcqId,
+      bookmark: newValue,
+      content: mcqObj,
+      concept: parentConcept,  // 👈 pass full concept for IDs
+    });
+  }}
 />
+
 
 )}
 
