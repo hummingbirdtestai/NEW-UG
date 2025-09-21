@@ -634,7 +634,8 @@ onBookmarkToggle={async (mediaId, newValue) => {
                onAttemptMCQ={async (mcq, selectedOption, isCorrect) => {
   if (!user) return;
   try {
-    const { error } = await supabase.from("student_mcq_attempts").insert({
+    // Log MCQ attempt
+    const { error: attemptError } = await supabase.from("student_mcq_attempts").insert({
       student_id: user.id,
       subject_id: parentConcept.subject_id,   // ✅ use parentConcept
       chapter_id: parentConcept.chapter_id,
@@ -651,38 +652,37 @@ onBookmarkToggle={async (mediaId, newValue) => {
       feedback: mcq.feedback ? mcq.feedback : null,
     });
 
-    if (error) {
-      console.error("❌ Failed to insert HYF MCQ attempt:", error);
+    if (attemptError) {
+      console.error("❌ Failed to insert HYF MCQ attempt:", attemptError);
     } else {
       console.log(`✅ Logged HYF MCQ attempt for ${mcq.id}`);
     }
+
+
+
+
+    // Update pointer for MCQ completion
+    const mcqKey = mcq.mcq_key; // e.g., "mcq_1"
+    const mcqTime = phaseStartTime
+      ? Math.floor((Date.now() - phaseStartTime.getTime()) / 1000)
+      : 0;
+
+    await supabase.from("student_learning_pointer").update({
+      [`${mcqKey}_time_seconds`]: mcqTime,
+      [`${mcqKey}_completed_at`]: new Date().toISOString(),
+      [`${mcqKey}_is_correct`]: isCorrect,
+      ...(isCorrect ? { mcq_section_completed: true } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("student_id", user.id)
+    .eq("vertical_id", currentConcept.vertical_id);
+
+    console.log(`✅ Pointer updated for ${mcq.mcq_key}`);
+    setPhaseStartTime(new Date());
   } catch (err) {
-    console.error("❌ Exception inserting HYF MCQ attempt:", err);
+    console.error("❌ Exception in MCQ attempt handling:", err);
   }
 }}
-
-                  // ✅ Update pointer for MCQ completion
-try {
-  const mcqKey = mcq.mcq_key; // e.g., "mcq_1"
-const mcqTime = phaseStartTime
-  ? Math.floor((Date.now() - phaseStartTime.getTime()) / 1000)
-  : 0;
-
-await supabase.from("student_learning_pointer").update({
-  [`${mcqKey}_time_seconds`]: mcqTime,
-  [`${mcqKey}_completed_at`]: new Date().toISOString(),
-  [`${mcqKey}_is_correct`]: isCorrect,
-  ...(isCorrect ? { mcq_section_completed: true } : {}),
-  updated_at: new Date().toISOString(),
-})
-.eq("student_id", user.id)
-.eq("vertical_id", currentConcept.vertical_id);
-
-  console.log(`✅ Pointer updated for ${mcq.mcq_key}`);
-} catch (err) {
-  console.error("❌ Failed to update pointer for MCQ:", err);
-}
-setPhaseStartTime(new Date());
                 }}
 
                 // ✅ Bookmark handler
