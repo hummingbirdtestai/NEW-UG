@@ -180,48 +180,23 @@ const fetchConcept = async (
 
 const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
   if (!user) return;
-
   const objectUuid = concept.concept_json_unicode?.uuid;
-  if (!objectUuid) {
-    console.error("❌ Concept missing uuid — cannot bookmark");
-    return;
-  }
+  if (!objectUuid) return;
 
-  // ✅ Optimistic UI update
+  await upsertSignal({
+    user,
+    type: "concept",
+    uuid: objectUuid,
+    bookmark: newValue,
+    content: concept.concept_json_unicode,
+    concept,
+  });
+
   setCurrentConcept((prev: any) =>
     prev ? { ...prev, isBookmarked: newValue } : prev
   );
-
-  try {
-    const { error } = await supabase
-      .from("student_signals")
-      .upsert(
-        {
-          student_id: user.id,
-          object_type: "concept",
-          object_uuid: objectUuid,
-          bookmark: newValue,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "student_id,object_type,object_uuid" }
-      );
-
-    if (error) {
-      console.error("❌ Error updating bookmark:", error);
-      // rollback if needed
-      setCurrentConcept((prev: any) =>
-        prev ? { ...prev, isBookmarked: !newValue } : prev
-      );
-    } else {
-      console.log("✅ Bookmark updated:", objectUuid, newValue);
-    }
-  } catch (err) {
-    console.error("❌ Exception updating bookmark:", err);
-    setCurrentConcept((prev: any) =>
-      prev ? { ...prev, isBookmarked: !newValue } : prev
-    );
-  }
 };
+
 
 
 
