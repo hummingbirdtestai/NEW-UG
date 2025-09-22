@@ -425,7 +425,21 @@ const handleNextPhase = async () => {
     );
 
   // ✅ Prepare MCQs
-  const mcqs = (currentConcept.mcq_1_6_unicode || []).filter(Boolean);
+  // ✅ Normalize concept MCQs before passing down
+const mcqs = (currentConcept.mcq_1_6_unicode || [])
+  .filter(Boolean)
+  .map((m: any, idx: number) => ({
+    id: m.id || m.uuid || `concept-mcq-${idx}`,
+    uuid: m.uuid || m.id || `concept-mcq-${idx}`,
+    mcq_key: m.mcq_key || `mcq_${idx + 1}`,
+    stem: m.stem ?? m.question ?? "",
+    options: m.options,
+    feedback: m.feedback,
+    learning_gap: m.learning_gap ?? "",
+    correct_answer: m.correct_answer,
+    isBookmarked: m.isBookmarked ?? false,
+  }));
+
 
   // ✅ Prepare Q&A data
   const qaData = currentConcept.flash_cards_unicode
@@ -702,16 +716,20 @@ onBookmarkToggle={async (mediaId, newValue) => {
 }}
 
                 // ✅ Bookmark handler
-              onBookmarkMCQ={async (mcqId, newValue) => {
+            onBookmarkMCQ={async (mcqId, newValue) => {
   if (!user) return;
-  const mcqObj = mcqs.find((m) => m.id === mcqId);  // ✅ concept mcqs array
+  const mcqObj = mcqs.find((m) => m.id === mcqId || m.uuid === mcqId); // ✅ robust lookup
+  if (!mcqObj) {
+    console.warn("⚠️ No MCQ object found for bookmark:", mcqId);
+    return;
+  }
   await upsertSignal({
     user,
     type: "concept_mcq",
-    uuid: mcqId,
+    uuid: mcqObj.uuid || mcqObj.id,     // ✅ always a UUID/string
     bookmark: newValue,
-    content: mcqObj,
-    concept: currentConcept, // ✅ always use parent concept here
+    content: mcqObj,                    // ✅ full object stored
+    concept: currentConcept,
   });
 }}
 
