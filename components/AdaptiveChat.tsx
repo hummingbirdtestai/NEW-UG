@@ -267,21 +267,22 @@ async function upsertSignal({
   if (!user || !uuid) return;
 
   const payload = {
-    student_id: user.id,
-    student_name: user.user_metadata?.full_name || null,
-    subject_id: concept?.subject_id || null,
-    subject_name: concept?.subject_name || null,
-    chapter_id: concept?.chapter_id || null,
-    chapter_name: concept?.chapter_name || null,
-    topic_id: concept?.topic_id || null,
-    topic_name: concept?.topic_name || null,
-    vertical_id: concept?.vertical_id || null,
-    object_type: type,
-    object_uuid: uuid,
-    bookmark,
-    object_content: content || null,
-    updated_at: new Date().toISOString(),
-  };
+  student_id: user.id,
+  student_name: user.name || user.user_metadata?.full_name || user.email || null,
+  subject_id: concept?.subject_id || null,
+  subject_name: concept?.subject_name || null,
+  chapter_id: concept?.chapter_id || null,
+  chapter_name: concept?.chapter_name || null,
+  topic_id: concept?.topic_id || null,
+  topic_name: concept?.topic_name || null,
+  vertical_id: concept?.vertical_id || null,
+  object_type: type,
+  object_uuid: uuid,
+  bookmark,
+  object_content: content || null,
+  updated_at: new Date().toISOString(),
+};
+
 
   const { error } = await supabase.from("student_signals").upsert(payload, {
     onConflict: "student_id,object_type,object_uuid",
