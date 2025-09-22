@@ -210,7 +210,8 @@ const handleBookmarkToggle = async (newValue: boolean, concept: any) => {
 
   // preload next concept
   const preloadConcept = async (idx: number) => {
-  .from("concepts_vertical")
+    const { data, error } = await supabase
+      .from("concepts_vertical")
   .select(
     `vertical_id,
      subject_id, subject_name,
