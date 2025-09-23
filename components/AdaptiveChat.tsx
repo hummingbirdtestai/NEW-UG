@@ -553,14 +553,18 @@ const mcqs = (currentConcept.mcq_1_6_unicode || [])
   const hyfObj = (currentConcept.correct_jsons?.HYFs || [])
     .find((h: any) => h.uuid === hyfUuid);
 
-  await upsertSignal({
-    user,
-    type: "conversation_hyf",
-    uuid: hyfUuid,
-    bookmark: newValue,
-    content: hyfObj,          // ✅ store full HYF JSON
-    concept: currentConcept,
-  });
+ await upsertSignal({
+  user,
+  type: "conversation_hyf",
+  uuid: hyfUuid,
+  bookmark: newValue,
+  content: {
+    uuid: hyfObj?.uuid || hyfUuid,
+    hyf: hyfObj?.HYF || "",
+  },  // ✅ only store uuid + hyf text
+  concept: currentConcept,
+});
+
 }}
   upsertSignal={upsertSignal} 
 />
