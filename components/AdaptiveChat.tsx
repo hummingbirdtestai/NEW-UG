@@ -142,6 +142,28 @@ const fetchConcept = async (
     concept.isBookmarked = signal?.bookmark ?? false;
   }
 
+  // ✅ Prepare Conversation HYFs and their MCQs with bookmark state
+if (user && Array.isArray(concept.correct_jsons?.HYFs)) {
+  for (let hyf of concept.correct_jsons.HYFs) {
+    if (Array.isArray(hyf.MCQs)) {
+      for (let mcq of hyf.MCQs) {
+        if (mcq?.id) {
+          const { data: signal } = await supabase
+            .from("student_signals")
+            .select("bookmark")
+            .eq("student_id", user.id)
+            .eq("object_type", "conversation_mcq")
+            .eq("object_uuid", mcq.id)
+            .maybeSingle();
+
+          mcq.isBookmarked = signal?.bookmark ?? false;
+        }
+      }
+    }
+  }
+}
+
+
   // ✅ Prepare MCQs with bookmark state
   if (user && Array.isArray(concept.mcq_1_6_unicode)) {
     for (let mcq of concept.mcq_1_6_unicode) {
