@@ -525,16 +525,21 @@ const mcqs = (currentConcept.mcq_1_6_unicode || [])
   }))}
   onComplete={handleNextPhase}
   onBookmark={async (hyfUuid, newValue) => {
-    if (!user) return;
-    await upsertSignal({
-      user,
-      type: "conversation_hyf",
-      uuid: hyfUuid,
-      bookmark: newValue,
-      content: { uuid: hyfUuid, text: "HYF" },
-      concept: currentConcept,  // 👈 full parent concept
-    });
-  }}
+  if (!user) return;
+
+  // find the full HYF object from currentConcept
+  const hyfObj = (currentConcept.correct_jsons?.HYFs || [])
+    .find((h: any) => h.uuid === hyfUuid);
+
+  await upsertSignal({
+    user,
+    type: "conversation_hyf",
+    uuid: hyfUuid,
+    bookmark: newValue,
+    content: hyfObj,          // ✅ store full HYF JSON
+    concept: currentConcept,
+  });
+}}
   upsertSignal={upsertSignal} 
 />
 
