@@ -150,7 +150,7 @@ const fetchConcept = async (
           .from("student_signals")
           .select("bookmark")
           .eq("student_id", user.id)
-          .eq("object_type", "conversation_mcq") // ✅ FIXED type
+          .eq("object_type", "concept_mcq") // ✅ FIXED type
           .eq("object_uuid", mcq.id)
           .maybeSingle();
 
