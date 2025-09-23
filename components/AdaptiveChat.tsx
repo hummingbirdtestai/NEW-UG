@@ -65,26 +65,48 @@ useEffect(() => {
 }, [chapterId, user, currentIdx]);
 
   // reset on chapter change
-  useEffect(() => {
-    if (chapterId && user) {
-      let isActive = true;
-      const load = async () => {
-        setCurrentIdx(0);
-        setPhase(0);
-        setIsCompleted(false);
-        setCurrentConcept(null);
-        setNextConcept(null);
-        setFetchError(false);
-        setLoadingConcept(true); 
-        await fetchTotalConcepts();
-        if (isActive) await fetchConcept(0, true, isActive);
-      };
-      load();
-      return () => {
-        isActive = false;
-      };
-    }
-  }, [chapterId, user]);
+// reset or resume on chapter change
+useEffect(() => {
+  if (chapterId && user) {
+    let isActive = true;
+    const load = async () => {
+      setPhase(0);
+      setIsCompleted(false);
+      setCurrentConcept(null);
+      setNextConcept(null);
+      setFetchError(false);
+      setLoadingConcept(true);
+
+      await fetchTotalConcepts();
+
+      // ✅ Try to resume from pointer
+      const { data: pointerRow, error: pointerError } = await supabase
+        .from("student_learning_pointer")
+        .select("seq_number")
+        .eq("student_id", user.id)
+        .eq("chapter_id", chapterId)
+        .order("updated_at", { ascending: false }) // in case multiple
+        .limit(1)
+        .maybeSingle();
+
+      let startIdx = 0;
+      if (pointerRow?.seq_number !== null && pointerRow?.seq_number !== undefined) {
+        startIdx = pointerRow.seq_number;
+        console.log("⏪ Resuming from saved pointer:", startIdx);
+      } else {
+        console.log("▶️ Starting fresh at index 0");
+      }
+
+      setCurrentIdx(startIdx);
+      if (isActive) await fetchConcept(startIdx, true, isActive);
+    };
+    load();
+    return () => {
+      isActive = false;
+    };
+  }
+}, [chapterId, user]);
+
 
   const fetchTotalConcepts = async () => {
     const { count, error } = await supabase
