@@ -64,7 +64,7 @@ useEffect(() => {
   }
 }, [chapterId, user, currentIdx]);
 
-  // reset on chapter change
+
 // reset or resume on chapter change
 useEffect(() => {
   if (chapterId && user) {
