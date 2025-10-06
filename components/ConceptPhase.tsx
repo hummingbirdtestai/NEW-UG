@@ -108,15 +108,14 @@ export default function ConceptPhase({
       >
         {/* Animated background gradient */}
         <MotiView
-          from={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1.2, opacity: 0.15 }}
-          transition={{
-            loop: true,
-            type: "timing",
-            duration: 8000,
-          }}
-          className="absolute inset-0 bg-gradient-to-br from-teal-500/30 via-cyan-500/20 to-indigo-500/30"
-        />
+  pointerEvents="none"                                // ✅ add this
+  from={{ scale: 0.8, opacity: 0 }}
+  animate={{ scale: 1.2, opacity: 0.15 }}
+  transition={{ loop: true, type: "timing", duration: 8000 }}
+  className="absolute inset-0 bg-gradient-to-br from-teal-500/30 via-cyan-500/20 to-indigo-500/30"
+  style={{ zIndex: -1 }}                              // ✅ add this (belt & suspenders)
+/>
+
 
         {/* Header */}
         <View className="flex-row items-center justify-between p-8 pt-16 border-b border-slate-700/30">
