@@ -8,6 +8,7 @@ import {
   Dimensions,
   Pressable,
   ActivityIndicator,
+  AppState 
 } from "react-native";
 import { MotiView } from "moti";
 import { ChevronRight } from "lucide-react-native";
