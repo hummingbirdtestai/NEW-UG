@@ -50,20 +50,61 @@ export default function AdaptiveChat({ chapterId }: AdaptiveChatProps) {
 
   // revalidate session when tab regains focus
   // revalidate session when tab regains focus
+// revalidate session when app/tab returns to foreground (web + native)
+// throttled + in-flight guarded
 useEffect(() => {
-  const onFocus = async () => {
-    const { data } = await supabase.auth.getSession();
-    if (data?.session && chapterId) {
-      console.log("🔄 Restoring session, refetching current concept:", currentIdx);
-      await fetchConcept(currentIdx, true); // ✅ reload currentIdx, not 0
+  const THROTTLE_MS = 1500;
+  const lastRunRef = { current: 0 } as { current: number };
+  const inFlightRef = { current: false } as { current: boolean };
+
+  const runSafely = async () => {
+    const now = Date.now();
+    if (inFlightRef.current) return;                      // ⛔ already running
+    if (now - lastRunRef.current < THROTTLE_MS) return;   // ⛔ too soon
+
+    inFlightRef.current = true;
+    try {
+      const { data } = await supabase.auth.getSession();
+      if (data?.session && chapterId) {
+        console.log("🔄 Focus/Resume: refetching concept @", currentIdx);
+        await fetchConcept(currentIdx, true);
+        lastRunRef.current = Date.now();
+      }
+    } catch (e) {
+      console.error("Focus/Resume refresh failed:", e);
+    } finally {
+      inFlightRef.current = false;
+    }
+  };
+
+  // Web: focus + (optional) visibilitychange
+  const onFocus = () => runSafely();
+  const onVisibility = () => {
+    // only when tab becomes visible
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
+      runSafely();
     }
   };
 
   if (typeof window !== "undefined") {
     window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
+    document?.addEventListener?.("visibilitychange", onVisibility);
   }
+
+  // Native: AppState -> active
+  const sub = AppState.addEventListener("change", (state) => {
+    if (state === "active") runSafely();
+  });
+
+  return () => {
+    if (typeof window !== "undefined") {
+      window.removeEventListener("focus", onFocus);
+      document?.removeEventListener?.("visibilitychange", onVisibility);
+    }
+    sub.remove();
+  };
 }, [chapterId, user, currentIdx]);
+
 
 
 // reset or resume on chapter change
