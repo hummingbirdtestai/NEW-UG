@@ -379,18 +379,12 @@ async function upsertSignal({
 }
 
   
-const handleNextPhase = async () => {
-  if (!user || !currentConcept) {
-    setPhase((prev) => prev + 1);
-    setPhaseStartTime(new Date()); // ✅ ensure restart
-    return;
-  }
+const handleNextPhase = () => {
+  // Move UI forward immediately
+  setPhase((prev) => prev + 1);
+  setPhaseStartTime(new Date());
 
-  if (!phaseStartTime) {
-    setPhase((prev) => prev + 1);
-    setPhaseStartTime(new Date()); // ✅ ensure restart
-    return;
-  }
+  if (!user || !currentConcept || !phaseStartTime) return;
 
   const timeSpent = Math.floor((Date.now() - phaseStartTime.getTime()) / 1000);
   let updateFields: any = {};
@@ -405,20 +399,16 @@ const handleNextPhase = async () => {
     updateFields = { flashcards_time_seconds: timeSpent, flashcards_completed_at: new Date().toISOString() };
   }
 
-  try {
-    await supabase
-      .from("student_learning_pointer")
-      .update(updateFields)
-      .eq("student_id", user.id)
-      .eq("vertical_id", currentConcept.vertical_id);
-    console.log("✅ Pointer updated for phase", phase);
-  } catch (err) {
-    console.error("❌ Failed to update pointer:", err);
-  }
-
-  setPhase((prev) => prev + 1);
-  setPhaseStartTime(new Date()); // ✅ always restart timer for next phase
+  // Fire-and-forget Supabase update
+  supabase
+    .from("student_learning_pointer")
+    .update(updateFields)
+    .eq("student_id", user.id)
+    .eq("vertical_id", currentConcept.vertical_id)
+    .then(() => console.log("✅ Pointer updated for phase", phase))
+    .catch((err) => console.error("❌ Failed to update pointer:", err));
 };
+
 
   const handleCompleteConcept = () => {
     if (currentIdx + 1 < totalConcepts) {
