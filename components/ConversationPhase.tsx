@@ -333,15 +333,14 @@ useEffect(() => {
       >
         {/* Animated background gradient */}
         <MotiView
-          from={{ scale: 0.8, opacity: 0 }}
-          animate={{ scale: 1.2, opacity: 0.1 }}
-          transition={{
-            loop: true,
-            type: 'timing',
-            duration: 8000,
-          }}
-          className="absolute inset-0 bg-gradient-to-br from-teal-500/20 via-cyan-500/10 to-indigo-500/20"
-        />
+  pointerEvents="none"                                // ✅ add this
+  from={{ scale: 0.8, opacity: 0 }}
+  animate={{ scale: 1.2, opacity: 0.1 }}
+  transition={{ loop: true, type: "timing", duration: 8000 }}
+  className="absolute inset-0 bg-gradient-to-br from-teal-500/20 via-cyan-500/10 to-indigo-500/20"
+  style={{ zIndex: -1 }}                              // ✅ add this
+/>
+
         
         <View className="flex-row items-center justify-between p-8 pt-16 border-b border-slate-700/30">
           <View className="flex-row items-center flex-1">
