@@ -261,7 +261,7 @@ export default function ConceptPhase({
 
             {/* Next Button */}
             <Pressable
-              onPress={onNext}
+              onPress={() => { console.log("▶️ Next pressed"); onNext?.(); }}
               className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl py-4 px-6 shadow-xl active:scale-95 flex-row items-center justify-center"
             >
               <Text className="text-white font-bold text-base mr-2">
